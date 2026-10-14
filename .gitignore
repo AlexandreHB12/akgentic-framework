@@ -37,3 +37,10 @@ coverage.json
 
 # OS files
 .DS_Store
+workspaces/
+data/event_store/
+data/event_store.v1/
+data/memory/
+data/demo-data/
+data/catalog-untracked-backup/
+.claude/launch.json
