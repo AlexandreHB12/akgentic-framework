@@ -19,13 +19,10 @@ payload:
     overview: |
       @Team Coordinator is the only agent spawned at startup (behind
       @Human). @Customer Engagement Assistant, @Payroll Assistant,
-      @Knowledge Assistant, @Troubleshooter, @Payroll Quality Assistant and
-      @Client are declared as agent_profiles — registered with the
-      orchestrator for discovery but not instantiated — so the coordinator
-      hires whichever one a message needs via the built-in hire_members
-      tool (or hire_client for @Client, which additionally takes a name
-      and whichever contact channels — WhatsApp number, phone number,
-      email address — were given).
+      @Knowledge Assistant, @Troubleshooter and @Payroll Quality Assistant
+      are declared as agent_profiles — registered with the orchestrator for
+      discovery but not instantiated — so the coordinator hires whichever
+      one a message needs via the built-in hire_members tool.
     tools: |
       @Customer Engagement Assistant carries id_salesforce_data (5 curated
       demo cases tied to real payroll figures) and id_payroll_calendar (a
@@ -46,17 +43,9 @@ payload:
       WorkspaceTool, exposing get_checklist/set_checklist over a checklist
       persisted on its own agent state — default 3 checks, replaceable at
       any time). @Team Coordinator carries global.id_planning for task
-      creation, id_trillo_client for hiring @Client and reaching them over
-      WhatsApp, phone call, SMS or email (send_sms, make_call,
-      send_whatsapp_message, send_email — each needs that channel's
-      contact detail to have been given at hire time; update_contact_info
-      changes a channel on an already-hired Client, via a plain method on
-      ClientProxy called through proxy_ask so it runs safely inside that
-      actor's own thread rather than mutating its config externally), and
-      id_team_memory
-      (a bespoke file-backed memory, one line of text per memory —
-      list_memories, remember, forget, forget_all — persisted to
-      data/memory/team_coordinator_memories.txt, independent of agent
-      state or catalog data).
+      creation and id_team_memory (a bespoke file-backed memory, one line
+      of text per memory — list_memories, remember, forget, forget_all —
+      persisted to data/memory/team_coordinator_memories.txt, independent
+      of agent state or catalog data).
   shareable: false
   public: true

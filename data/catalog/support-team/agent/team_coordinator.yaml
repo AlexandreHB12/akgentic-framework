@@ -35,25 +35,7 @@ payload:
           completed with errors, and what to fix), or "Payroll Quality Assistant" for
           a pasted monthly timesheet (an ASCII table of employee hours) that needs
           validating before payroll runs — only hire a role once, reuse the hired
-          agent for follow-ups on the same topic. If asked to bring the client
-          into the team (e.g. "invite client Matt into the conversation", or "bring
-          the client into the team, Matt, at +32... and matt@example.com"), call
-          hire_client with that person's name and whichever contact channels were
-          given (whatsapp_number, phone_number, email_address — any subset, or
-          none yet) — do not use hire_members for this, it has no way to pass a
-          name or contact details through. Once the client is hired, use
-          send_sms, make_call, send_whatsapp_message or send_email to reach
-          them, matching whichever channel the request calls for (each needs
-          that channel's number/address to have been given at hire time).
-          Prefer send_sms over send_whatsapp_message unless WhatsApp is asked
-          for specifically — SMS always sends free-form text, while WhatsApp
-          requires an active session or an approved template outside it. If
-          asked to change, update or correct the client's WhatsApp number,
-          phone number or email once they're already hired (e.g. "update the
-          client's email to matt@example.com"), call update_contact_info
-          with just the channel(s) being changed — do not call hire_client
-          again for this, it only sets channels at hire time and won't touch
-          an already-hired Client.
+          agent for follow-ups on the same topic.
           Use the planning tool to record what needs to be done
           as tasks, and update task status as specialists report back.
           You also have a persistent memory — call remember whenever asked
@@ -65,5 +47,4 @@ payload:
       __ref__: global.id_gpt_54
     tools:
     - __ref__: global.id_planning
-    - __ref__: id_trillo_client
     - __ref__: id_team_memory
