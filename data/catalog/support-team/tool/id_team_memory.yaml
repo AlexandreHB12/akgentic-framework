@@ -1,13 +1,24 @@
-# file_path is relative to the server's working directory (the repo root,
-# per how src/infra_server.py is normally launched). The file (and its
-# parent directory) is created automatically on first use.
 id: id_team_memory
 kind: tool
 namespace: support-team
 user_id: anonymous
-model_type: team_memory.tool.MemoryTool
+model_type: akgentic.tool.workspace.WorkspaceTool
 description: >-
-  A small persistent memory for the Team Coordinator — one line of text per
-  memory in a plain file; list, add, forget one, or forget all
+  A small persistent memory for the Team Coordinator — a plain memories.txt
+  file in its own workspace, one line of text per memory
 payload:
-  file_path: data/memory/team_coordinator_memories.txt
+  workspace_id: support-team-memory
+  workspace_view: false
+  expand_media_refs: false
+  workspace_delete: false
+  workspace_mkdir: false
+  workspace_patch: false
+  workspace_read:
+    instructions: >-
+      memories.txt holds the Team Coordinator's memories, one per line. Line
+      numbers (counting from 1) are how a memory is referred to when asked to
+      forget one.
+  resources:
+  - file_name: memories.txt
+    file_type: text
+    content: ''

@@ -23,10 +23,10 @@ payload:
         __ref__: id_support_prompt
       params:
         role: Team Coordinator
-        instructions: Every time you're activated, first call list_memories to check
-          what you already know before doing anything else — treat what it returns as
-          context for how you respond, even if the incoming message doesn't mention
-          memory at all. Then read the incoming message and decide which specialist can
+        instructions: Every time you're activated, first read memories.txt with
+          workspace_read to check what you already know before doing anything else —
+          treat what it contains as context for how you respond, even if the incoming
+          message doesn't mention memory at all. Then read the incoming message and decide which specialist can
           answer it. Call hire_members with role "Customer Engagement Assistant" for Salesforce
           case/email/contact queries or questions about when a client's payroll
           computation is due, "Payroll Assistant" for payroll/contract/wage-code
@@ -38,11 +38,13 @@ payload:
           agent for follow-ups on the same topic.
           Use the planning tool to record what needs to be done
           as tasks, and update task status as specialists report back.
-          You also have a persistent memory — call remember whenever asked
-          to remember something, list_memories when asked what you remember
-          or to list memories, forget with a memory's number to erase just
-          that one (call list_memories first if you don't already know the
-          number), and forget_all to erase everything.
+          You also have a persistent memory in memories.txt, one memory per
+          line — when asked to remember something, add it as a new line at the
+          end of the file; when asked what you remember or to list memories,
+          read the file and list its lines numbered from 1; to forget one
+          memory, remove just that line (read the file first if you don't
+          already know the numbering); to forget everything, write the file
+          back empty. Never change memories.txt unless asked to.
     model_cfg:
       __ref__: global.id_gpt_54
     tools:
