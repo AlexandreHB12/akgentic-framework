@@ -1,0 +1,56 @@
+id: id_customer_engagement_data
+kind: tool
+namespace: support-team
+user_id: anonymous
+model_type: akgentic.tool.workspace.WorkspaceTool
+description: Salesforce demo cases and the payroll calendar, combined into one workspace for the Customer
+  Engagement Assistant
+payload:
+  workspace_id: support-team-customer-engagement
+  read_only: true
+  workspace_view: false
+  expand_media_refs: false
+  workspace_read:
+    instructions: 'Combines two data sources the Customer Engagement Assistant needs together in one workspace
+      (a single agent can only carry one WorkspaceTool, since each one exposes an identically-named workspace_read
+      tool — see id_salesforce_data / id_payroll_calendar for the same files split by role instead). salesforce_cases_demo.csv
+      is a small, demo-sized case list — deliberately not the full Salesforce export. Each of the 5 cases
+      names a real employeeNumber and cites real figures from the payroll data, and none of them can be
+      answered from this file alone: a tax-increase case needs the Payroll Assistant to compare payslips,
+      an indexation/mobility case needs the Knowledge Assistant for the sector''s collective agreement,
+      a vacation-days case needs payroll days-taken data, and a meal/eco-voucher case needs the granted
+      amounts per period. los21_payroll_calendar.csv has one row per (employer, payrollPeriod): periodEndDate,
+      computationDueDate, status (completed / completed_with_errors / failed for periods already run,
+      or upcoming / scheduled for periods not yet run) and notes, e.g. an employer''s timesheet-cutoff
+      day. Compare computationDueDate against the current date (given in your own system prompt) to say
+      how soon a client''s payroll is due, or whether it''s overdue.'
+  resources:
+  - file_name: salesforce_cases_demo.csv
+    file_type: text
+    content: |
+      case_id,case_number,affiliate_number,account_name,contact_id,subject,topic,description,status,yuma_status_ai,priority,origin,language,record_type,owner,created_date,closed_date
+      500J2910001XYZ,00785076,0624623,Bakkerij Nijs BV,003J2765749ABC,Bedrijfsvoorheffing sterk gestegen tussen januari en februari 2026,Bedrijfsvoorheffing,"Medewerker 0636388 (Stijn Roelants) vraagt waarom de bedrijfsvoorheffing in februari 2026 (EUR 843.42) meer dan het dubbele is van januari 2026 (EUR 396.21), terwijl hij nog steeds hetzelfde contract heeft. De stijging volgt uit een hoger brutoloon die maand (EUR 1 424.18 in januari tegenover EUR 4 169.38 in februari, door overuren/premies), wat hem op de progressieve schaal van bedrijfsvoorheffing in een hogere schijf duwt. Klant wenst een vergelijking van beide loonstroken en een verwijzing naar de toepasselijke schaal om de stijging te verantwoorden.",New,Need input,Medium,Web,NL,SME Payroll,PayCo Team Oost,2026-03-09,
+      500J2910002XYZ,00785077,0841348,Constructions Ghys SA,003J2518341ABC,Indexation salariale 2026 pour la commission paritaire 124 (Construction),Indexation,"Le client demande si les salaires des employes releve du CP 124 (Bouwbedrijf / Construction), dont Thibaut Thiry (employe 0033339, Comptable, temps plein), seront indexes selon l'inflation en 2026, et de quel pourcentage. La reponse necessite de consulter la convention collective de travail (CCT) du CP 124 pour verifier son mecanisme et sa date d'indexation, qui differe des autres commissions paritaires du dossier (ex : CP 200).",New,Missing information,High,Email,FR,SME Payroll,PayCo Team West,2026-01-15,
+      500J2910003XYZ,00785078,0171169,Heyndrickx Logistiek NV,003J2350404ABC,Recht op mobiliteitsvergoeding voor medewerker 0526368 (PC 140.03),Mobiliteit,"Klant vraagt of medewerker 0526368 (Joke Schepers, flexi-job, Boekhouder, PC 140.03 - Vervoer en logistiek wegvervoer) recht heeft op een mobiliteitsvergoeding of -budget, en hoe deze aangevraagd moet worden. Dit vereist na te gaan onder welk paritair comite de medewerker valt (PC 140.03, verschillend van het bediendencomite PC 200 van andere medewerkers in dit dossier) en wat de sectorale CAO daarover bepaalt voor een flexi-job statuut.",New,Need input,Medium,MyServicePoint,NL,SME Payroll,PayCo Team West,2026-04-20,
+      500J2910004XYZ,00785079,0624623,Bakkerij Nijs BV,003J2765749ABC,Resterend aantal vakantiedagen 2026 voor medewerker 0481118,Vakantie,"Klant vraagt hoeveel wettelijke vakantiedagen medewerker 0481118 (Roel Vangeel, vervangingsovereenkomst, flexi-job, 4/5 regime van 30.40u/week) nog over heeft in 2026. Volgens de loonberekening werden reeds 21.45, 21.80, 18.72, 19.97, 20.77, 15.30 dagen opgenomen in respectievelijk januari t.e.m. juni 2026. Klant wil dit afgezet zien tegen het jaarlijkse quotum voor een 4/5 arbeidsregime om het resterend saldo te bepalen.",In Progress,Processing,Low,Phone,NL,SME Payroll,PayCo Team Wallonie,2026-06-10,
+      500J2910005XYZ,00785080,0624623,Bakkerij Nijs BV,003J2521737ABC,Recht op maaltijdcheques en ecocheques voor medewerker 0777659,Loonvoordelen,"Klant vraagt of medewerker 0777659 (Maarten Vanacker) recht heeft op maaltijdcheques en ecocheques, en voor welk bedrag. Volgens de loonberekening werden van januari tot juni 2026 volgende bedragen toegekend — maaltijdcheques: EUR 116.20, EUR 130.45, EUR 133.34, EUR 97.48, EUR 76.94, EUR 155.34; ecocheques: EUR 93.34, EUR 47.17, EUR 52.43, EUR 79.31, EUR 97.82, EUR 66.70. Klant wil bevestiging dat dit conform de toepasselijke regeling (PC 200) is en vraagt uitleg bij de maandelijkse schommelingen.",Waiting on Customer,Processing,Low,Email,NL,SME Payroll,PayCo Team Brussel,2026-06-12,
+  - file_name: los21_payroll_calendar.csv
+    file_type: text
+    content: |
+      dossierNumber,employerName,payrollPeriod,periodEndDate,computationDueDate,status,notes
+      0624623,Bakkerij Nijs BV,2026-07,2026-07-31,2026-08-03,completed_with_errors,Matches RUN-202607-0624623 in los21_payroll_run_status.csv - 3 errors on this run.
+      0624623,Bakkerij Nijs BV,2026-08,2026-08-31,2026-09-03,completed,
+      0624623,Bakkerij Nijs BV,2026-09,2026-09-30,2026-10-03,upcoming,Timesheet cutoff is the 18th per employer instructions (Loonverwerking).
+      0624623,Bakkerij Nijs BV,2026-10,2026-10-31,2026-11-03,scheduled,
+      0841348,Constructions Ghys SA,2026-07,2026-07-31,2026-08-03,completed_with_errors,Matches RUN-202607-0841348 in los21_payroll_run_status.csv - 2 errors on this run.
+      0841348,Constructions Ghys SA,2026-08,2026-08-31,2026-09-03,completed,
+      0841348,Constructions Ghys SA,2026-09,2026-09-30,2026-10-03,upcoming,Employer instructions list two conflicting Loonverwerking entries - exact cutoff day is unclear.
+      0841348,Constructions Ghys SA,2026-10,2026-10-31,2026-11-03,scheduled,
+      0171169,Heyndrickx Logistiek NV,2026-07,2026-07-31,2026-08-03,completed,Matches RUN-202607-0171169 in los21_payroll_run_status.csv - no errors on this run.
+      0171169,Heyndrickx Logistiek NV,2026-08,2026-08-31,2026-09-03,completed,
+      0171169,Heyndrickx Logistiek NV,2026-09,2026-09-30,2026-10-03,upcoming,Timesheet cutoff is the 18th per employer instructions (Loonverwerking).
+      0171169,Heyndrickx Logistiek NV,2026-10,2026-10-31,2026-11-03,scheduled,
+      0287042,Brasserie Hannard SPRL,2026-07,2026-07-31,2026-08-03,failed,Matches RUN-202607-0287042 in los21_payroll_run_status.csv - run failed, 2 blocking errors.
+      0287042,Brasserie Hannard SPRL,2026-08,2026-08-31,2026-09-03,completed,Re-run succeeded after the July blocking errors were resolved.
+      0287042,Brasserie Hannard SPRL,2026-09,2026-09-30,2026-10-03,upcoming,No Loonverwerking cutoff on file - using the standard 3rd-business-day default.
+      0287042,Brasserie Hannard SPRL,2026-10,2026-10-31,2026-11-03,scheduled,

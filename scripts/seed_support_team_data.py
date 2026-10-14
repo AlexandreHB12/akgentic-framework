@@ -101,6 +101,40 @@ TOOLS: list[dict[str, Any]] = [
         ],
     ),
     _build_tool(
+        "id_customer_engagement_data",
+        (
+            "Salesforce demo cases and the payroll calendar, combined into one workspace "
+            "for the Customer Engagement Assistant"
+        ),
+        "support-team-customer-engagement",
+        (
+            "Combines two data sources the Customer Engagement Assistant needs together "
+            "in one workspace (a single agent can only carry one WorkspaceTool, since "
+            "each one exposes an identically-named workspace_read tool — see "
+            "id_salesforce_data / id_payroll_calendar for the same files split by role "
+            "instead). "
+            "salesforce_cases_demo.csv is a small, demo-sized case list — deliberately "
+            "not the full Salesforce export. Each of the 5 cases names a real "
+            "employeeNumber and cites real figures from the payroll data, and none of "
+            "them can be answered from this file alone: a tax-increase case needs the "
+            "Payroll Assistant to compare payslips, an indexation/mobility case needs the "
+            "Knowledge Assistant for the sector's collective agreement, a vacation-days "
+            "case needs payroll days-taken data, and a meal/eco-voucher case needs the "
+            "granted amounts per period. "
+            "los21_payroll_calendar.csv has one row per (employer, payrollPeriod): "
+            "periodEndDate, computationDueDate, status (completed / "
+            "completed_with_errors / failed for periods already run, or upcoming / "
+            "scheduled for periods not yet run) and notes, e.g. an employer's "
+            "timesheet-cutoff day. Compare computationDueDate against the current date "
+            "(given in your own system prompt) to say how soon a client's payroll is "
+            "due, or whether it's overdue."
+        ),
+        [
+            "salesforce_cases_demo.csv",
+            "los21_payroll_calendar.csv",
+        ],
+    ),
+    _build_tool(
         "id_calculated_payroll_data",
         "Payroll contracts, calculated salary data, wage codes and employer instructions",
         "support-team-payroll",
