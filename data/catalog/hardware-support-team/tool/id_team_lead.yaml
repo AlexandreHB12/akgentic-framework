@@ -13,8 +13,7 @@ payload:
       needs a role that is not yet in your roster — you do not need the user to ask.
       Pass every missing role in ONE call, plus any missing peer they consult (Order
       Manager <-> Stock Manager, Product Expert -> Stock Manager, Sales Assistant ->
-      Contracting Assistant). Never hire a role already in the roster. For the client
-      contact, use hire_client, not this.
+      Contracting Assistant). Never hire a role already in the roster.
   fire_team_members: false
   get_role_profiles: true
   get_team_roster: true

@@ -73,19 +73,9 @@ payload:
       channel is how a member finds its peer's exact name. An @name matching nobody is
       silently dropped, so every prompt says to copy names from the roster.
 
-      TrilloClientTool (client_proxy.tool) - lead only, copied from support-team's
-      id_trillo_client. hire_client brings a hireable @Client (a client_proxy ClientProxy,
-      listed in agent_profiles, never instantiated at start) into the team with the
-      contact's name and channels; send_email (Twilio SendGrid) and send_whatsapp_message
-      (Twilio) then reach that person. make_call and send_sms are DISABLED - the ask was
-      email and WhatsApp only; flip them to true to enable. Needs TWILIO_ACCOUNT_SID /
-      TWILIO_AUTH_TOKEN (WhatsApp; TWILIO_WHATSAPP_FROM defaults to the Twilio sandbox) and
-      SENDGRID_API_KEY / SENDGRID_FROM_EMAIL (email) in the server environment, and the
-      server must allow the `client_proxy.` model_type prefix
-      (AKGENTIC_CATALOG_MODEL_TYPE_PREFIXES), as support-team already requires. The lead
-      always shows @Human the draft and recipient and sends only on an explicit go-ahead.
-      Contact details on file are fake (*.example) - give a real address/number in chat to
-      actually receive a message.
+      No client-contact tool: the lead drafts emails and WhatsApp messages for @Human to
+      send (prompt §9). Every entry uses built-in akgentic classes only, so the namespace
+      needs no Twilio/SendGrid keys and no model_type allowlist on the server.
 
       No SearchTool, no KnowledgeGraphTool: every answer must come from the seeded systems
       of record, never the web.

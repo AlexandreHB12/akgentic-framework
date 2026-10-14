@@ -17,7 +17,7 @@ payload:
     - "Aurora is complaining about the prices on SO-24718. What happened?"
     - "Can Meridian put the 3.84 TB SSDs into their N16?"
 
-    I can also email or WhatsApp a client contact — give me their address or number, or I'll use the one on file — and I'll always show you the message before it goes out.
+    I can also draft an email or WhatsApp message to a client contact — give me their address or number, or I'll use the one on file.
   entry_point:
     card:
       __ref__: human_proxy
@@ -31,6 +31,5 @@ payload:
   - __ref__: product_expert
   - __ref__: sales_assistant
   - __ref__: contracting_assistant
-  - __ref__: client
   message_types:
   - __type__: akgentic.agent.messages.AgentMessage

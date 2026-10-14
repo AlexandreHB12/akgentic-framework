@@ -25,4 +25,3 @@ payload:
     tools:
     - __ref__: id_team_lead
     - __ref__: id_planning_lead
-    - __ref__: id_trillo_client

@@ -71,19 +71,9 @@ properties:
     channel is how a member finds its peer's exact name. An @name matching nobody is
     silently dropped, so every prompt says to copy names from the roster.
 
-    TrilloClientTool (client_proxy.tool) - lead only, copied from support-team's
-    id_trillo_client. hire_client brings a hireable @Client (a client_proxy ClientProxy,
-    listed in agent_profiles, never instantiated at start) into the team with the
-    contact's name and channels; send_email (Twilio SendGrid) and send_whatsapp_message
-    (Twilio) then reach that person. make_call and send_sms are DISABLED - the ask was
-    email and WhatsApp only; flip them to true to enable. Needs TWILIO_ACCOUNT_SID /
-    TWILIO_AUTH_TOKEN (WhatsApp; TWILIO_WHATSAPP_FROM defaults to the Twilio sandbox) and
-    SENDGRID_API_KEY / SENDGRID_FROM_EMAIL (email) in the server environment, and the
-    server must allow the `client_proxy.` model_type prefix
-    (AKGENTIC_CATALOG_MODEL_TYPE_PREFIXES), as support-team already requires. The lead
-    always shows @Human the draft and recipient and sends only on an explicit go-ahead.
-    Contact details on file are fake (*.example) - give a real address/number in chat to
-    actually receive a message.
+    No client-contact tool: the lead drafts emails and WhatsApp messages for @Human to
+    send (prompt §9). Every entry uses built-in akgentic classes only, so the namespace
+    needs no Twilio/SendGrid keys and no model_type allowlist on the server.
 
     No SearchTool, no KnowledgeGraphTool: every answer must come from the seeded systems
     of record, never the web.
@@ -124,7 +114,7 @@ entries:
         - "Aurora is complaining about the prices on SO-24718. What happened?"
         - "Can Meridian put the 3.84 TB SSDs into their N16?"
 
-        I can also email or WhatsApp a client contact — give me their address or number, or I'll use the one on file — and I'll always show you the message before it goes out.
+        I can also draft an email or WhatsApp message to a client contact — give me their address or number, or I'll use the one on file.
       entry_point:
         card:
           __ref__: human_proxy
@@ -138,7 +128,6 @@ entries:
       - __ref__: product_expert
       - __ref__: sales_assistant
       - __ref__: contracting_assistant
-      - __ref__: client
       message_types:
       - __type__: akgentic.agent.messages.AgentMessage
 
@@ -154,21 +143,6 @@ entries:
       config:
         name: '@Human'
         role: Human
-
-  client:
-    kind: agent
-    model_type: akgentic.core.AgentCard
-    description: The client contact, reachable over WhatsApp or email — hired by
-      @SupportLead with hire_client, never started with the team
-    payload:
-      description: The client contact, reachable over WhatsApp or email. The phone
-        number you receive is used for WhatsApp.
-      agent_class: client_proxy.agent.ClientProxy
-      skills: []
-      config:
-        name: '@Client'
-        role: Client
-      can_be_hired: true
 
   support_lead:
     kind: agent
@@ -195,7 +169,6 @@ entries:
         tools:
         - __ref__: id_team_lead
         - __ref__: id_planning_lead
-        - __ref__: id_trillo_client
 
   customer_engagement_assistant:
     kind: agent
@@ -389,16 +362,16 @@ entries:
 
         You DO: work out which specialists a case needs; dispatch them; track them on your
         planning board; combine their responses; offer a next step (a draft reply to the
-        client, a proposal, an escalation); email or WhatsApp a client contact when @Human
-        asks (§9).
+        client, a proposal, an escalation); draft an email or WhatsApp message to a client
+        contact when @Human asks (§9).
 
         You do NOT:
         - invent or estimate any figure, date, price or status;
         - dispatch every specialist by default — only the ones the case needs (§7);
         - dispatch @SalesAssistant for an opportunity @Human did not ask about — you
           *offer* it (§7);
-        - email or WhatsApp a client without @Human's explicit go-ahead on the exact
-          message and recipient (§9);
+        - claim to have sent an email or WhatsApp message — you can only draft them for
+          @Human to send (§9);
         - answer anything that is not Voltaris customer-support business. Off-topic or
           general-knowledge questions get a one-line decline and a redirect, even when the
           answer is trivial.
@@ -497,9 +470,10 @@ entries:
         Calm, precise, support-desk professional. Numbers, dates and IDs exactly as the
         specialists gave them. Flag risk plainly ("at risk: new hires start 5 Oct").
 
-        ## 9. CONTACTING A CLIENT — EMAIL AND WHATSAPP
+        ## 9. CONTACTING A CLIENT — EMAIL AND WHATSAPP DRAFTS
 
-        When @Human asks you to email or WhatsApp a client contact:
+        You cannot send messages yourself. When @Human asks you to email or WhatsApp a
+        client contact, prepare the message for @Human to send:
 
         1. **Recipient.** Use the name and address/number @Human gave. If @Human gave none,
            dispatch `@CustomerEngagementAssistant` (hiring it first if needed, with a
@@ -509,18 +483,9 @@ entries:
            specialists reported in this conversation — never a new figure or promise. Email:
            a subject plus a plain-text body (greeting, 80–150 words, sign-off "Voltaris
            Hardware Support"). WhatsApp: at most 60 words, no markdown.
-        3. **Confirm first.** Reply to @Human with the channel, the recipient and the exact
-           draft, and ask "Send it?" — unless @Human's own message already said to send that
-           text as is. Never send on your own initiative.
-        4. **Send** once @Human says yes: call `hire_client` with the contact's name and every
-           channel you have (whatsapp_number, email_address) — it is safe to call again, it
-           reuses the client already in the team. If that client is a different person or
-           the details changed, call `update_contact_info` first. Then call `send_email`
-           or `send_whatsapp_message`.
-        5. Tell @Human in one line what was sent to whom — or the tool's error, word for
-           word, if it failed. Do not retry a failed send more than once.
-
-        These are tool calls, not messages: never put the client in a `recipient` field.
+        3. **Hand it over.** Reply to @Human with the channel, the recipient and the exact
+           draft, ready to copy and send. Never put the client in a `recipient` field —
+           the client is not a member of this team.
 
   id_customer_engagement_prompt:
     kind: prompt
@@ -1031,8 +996,7 @@ entries:
           needs a role that is not yet in your roster — you do not need the user to ask.
           Pass every missing role in ONE call, plus any missing peer they consult (Order
           Manager <-> Stock Manager, Product Expert -> Stock Manager, Sales Assistant ->
-          Contracting Assistant). Never hire a role already in the roster. For the client
-          contact, use hire_client, not this.
+          Contracting Assistant). Never hire a role already in the roster.
       fire_team_members: false
       get_role_profiles: true
       get_team_roster: true
@@ -1051,17 +1015,6 @@ entries:
       get_role_profiles: false
       get_team_roster: true
       get_team_activity: false
-
-  id_trillo_client:
-    kind: tool
-    model_type: client_proxy.tool.TrilloClientTool
-    description: Hire the client contact (with the channels given at hire time) and reach
-      them by email (Twilio SendGrid) or WhatsApp (Twilio). Copied from support-team's
-      id_trillo_client; voice calls and SMS disabled.
-    payload:
-      target_role: Client
-      make_call: false
-      send_sms: false
 
   id_planning_lead:
     kind: tool
