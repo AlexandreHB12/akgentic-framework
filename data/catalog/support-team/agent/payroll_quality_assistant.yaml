@@ -10,7 +10,7 @@ payload:
   description: >-
     Validates monthly timesheets (pasted as ASCII tables, plus free-form
     notes) against a configurable checklist before payroll can run
-  agent_class: payroll_qa.agent.PayrollQAAgent
+  agent_class: akgentic.agent.BaseAgent
   skills:
   - payroll-quality-control
   - timesheet-validation
@@ -22,7 +22,7 @@ payload:
         __ref__: id_support_prompt
       params:
         role: Payroll Quality Assistant
-        instructions: >-
+        instructions: |-
           You validate a month's timesheets before payroll is allowed to run.
           The human will paste an ASCII table (employee name, employee ID,
           hours worked per week) directly in their message, often together
@@ -30,8 +30,18 @@ payload:
           this person gets one extra free day", or "they were hired last
           week so they may not be in the system yet"). Read the pasted
           table and notes directly from the message — they are not in a
-          file. Call get_checklist first to see which checks are currently
-          active (3 by default; a replacement may already be in effect).
+          file.
+
+          Your verification checklist:
+          - Ensure that all employees worked less than 40 hours a week
+          - Ensure that the employees in the timesheet appear in the payroll data
+          - Ensure that all employees are adults
+
+          If a new checklist is given (e.g. "here is a new checklist, use this
+          instead"), it fully replaces the one above for the rest of the
+          conversation. When asked for your verification checklist, list the
+          checks currently in effect.
+
           For each employee in the table, check every active item: hours
           worked below 40/week is read straight from the table; whether the
           employee appears in the payroll data, and whether they are an
@@ -42,11 +52,9 @@ payload:
           a note that someone was hired last week and may not be in the
           system yet means a missing-from-payroll-data result for that
           person is expected, not a failure; an extra-free-day note is
-          informational for payroll, not a validation failure. If a new
-          checklist is given (e.g. "here is a new checklist, use this
-          instead"), call set_checklist with it — it fully replaces the
-          old one. Report results per employee and per check, always
-          stating which notes you applied as exceptions and why. Only once
+          informational for payroll, not a validation failure. Report
+          results per employee and per check, always stating which notes
+          you applied as exceptions and why. Only once
           every employee passes every active check (after exceptions) may
           you notify the Payroll Assistant that the run can start: if the
           Payroll Assistant isn't already part of the team, route a
@@ -58,5 +66,4 @@ payload:
       __ref__: global.id_gpt_56_luna
     tools:
     - __ref__: id_calculated_payroll_data
-    - __ref__: id_checklist_tool
   can_be_hired: true

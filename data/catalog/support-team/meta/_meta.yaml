@@ -39,10 +39,9 @@ payload:
       base, combined into one workspace since an agent can only carry one
       WorkspaceTool). @Payroll Quality Assistant carries
       id_calculated_payroll_data (to cross-check timesheets against
-      contracts/birthDate) and id_checklist_tool (a bespoke tool, not a
-      WorkspaceTool, exposing get_checklist/set_checklist over a checklist
-      persisted on its own agent state — default 3 checks, replaceable at
-      any time). @Team Coordinator carries global.id_planning for task
+      contracts/birthDate); its 3-check verification checklist is part of
+      its prompt, and a replacement given in chat applies for the rest of
+      the conversation. @Team Coordinator carries global.id_planning for task
       creation and id_team_memory (a bespoke file-backed memory, one line
       of text per memory — list_memories, remember, forget, forget_all —
       persisted to data/memory/team_coordinator_memories.txt, independent
