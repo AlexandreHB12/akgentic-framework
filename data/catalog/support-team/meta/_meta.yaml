@@ -26,11 +26,11 @@ payload:
       uses built-in akgentic classes only, so the namespace imports into
       any akgentic server as-is, with no custom code or model_type allowlist.
     tools: |
-      @Customer Engagement Assistant carries id_salesforce_data (5 curated
-      demo cases tied to real payroll figures) and id_payroll_calendar (a
-      dummy per-employer payroll computation calendar — completed periods
-      match los21_payroll_run_status.csv exactly, upcoming/scheduled
-      periods let it proactively flag what's due soon). @Payroll Assistant
+      @Customer Engagement Assistant carries id_customer_engagement_data
+      (5 curated demo cases tied to real payroll figures, plus a dummy
+      per-employer payroll computation calendar — completed periods match
+      los21_payroll_run_status.csv exactly, upcoming/scheduled periods let
+      it proactively flag what's due soon). @Payroll Assistant
       carries
       id_calculated_payroll_data (contracts, calculated salary data, wage
       codes). @Knowledge Assistant carries id_knowledge_base (FAQ/wiki/
