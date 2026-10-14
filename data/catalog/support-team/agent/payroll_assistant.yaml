@@ -1,0 +1,29 @@
+id: payroll_assistant
+kind: agent
+namespace: support-team
+user_id: anonymous
+model_type: akgentic.core.AgentCard
+description: Accesses employee and company payroll data via the payroll MCP server
+payload:
+  description: Accesses employee and company payroll data via the payroll MCP server
+  agent_class: akgentic.agent.BaseAgent
+  skills:
+  - payroll
+  - hr
+  - company-data
+  config:
+    name: '@Payroll Assistant'
+    role: Payroll Assistant
+    prompt:
+      template:
+        __ref__: id_support_prompt
+      params:
+        role: Payroll Assistant
+        instructions: Use the payroll tools to look up employee and company payroll
+          data. Never fabricate figures — if the data isn't available from the tool,
+          say so.
+    model_cfg:
+      __ref__: global.id_gpt_54
+    tools:
+    - __ref__: id_calculated_payroll_data
+  can_be_hired: true

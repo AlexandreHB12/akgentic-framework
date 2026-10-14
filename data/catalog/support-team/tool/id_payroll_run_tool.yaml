@@ -1,0 +1,38 @@
+id: id_payroll_run_tool
+kind: tool
+namespace: support-team
+user_id: anonymous
+model_type: akgentic.tool.workspace.WorkspaceTool
+description: Payroll run status and raw engine-reported errors for the current (2026-07) run
+payload:
+  workspace_id: support-team-payroll-runs
+  read_only: true
+  workspace_view: false
+  expand_media_refs: false
+  workspace_read:
+    instructions: 'los21_payroll_run_status.csv has one row per (dossier, period) payroll run: status
+      (completed / completed_with_errors / failed), employees processed, employees with errors. los21_payroll_run_errors.csv
+      has one row per raw engine-reported error within a run: errorCode, errorCategory, severity, fieldOrCode
+      and an uninterpreted engineMessage — every employeeNumber/dossierNumber here also appears in los21_contracts_employees.csv.
+      The engine states the error as-is; it does not explain why it occurred or how to fix it — that interpretation
+      is this tool''s consumer''s job.'
+  resources:
+  - file_name: los21_payroll_run_status.csv
+    file_type: text
+    content: |
+      runId,dossierNumber,employerName,paymentPeriodFrom,paymentPeriodUntil,runTimestamp,status,employeesProcessed,employeesWithErrors,totalErrors
+      RUN-202607-0624623,0624623,Bakkerij Nijs BV,2026-07-01,2026-07-31,2026-08-03T06:12:00,completed_with_errors,6,3,3
+      RUN-202607-0841348,0841348,Constructions Ghys SA,2026-07-01,2026-07-31,2026-08-03T06:14:00,completed_with_errors,6,2,2
+      RUN-202607-0171169,0171169,Heyndrickx Logistiek NV,2026-07-01,2026-07-31,2026-08-03T06:16:00,completed,8,0,0
+      RUN-202607-0287042,0287042,Brasserie Hannard SPRL,2026-07-01,2026-07-31,2026-08-03T06:18:00,failed,4,2,2
+  - file_name: los21_payroll_run_errors.csv
+    file_type: text
+    content: |
+      runId,dossierNumber,employeeNumber,employeeName,errorCode,errorCategory,severity,fieldOrCode,engineMessage,detectedAt
+      RUN-202607-0624623,0624623,0246883,Hanne Coppens,BANK-001,Payment,Blocking,bankAccount,No valid IBAN on file for employee; net payment cannot be processed.,2026-08-03T06:12:04
+      RUN-202607-0624623,0624623,0931346,Ruben Moons,CONTRACT-014,Contract,Warning,contractNumber,Overlapping contract periods detected: 0931346-01 (ends 2026-05-22) and 0931346-02 (starts 2025-03-02) overlap by 424 days.,2026-08-03T06:12:09
+      RUN-202607-0624623,0624623,0481118,Roel Vangeel,WAGECODE-102,WageCode,Warning,1720,Wage code 1720 (Overuren 100%) applied but employee's work regime is 4/5 (30.40u); overtime threshold recalculation required before the amount can be confirmed.,2026-08-03T06:12:15
+      RUN-202607-0841348,0841348,0176874,Xavier Pirlot,PC-021,JointCommittee,Warning,jointCommittee,Active contract 0176874-02 (flexi-job) is declared under PC 200 with employeeType 'arbeider'; statute and joint committee do not agree for a flexi-job contract.,2026-08-03T06:14:05
+      RUN-202607-0841348,0841348,0708407,Aurelie Baudouin,LOONBESLAG-007,Garnishment,Blocking,netAttribution,Net pay after garnishment deduction is negative (-EUR 42.18) for period 2026-07; the garnishment schedule must be revised before this run can complete.,2026-08-03T06:14:11
+      RUN-202607-0287042,0287042,0989465,Bruno Delvaux,STUDENT-QUOTA-003,Student,Blocking,studentQuotaHours,Cumulative student hours for 2026 (612.5h) exceed the 600h solidarity-contribution threshold as of 2026-07-14; standard RSZ contributions must be applied from this date forward instead of the reduced student rate.,2026-08-03T06:18:03
+      RUN-202607-0287042,0287042,0122109,Amandine Piret,DIMONA-005,Declaration,Blocking,dimonaStatus,No active Dimona declaration found for period 2026-07-01 to 2026-07-31; a declaration must be filed before this run can complete.,2026-08-03T06:18:08

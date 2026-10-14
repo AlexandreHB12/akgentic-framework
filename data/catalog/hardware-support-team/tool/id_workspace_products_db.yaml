@@ -1,0 +1,228 @@
+id: id_workspace_products_db
+kind: tool
+namespace: hardware-support-team
+user_id: anonymous
+model_type: akgentic.tool.workspace.WorkspaceTool
+description: Read-only product catalogue, scoped to @ProductExpert by a unique workspace_id.
+payload:
+  workspace_id: hardware-support-products-db
+  read_only: true
+  workspace_view: false
+  workspace_list: false
+  workspace_glob: false
+  workspace_grep: false
+  expand_media_refs: false
+  workspace_read:
+    instructions: |
+      The only file is products.md. Read it once per task.
+  resources:
+  - file_name: products.md
+    content: |
+      # Voltaris Hardware — Product Catalogue (2026 range)
+      Descriptions, specifications, compatibility, substitutes and accessories for every SKU we sell. Prices and stock are NOT in this catalogue.
+
+      ## Datacenter
+
+      ### VX-SRV-R250 — Voltaris R250 1U Rack Server
+
+      - **What it is:** Single-socket 1U rack server for branch offices, virtualisation hosts and edge workloads.
+      - **Key specs:** 1x 16-core Xeon-class CPU (2.9 GHz); 128 GB DDR5 ECC (max 1 TB, 8 DIMM slots); 4x 2.5" hot-swap NVMe/SAS bays; 2x 10GbE SFP+ onboard; 1x PCIe 5.0 x16 slot; redundant 800 W PSUs; Voltaris BMC remote management; 1U, 16 kg.
+      - **Compatible with:** VX-SSD-3840 (up to 4 drives), VX-SFP-10G-SR, VX-RACK-42U, VX-UPS-1500.
+      - **Substitutes:** VX-SRV-R450 when more cores, memory or drive bays are needed (2U, higher price).
+      - **Recommended accessories / add-ons:** VX-SSD-3840 drives, VX-SFP-10G-SR optics, VX-UPS-1500.
+      - **Warranty:** 3 years next-business-day onsite
+      - **Lifecycle:** Active
+
+      ### VX-SRV-R450 — Voltaris R450 2U Rack Server
+
+      - **What it is:** Dual-socket 2U workhorse for databases, virtualisation clusters, research computing and GPU workloads.
+      - **Key specs:** 2x 24-core Xeon-class CPUs (2.6 GHz); 256 GB DDR5 ECC (max 4 TB, 32 DIMM slots); 12x 3.5"/2.5" hot-swap bays (SAS/NVMe); 4x 10GbE SFP+ onboard; up to 2 double-width GPUs (300 W each); redundant 1400 W PSUs; Voltaris BMC; 2U, 28 kg.
+      - **Compatible with:** VX-SSD-3840, VX-HDD-16T, VX-SFP-10G-SR, VX-RACK-42U, VX-UPS-1500 (one UPS per two servers).
+      - **Substitutes:** VX-SRV-R250 for lighter single-socket workloads (fewer bays, half the memory slots).
+      - **Recommended accessories / add-ons:** VX-RACK-42U and VX-UPS-1500 for new deployments; VX-NET-S48X for 10G cluster fabric.
+      - **Warranty:** 3 years next-business-day onsite
+      - **Lifecycle:** Active
+
+      ### VX-STO-N8 — Voltaris N8 8-Bay NAS
+
+      - **What it is:** Desktop/tower 8-bay NAS for file sharing, backup targets and small-office video storage.
+      - **Key specs:** 8x 3.5" SATA/SAS bays (drives not included); quad-core CPU; 16 GB ECC (max 64 GB); 2x 2.5GbE + 1x 10GbE RJ45; RAID 0/1/5/6/10; snapshots and replication; max raw capacity 128 TB with VX-HDD-16T.
+      - **Compatible with:** VX-HDD-16T (up to 8). Not compatible with VX-SSD-3840 (no U.2/NVMe bays).
+      - **Substitutes:** VX-STO-N16 when rack mounting, SFP+ or more than 8 drives is needed.
+      - **Recommended accessories / add-ons:** VX-HDD-16T drives (sold separately), VX-UPS-1500.
+      - **Warranty:** 3 years return-to-base
+      - **Lifecycle:** Active
+
+      ### VX-STO-N16 — Voltaris N16 16-Bay Rack NAS
+
+      - **What it is:** 3U rack NAS for departmental storage, imaging archives (PACS), research data and backup.
+      - **Key specs:** 16x 3.5" SAS bays + 2x U.2 NVMe cache bays (drives not included); 8-core CPU; 64 GB ECC (max 512 GB); 2x 10GbE SFP+ + 2x 1GbE; RAID 5/6/10/60; dual controllers optional; max raw capacity 256 TB with VX-HDD-16T; 3U, 31 kg.
+      - **Compatible with:** VX-HDD-16T (up to 16), VX-SSD-3840 (only in the 2 U.2 cache bays), VX-SFP-10G-SR, VX-RACK-42U, VX-UPS-1500.
+      - **Substitutes:** VX-STO-N8 for small sites (desktop, 8 bays, no SFP+).
+      - **Recommended accessories / add-ons:** VX-HDD-16T drives, 2x VX-SSD-3840 as read/write cache, VX-SFP-10G-SR optics.
+      - **Warranty:** 3 years next-business-day onsite
+      - **Lifecycle:** Active
+
+      ### VX-SSD-3840 — Voltaris 3.84 TB Enterprise NVMe SSD
+
+      - **What it is:** U.2 NVMe data-centre SSD for server boot/data volumes and NAS caching.
+      - **Key specs:** 3.84 TB; U.2 (2.5", 15 mm) PCIe 4.0 x4; 6,800 MB/s read / 4,000 MB/s write; 1 DWPD; power-loss protection; hot-swap tray included.
+      - **Compatible with:** VX-SRV-R250, VX-SRV-R450, VX-STO-N16 (cache bays only). Not compatible with VX-STO-N8.
+      - **Substitutes:** None in the current range.
+      - **Recommended accessories / add-ons:** Sold with VX-SRV-R250 / VX-SRV-R450 configurations.
+      - **Warranty:** 5 years or 7 PBW, return-to-base
+      - **Lifecycle:** Active
+
+      ### VX-HDD-16T — Voltaris 16 TB Enterprise SAS HDD
+
+      - **What it is:** 7,200 rpm 3.5" capacity drive for NAS and server bulk storage.
+      - **Key specs:** 16 TB; SAS 12 Gb/s (also works on SATA backplanes of VX-STO-N8); 7,200 rpm; 512 MB cache; 550 TB/year workload rating; hot-swap tray included.
+      - **Compatible with:** VX-STO-N8, VX-STO-N16, VX-SRV-R450.
+      - **Substitutes:** None in the current range.
+      - **Recommended accessories / add-ons:** Sold with VX-STO-N8 / VX-STO-N16 (NAS units ship without drives).
+      - **Warranty:** 5 years return-to-base
+      - **Lifecycle:** Active
+
+      ### VX-UPS-1500 — Voltaris UPS-1500 Rack UPS
+
+      - **What it is:** 1,500 VA / 1,350 W line-interactive 2U UPS for server and network racks.
+      - **Key specs:** 1,500 VA / 1,350 W; 2U; 8x C13 outlets; hot-swap batteries; network management card included; ~10 min runtime at 800 W.
+      - **Compatible with:** VX-RACK-42U, VX-SRV-R250 (up to two), VX-SRV-R450 (one per two servers), VX-STO-N16, VX-NET-S48X.
+      - **Substitutes:** None in the current range.
+      - **Recommended accessories / add-ons:** Recommended with every new server or NAS rack deployment.
+      - **Warranty:** 3 years (2 years on batteries)
+      - **Lifecycle:** Active
+
+      ### VX-RACK-42U — Voltaris 42U Server Rack Cabinet
+
+      - **What it is:** 600x1200 mm 42U cabinet for server rooms.
+      - **Key specs:** 42U, 600 mm wide x 1200 mm deep; perforated front/rear doors; 1,300 kg static load; side panels with locks; cable management kit; 2x 0U PDU mounts.
+      - **Compatible with:** All Voltaris rack-mount products (R250, R450, N16, S48X, UPS-1500, FW200 rack kit).
+      - **Substitutes:** None.
+      - **Recommended accessories / add-ons:** VX-UPS-1500.
+      - **Warranty:** 5 years
+      - **Lifecycle:** Active
+
+      ## Networking
+
+      ### VX-NET-S24 — Voltaris S24 24-Port PoE+ Switch
+
+      - **What it is:** Managed L2+ access switch that powers access points, cameras and phones.
+      - **Key specs:** 24x 1GbE PoE+ (370 W budget); 4x 10GbE SFP+ uplinks; L2+ static routing; VLAN, LACP, 802.1X; cloud or local management; 1U, fanless below 200 W load.
+      - **Compatible with:** VX-NET-AP6, VX-NET-AP7 (PoE+ powers one AP7 per port at full performance), VX-SFP-10G-SR uplinks, VX-NET-FW200.
+      - **Substitutes:** None at 24 ports; for 10G aggregation use VX-NET-S48X.
+      - **Recommended accessories / add-ons:** VX-SFP-10G-SR uplink optics; pairs with VX-NET-AP7 rollouts.
+      - **Warranty:** Limited lifetime, next-business-day advance replacement
+      - **Lifecycle:** Active
+
+      ### VX-NET-S48X — Voltaris S48X 48-Port 10G Switch
+
+      - **What it is:** L3 aggregation/top-of-rack switch for server and storage networks.
+      - **Key specs:** 48x 10GbE SFP+; 6x 100GbE QSFP28; full L3 (OSPF, BGP); VXLAN; redundant hot-swap PSUs and fans; 1U.
+      - **Compatible with:** VX-SFP-10G-SR, VX-SRV-R250, VX-SRV-R450, VX-STO-N16, VX-NET-S24 uplinks.
+      - **Substitutes:** None in the current range.
+      - **Recommended accessories / add-ons:** VX-SFP-10G-SR optics (one per used port, both ends).
+      - **Warranty:** Limited lifetime, next-business-day advance replacement
+      - **Lifecycle:** Active
+
+      ### VX-SFP-10G-SR — Voltaris 10G SFP+ SR Transceiver
+
+      - **What it is:** 10GBASE-SR multimode optic for links up to 300 m.
+      - **Key specs:** SFP+, 850 nm, LC duplex, up to 300 m on OM3; DOM supported.
+      - **Compatible with:** All Voltaris SFP+ ports: VX-NET-S24, VX-NET-S48X, VX-SRV-R250, VX-SRV-R450, VX-STO-N16, VX-NET-FW200.
+      - **Substitutes:** None.
+      - **Recommended accessories / add-ons:** Always quoted with VX-NET-S48X and with SFP+ server/NAS links.
+      - **Warranty:** Limited lifetime
+      - **Lifecycle:** Active
+
+      ### VX-NET-AP6 — Voltaris AP6 Wi-Fi 6 Access Point
+
+      - **What it is:** Ceiling-mount Wi-Fi 6 (802.11ax) AP for offices and warehouses.
+      - **Key specs:** 2x2 dual-band 802.11ax, up to 3.0 Gbps aggregate; 1x 1GbE; PoE (802.3af) powered; cloud or controller managed; indoor, IP42.
+      - **Compatible with:** VX-NET-S24 (PoE).
+      - **Substitutes:** VX-NET-AP7 — the direct successor; same mounting bracket, same management platform, mixes with AP6 in one network.
+      - **Recommended accessories / add-ons:** VX-NET-S24 for PoE.
+      - **Warranty:** Limited lifetime; firmware support until 2029-06-30
+      - **Lifecycle:** End of life — last-time-buy, no further production (EOL announced 2026-06-30)
+
+      ### VX-NET-AP7 — Voltaris AP7 Wi-Fi 7 Access Point
+
+      - **What it is:** Tri-band Wi-Fi 7 (802.11be) AP — successor to the AP6 — for high-density offices, warehouses, retail and campuses.
+      - **Key specs:** 4x4 tri-band 2.4/5/6 GHz 802.11be, up to 9.3 Gbps aggregate; 1x 2.5GbE; PoE+ (802.3at) powered; uses the AP6 mounting bracket; cloud or controller managed; indoor, IP42.
+      - **Compatible with:** VX-NET-S24 (PoE+), VX-NET-AP6 (mixed deployments supported).
+      - **Substitutes:** VX-NET-AP6 only while last-time-buy stock lasts (lower performance, no 6 GHz).
+      - **Recommended accessories / add-ons:** VX-NET-S24 PoE+ switches; VX-NET-FW200 per site.
+      - **Warranty:** Limited lifetime
+      - **Lifecycle:** Active
+
+      ### VX-NET-FW200 — Voltaris FW200 Firewall Appliance
+
+      - **What it is:** Next-generation firewall for branches, stores and small campuses.
+      - **Key specs:** 5 Gbps firewall / 1.2 Gbps threat protection throughput; 8x 1GbE + 2x 10GbE SFP+; SD-WAN; site-to-site VPN; zero-touch provisioning; desktop or 1U rack kit.
+      - **Compatible with:** VX-NET-S24, VX-SFP-10G-SR.
+      - **Substitutes:** None in the current range.
+      - **Recommended accessories / add-ons:** One per site with VX-NET-S24 and VX-NET-AP7 rollouts.
+      - **Warranty:** 3 years advance replacement; security subscription sold separately
+      - **Lifecycle:** Active
+
+      ## Endpoint
+
+      ### VX-LAP-E14 — Voltaris E14 Business Laptop
+
+      - **What it is:** 14" business laptop for office staff, students and field teams.
+      - **Key specs:** 14" 1920x1200 IPS; 10-core CPU; 16 GB RAM; 512 GB NVMe; Wi-Fi 6E; 2x USB-C/Thunderbolt 4; 1.35 kg; 12 h battery; TPM 2.0.
+      - **Compatible with:** VX-DOCK-TB4, VX-MON-27Q, VX-MON-34W.
+      - **Substitutes:** VX-LAP-P16 for engineering/CAD users (heavier, much higher price).
+      - **Recommended accessories / add-ons:** VX-DOCK-TB4 + VX-MON-27Q desk setup.
+      - **Warranty:** 1 year carry-in (3-year onsite upgrade available)
+      - **Lifecycle:** Active
+
+      ### VX-LAP-P16 — Voltaris P16 Mobile Workstation
+
+      - **What it is:** 16" ISV-certified mobile workstation for CAD, simulation and content creation.
+      - **Key specs:** 16" 3840x2400 OLED; 16-core CPU; 64 GB RAM; 2 TB NVMe; professional GPU with 12 GB; Wi-Fi 7; 2x Thunderbolt 4; 2.4 kg; ISV-certified for major CAD suites.
+      - **Compatible with:** VX-DOCK-TB4, VX-MON-34W, VX-MON-27Q.
+      - **Substitutes:** No equivalent mobile workstation; VX-DSK-M5 is NOT a substitute for CAD workloads. VX-LAP-E14 only as a temporary loaner for non-CAD work.
+      - **Recommended accessories / add-ons:** VX-DOCK-TB4 + VX-MON-34W engineering desk setup.
+      - **Warranty:** 3 years onsite
+      - **Lifecycle:** Active
+
+      ### VX-DSK-M5 — Voltaris M5 Mini Desktop
+
+      - **What it is:** 1-litre mini PC for point-of-sale back offices, kiosks, reception desks and hot desks.
+      - **Key specs:** 8-core CPU; 16 GB RAM; 512 GB NVMe; 2x DisplayPort + HDMI; 1x 2.5GbE; Wi-Fi 6E; VESA mount included.
+      - **Compatible with:** VX-MON-27Q (VESA mount behind the monitor), VX-MON-34W.
+      - **Substitutes:** VX-LAP-E14 where mobility is required.
+      - **Recommended accessories / add-ons:** VX-MON-27Q (one per M5).
+      - **Warranty:** 3 years onsite
+      - **Lifecycle:** Active
+
+      ### VX-MON-27Q — Voltaris 27Q 27" QHD Monitor
+
+      - **What it is:** 27" QHD office monitor with height-adjustable stand.
+      - **Key specs:** 27" 2560x1440 IPS, 75 Hz; USB-C 65 W power delivery; DisplayPort, HDMI; VESA 100; M5 mounting bracket included.
+      - **Compatible with:** VX-LAP-E14, VX-LAP-P16, VX-DSK-M5, VX-DOCK-TB4.
+      - **Substitutes:** VX-MON-34W for more screen area.
+      - **Recommended accessories / add-ons:** VX-DOCK-TB4 for laptop users.
+      - **Warranty:** 3 years advance replacement
+      - **Lifecycle:** Active
+
+      ### VX-MON-34W — Voltaris 34W 34" Ultrawide USB-C Monitor
+
+      - **What it is:** 34" curved ultrawide for engineering, finance and multi-window work.
+      - **Key specs:** 34" 3440x1440 IPS, 100 Hz; USB-C 90 W power delivery with built-in KVM; 2.5GbE port; DisplayPort, HDMI; factory-calibrated.
+      - **Compatible with:** VX-LAP-E14, VX-LAP-P16, VX-DSK-M5, VX-DOCK-TB4.
+      - **Substitutes:** VX-MON-27Q (smaller, lower price).
+      - **Recommended accessories / add-ons:** VX-DOCK-TB4.
+      - **Warranty:** 3 years advance replacement
+      - **Lifecycle:** Active
+
+      ### VX-DOCK-TB4 — Voltaris TB4 Thunderbolt Dock
+
+      - **What it is:** Single-cable Thunderbolt 4 dock for laptops.
+      - **Key specs:** Thunderbolt 4 / USB4 host; 96 W charging; 2x DisplayPort 1.4; 1x 2.5GbE; 4x USB-A, 2x USB-C; drives up to two 4K displays.
+      - **Compatible with:** VX-LAP-E14, VX-LAP-P16, VX-MON-27Q, VX-MON-34W.
+      - **Substitutes:** None.
+      - **Recommended accessories / add-ons:** Sold with every E14/P16 desk setup.
+      - **Warranty:** 3 years advance replacement
+      - **Lifecycle:** Active

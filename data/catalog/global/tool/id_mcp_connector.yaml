@@ -1,0 +1,34 @@
+# Catalog-only: akgentic.tool.mcp.MCPTool already exists in akgentic-tool, so this
+# entry needs no new Python (per the catalog-first principle) — it's a template you
+# configure per MCP server, not a ready-to-use single connection.
+#
+# IMPORTANT — this framework's catalog has NO ${VAR} env-var substitution (unlike the
+# Twilio/SendGrid tools built earlier in this project, which deliberately keep
+# credentials out of the catalog and read os.environ directly in Python instead).
+# MCPTool's bearer_token is a plain config field with no such indirection, so a real
+# token placed here is stored as a literal in this YAML file. To use this against a
+# real MCP server: either (a) clone this file into a namespace-specific copy with the
+# real url/bearer_token filled in and keep that copy out of version control if it
+# holds a live credential, or (b) ask for MCPHTTPConnectionConfig to be extended with
+# ${VAR} resolution (a small framework change, not done here since it touches the
+# shared akgentic-tool package and wasn't asked for).
+#
+# url below is a placeholder so this entry validates on its own — replace it (and
+# bearer_token, if the server needs one) with the real endpoint per use.
+id: id_mcp_connector
+kind: tool
+namespace: global
+user_id: anonymous
+model_type: akgentic.tool.mcp.MCPTool
+description: >-
+  Generic connector to any MCP server over HTTP/SSE — configure connection.url,
+  connection.transport and connection.bearer_token per server; clone into a
+  team namespace to point at a specific one
+payload:
+  connection:
+    url: https://example.com/mcp
+    transport: streamable-http
+    bearer_token: null
+    timeout: 10.0
+    read_timeout: 300.0
+    tool_prefix: null

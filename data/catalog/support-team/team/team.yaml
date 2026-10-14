@@ -1,0 +1,27 @@
+id: team
+kind: team
+namespace: support-team
+user_id: anonymous
+model_type: akgentic.team.TeamCard
+description: Team Coordinator that triages incoming queries and dynamically hires
+  a Customer Engagement Assistant (Salesforce), Payroll Assistant (payroll data),
+  Knowledge Assistant (FAQ/wiki/reference data + DigiFAQ crawl) or Troubleshooter
+  (payroll-run error diagnosis) based on message context
+payload:
+  welcome_message: |
+    Welcome to the Payroll Support Team.
+  entry_point:
+    card:
+      __ref__: human_proxy
+  members:
+  - card:
+      __ref__: team_coordinator
+  agent_profiles:
+  - __ref__: customer_engagement_assistant
+  - __ref__: payroll_assistant
+  - __ref__: knowledge_assistant
+  - __ref__: troubleshooter
+  - __ref__: payroll_quality_assistant
+  - __ref__: client
+  message_types:
+  - __type__: akgentic.agent.messages.AgentMessage

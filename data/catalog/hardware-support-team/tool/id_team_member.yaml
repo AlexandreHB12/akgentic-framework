@@ -1,0 +1,15 @@
+id: id_team_member
+kind: tool
+namespace: hardware-support-team
+user_id: anonymous
+model_type: akgentic.tool.team.TeamTool
+description: Specialists' TeamTool — roster only. Specialists are hired on demand,
+  so their names carry a random suffix; the roster (system-prompt channel, no tool
+  call) is how a member finds its peer's exact @Name. Hire/fire/activity stay off
+  — hiring is the lead's job and team_activity is pollable.
+payload:
+  hire_team_members: false
+  fire_team_members: false
+  get_role_profiles: false
+  get_team_roster: true
+  get_team_activity: false

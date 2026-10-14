@@ -1,0 +1,13 @@
+# file_path is relative to the server's working directory (the repo root,
+# per how src/infra_server.py is normally launched). The file (and its
+# parent directory) is created automatically on first use.
+id: id_team_memory
+kind: tool
+namespace: support-team
+user_id: anonymous
+model_type: team_memory.tool.MemoryTool
+description: >-
+  A small persistent memory for the Team Coordinator — one line of text per
+  memory in a plain file; list, add, forget one, or forget all
+payload:
+  file_path: data/memory/team_coordinator_memories.txt

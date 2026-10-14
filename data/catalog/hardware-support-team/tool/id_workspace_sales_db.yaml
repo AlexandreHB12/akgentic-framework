@@ -1,0 +1,80 @@
+id: id_workspace_sales_db
+kind: tool
+namespace: hardware-support-team
+user_id: anonymous
+model_type: akgentic.tool.workspace.WorkspaceTool
+description: Read-only price list and pricing policy, scoped to @SalesAssistant by
+  a unique workspace_id.
+payload:
+  workspace_id: hardware-support-sales-db
+  read_only: true
+  workspace_view: false
+  workspace_list: false
+  workspace_glob: false
+  workspace_grep: false
+  expand_media_refs: false
+  workspace_read:
+    instructions: |
+      Files: price_list.csv, pricing_policy.md. Read each at most once per task.
+  resources:
+  - file_name: price_list.csv
+    content: |
+      sku,product,category,list_price_eur,tier_10plus_eur,tier_50plus_eur,lifecycle,cross_sell
+      VX-SRV-R250,Voltaris R250 1U Rack Server,Datacenter,4890.00,4743.30,4596.60,Active,"VX-SSD-3840 drives, VX-SFP-10G-SR optics, VX-UPS-1500."
+      VX-SRV-R450,Voltaris R450 2U Rack Server,Datacenter,11250.00,10912.50,10575.00,Active,VX-RACK-42U and VX-UPS-1500 for new deployments; VX-NET-S48X for 10G cluster fabric.
+      VX-STO-N8,Voltaris N8 8-Bay NAS,Datacenter,2390.00,2318.30,2246.60,Active,"VX-HDD-16T drives (sold separately), VX-UPS-1500."
+      VX-STO-N16,Voltaris N16 16-Bay Rack NAS,Datacenter,6980.00,6770.60,6561.20,Active,"VX-HDD-16T drives, 2x VX-SSD-3840 as read/write cache, VX-SFP-10G-SR optics."
+      VX-SSD-3840,Voltaris 3.84 TB Enterprise NVMe SSD,Datacenter,689.00,668.33,647.66,Active,Sold with VX-SRV-R250 / VX-SRV-R450 configurations.
+      VX-HDD-16T,Voltaris 16 TB Enterprise SAS HDD,Datacenter,429.00,416.13,403.26,Active,Sold with VX-STO-N8 / VX-STO-N16 (NAS units ship without drives).
+      VX-NET-S24,Voltaris S24 24-Port PoE+ Switch,Networking,1290.00,1251.30,1212.60,Active,VX-SFP-10G-SR uplink optics; pairs with VX-NET-AP7 rollouts.
+      VX-NET-S48X,Voltaris S48X 48-Port 10G Switch,Networking,7450.00,7226.50,7003.00,Active,"VX-SFP-10G-SR optics (one per used port, both ends)."
+      VX-SFP-10G-SR,Voltaris 10G SFP+ SR Transceiver,Networking,59.00,57.23,55.46,Active,Always quoted with VX-NET-S48X and with SFP+ server/NAS links.
+      VX-NET-AP6,Voltaris AP6 Wi-Fi 6 Access Point,Networking,349.00,338.53,328.06,EOL,VX-NET-S24 for PoE.
+      VX-NET-AP7,Voltaris AP7 Wi-Fi 7 Access Point,Networking,529.00,513.13,497.26,Active,VX-NET-S24 PoE+ switches; VX-NET-FW200 per site.
+      VX-NET-FW200,Voltaris FW200 Firewall Appliance,Networking,1840.00,1784.80,1729.60,Active,One per site with VX-NET-S24 and VX-NET-AP7 rollouts.
+      VX-LAP-E14,Voltaris E14 Business Laptop,Endpoint,1149.00,1114.53,1080.06,Active,VX-DOCK-TB4 + VX-MON-27Q desk setup.
+      VX-LAP-P16,Voltaris P16 Mobile Workstation,Endpoint,3290.00,3191.30,3092.60,Active,VX-DOCK-TB4 + VX-MON-34W engineering desk setup.
+      VX-DSK-M5,Voltaris M5 Mini Desktop,Endpoint,749.00,726.53,704.06,Active,VX-MON-27Q (one per M5).
+      VX-MON-27Q,"Voltaris 27Q 27"" QHD Monitor",Endpoint,329.00,319.13,309.26,Active,VX-DOCK-TB4 for laptop users.
+      VX-MON-34W,"Voltaris 34W 34"" Ultrawide USB-C Monitor",Endpoint,689.00,668.33,647.66,Active,VX-DOCK-TB4.
+      VX-DOCK-TB4,Voltaris TB4 Thunderbolt Dock,Endpoint,249.00,241.53,234.06,Active,Sold with every E14/P16 desk setup.
+      VX-UPS-1500,Voltaris UPS-1500 Rack UPS,Datacenter,1090.00,1057.30,1024.60,Active,Recommended with every new server or NAS rack deployment.
+      VX-RACK-42U,Voltaris 42U Server Rack Cabinet,Datacenter,1450.00,1406.50,1363.00,Active,VX-UPS-1500.
+  - file_name: pricing_policy.md
+    content: |
+      # Voltaris Hardware — Pricing & Proposal Policy (sales use only)
+
+      ## How a net price is built
+      1. Start from the list price (price_list.csv, EUR, excl. VAT).
+      2. **Client with a framework contract in force** on the quote date: apply that contract's discount for the
+         product's category (Datacenter / Networking / Endpoint). Volume tiers do NOT stack on a contract discount.
+         Contract discounts and status are held by @ContractingAssistant — never assume them.
+      3. **Client without a contract in force** (none, expired, or only a draft renewal): apply volume tiers per SKU line —
+         3% at 10+ units, 6% at 50+ units — and standard terms (Net 30).
+      4. **Promotions** (below) replace the discount from step 2 or 3 on the eligible SKUs, whichever is better for the
+         client. Never stack a promotion with a contract discount.
+      5. Discretionary discount: up to 3% extra on proposals above EUR 50,000 net, sales manager approval required above
+         that. Always state it as a separate line, never fold it into the unit price.
+      6. Quotes are valid 30 days (see terms and conditions). Prices exclude VAT and exclude installation services.
+
+      ## Active promotions
+      | Code | Offer | Eligible | Valid until |
+      |---|---|---|---|
+      | PROMO-WIFI7-Q4 | 15% off VX-NET-AP7 for customers migrating from AP6 or a third-party Wi-Fi estate | VX-NET-AP7, min. 20 units per order | 2026-12-31 |
+      | PROMO-RACKREADY | Free VX-RACK-42U with every 4x VX-SRV-R450 on one order | VX-SRV-R450 | 2026-12-31 |
+
+      ## Cross-sell & up-sell playbook
+      | If the client buys / plans… | Propose |
+      |---|---|
+      | Access points (AP7) for a new site | VX-NET-S24 PoE+ switch per ~20 APs, VX-NET-FW200 per site |
+      | AP6 estate (EOL) | AP7 migration with PROMO-WIFI7-Q4 |
+      | R450 / R250 servers | VX-RACK-42U, VX-UPS-1500 (1 per 2 R450), VX-SFP-10G-SR optics, VX-NET-S48X for a 10G fabric |
+      | N8 / N16 NAS | VX-HDD-16T drives (NAS ships empty), VX-SSD-3840 cache (N16 only), VX-UPS-1500 |
+      | E14 / P16 laptops | VX-DOCK-TB4 + VX-MON-27Q (office) or VX-MON-34W (engineering) |
+      | Retail store kit | 1x VX-NET-FW200, 1x VX-NET-S24, 2-3x VX-NET-AP7, 1x VX-DSK-M5 + VX-MON-27Q per store |
+      | Contract renewal due | Bundle the client's next planned purchase into the renewal to lift the discount band |
+
+      ## Proposal format
+      Proposal ID (PRP-<client id>-<yyyymmdd>), client, pricing basis (contract id or list/tiers), one line per SKU
+      (qty, list, discount %, net unit, line total), promotions applied, subtotal, validity date, payment terms, and
+      up to three cross-sell suggestions as optional lines (not included in the subtotal).

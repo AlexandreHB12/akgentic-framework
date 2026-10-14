@@ -1,0 +1,13 @@
+id: id_run_limits_member
+kind: model
+namespace: hardware-support-team
+user_id: anonymous
+model_type: akgentic.llm.RunUsageLimits
+description: Per-run brake for read-only specialists — up to 5 file reads (often in
+  one parallel batch, which counts as 5 calls), then one response. A limit of 4 was
+  measured to refuse @CustomerEngagementAssistant's single 5-file batch outright.
+payload:
+  run_request_limit: 12
+  tool_calls_limit: 8
+  total_tokens_limit: 80000
+  output_tokens_limit: 2500

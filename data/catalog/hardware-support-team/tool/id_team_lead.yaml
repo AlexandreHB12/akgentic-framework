@@ -1,0 +1,21 @@
+id: id_team_lead
+kind: tool
+namespace: hardware-support-team
+user_id: anonymous
+model_type: akgentic.tool.team.TeamTool
+description: Support Lead's TeamTool — hire + roster + role profiles. Specialists
+  are agent_profiles, hired the first time a case needs them. No fire (a hired specialist
+  is reused for the rest of the session) and no team_activity (pollable).
+payload:
+  hire_team_members:
+    instructions: |
+      On this team, hiring is how a specialist joins: call this the first time a case
+      needs a role that is not yet in your roster — you do not need the user to ask.
+      Pass every missing role in ONE call, plus any missing peer they consult (Order
+      Manager <-> Stock Manager, Product Expert -> Stock Manager, Sales Assistant ->
+      Contracting Assistant). Never hire a role already in the roster. For the client
+      contact, use hire_client, not this.
+  fire_team_members: false
+  get_role_profiles: true
+  get_team_roster: true
+  get_team_activity: false

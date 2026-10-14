@@ -1,0 +1,108 @@
+id: _meta
+kind: meta
+namespace: hardware-support-team
+user_id: anonymous
+model_type: akgentic.catalog.models.namespace_meta.NamespaceMeta
+description: Support Lead for a hardware vendor, routing each case to six data-holding
+  specialists — customer, orders, stock, products, sales and contracts.
+payload:
+  name: Hardware Customer Support
+  description: Support Lead for a hardware vendor, routing each case to six data-holding
+    specialists — customer, orders, stock, products, sales and contracts.
+  properties:
+    overview: |
+      Customer-support desk for Voltaris Hardware, a fictional B2B vendor of servers, storage,
+      networking and endpoint hardware. @Human is a Voltaris support representative working a
+      case (a client email, a call, a warehouse notice). @SupportLead is their only point of
+      contact; it routes each case to the specialists that hold the data and answers once,
+      attributing every fact. Demonstrates routing discrimination (only the needed specialists
+      fire), parallel fan-out with a gather, bounded peer consultation, and one agent that
+      WRITES to its system of record (@StockManager).
+    principles: |
+      Information asymmetry by construction: every specialist holds one system of record in a
+      workspace no other agent can reach, and @SupportLead holds none. It structurally cannot
+      answer a data question alone. All fake data is generated from one source
+      (scripts/build_hardware_support_team.py), so clients, SKUs, contract discounts, order
+      prices and stock reservations agree across all six workspaces: reserved stock = the
+      open order lines; every order unit price = list price x the contract in force on the
+      order date.
+
+      Specialists are hired on demand: the team starts with only @Human and @SupportLead,
+      and every specialist is an agent_profile (can_be_hired) that the lead hires with
+      hire_members the first time a case needs that role, then reuses. A role's peer is
+      hired in the same call, because a member cannot consult someone not in the team.
+
+      Peer edges exist only where one specialist genuinely cannot finish without another's
+      data: Sales needs the client's contract discount (Contracting); Product Expert's
+      recommendations must be in stock (Stock); Order Manager's backorders need a restock
+      date (Stock); Stock Manager's order-driven updates need the exact order lines (Orders).
+      One named peer per agent, at most one consultation per task, a `notification` to the
+      lead while waiting, and "a peer request is answered, never forwarded" - so every chain
+      terminates at depth 1. Customer Engagement and Contracting consult nobody.
+
+      Opportunities are surfaced, not acted on: @CustomerEngagementAssistant ends every
+      response with an `Opportunity:` line; @SupportLead offers a proposal to @Human and only
+      dispatches @SalesAssistant when asked.
+    flow: |
+      @Human -> @SupportLead -> {one or more specialists, in parallel} -> @SupportLead -> @Human.
+      Routing table in the lead prompt §7. Any case naming a client also goes to
+      @CustomerEngagementAssistant for context and opportunities (except pure warehouse
+      stock events). PlanningTool is the gather ledger: one task per dispatch, closed only by
+      a `response`; a `notification` means the member is consulting its peer. One reply to
+      @Human per round. Peer edges:
+        @SalesAssistant -> @ContractingAssistant   (contract discount/terms before any price)
+        @ProductExpert  -> @StockManager           (availability of what it recommends)
+        @OrderManager   -> @StockManager           (restock ETA for backordered/held lines)
+        @StockManager   -> @OrderManager           (exact order lines for an order-driven update)
+    tools: |
+      WorkspaceTool - one card per specialist, each with its own fixed workspace_id
+      (hardware-support-<name>-db) seeded via `resources`. Five are read_only with only
+      workspace_read enabled. @StockManager's card is writable but narrowed to
+      read + edit + multi_edit (no write/delete/mkdir/patch), so it can change rows in
+      stock.csv and append to stock_movements.csv but cannot delete or replace the files.
+      Seeding never overwrites an existing file, so stock changes PERSIST across teams; to
+      reset the demo, delete the workspace's stock files and create a new team (README in
+      data/demo-data/hardware-support-team).
+
+      PlanningTool - lead only, the dispatch/gather ledger (get_planning is on the system
+      prompt channel, so the lead sees open tasks every turn).
+
+      TeamTool - explicit cards, never the auto-injected default. Lead: hire_members +
+      roster + role profiles (no fire, no team_activity). Members: roster only - hired
+      names carry a random suffix (@StockManager482), so the roster on the system-prompt
+      channel is how a member finds its peer's exact name. An @name matching nobody is
+      silently dropped, so every prompt says to copy names from the roster.
+
+      TrilloClientTool (client_proxy.tool) - lead only, copied from support-team's
+      id_trillo_client. hire_client brings a hireable @Client (a client_proxy ClientProxy,
+      listed in agent_profiles, never instantiated at start) into the team with the
+      contact's name and channels; send_email (Twilio SendGrid) and send_whatsapp_message
+      (Twilio) then reach that person. make_call and send_sms are DISABLED - the ask was
+      email and WhatsApp only; flip them to true to enable. Needs TWILIO_ACCOUNT_SID /
+      TWILIO_AUTH_TOKEN (WhatsApp; TWILIO_WHATSAPP_FROM defaults to the Twilio sandbox) and
+      SENDGRID_API_KEY / SENDGRID_FROM_EMAIL (email) in the server environment, and the
+      server must allow the `client_proxy.` model_type prefix
+      (AKGENTIC_CATALOG_MODEL_TYPE_PREFIXES), as support-team already requires. The lead
+      always shows @Human the draft and recipient and sends only on an explicit go-ahead.
+      Contact details on file are fake (*.example) - give a real address/number in chat to
+      actually receive a message.
+
+      No SearchTool, no KnowledgeGraphTool: every answer must come from the seeded systems
+      of record, never the web.
+    graph: No knowledge graph - the case outcome lives in the message history.
+    limits: |
+      Both tiers on every agent (unset by default; pydantic-ai's run_request_limit=50 is only
+      a loop guard).
+        lead      run 25 req / 12 tool calls / 200k tokens / 4k output ; life 200 req / 1.5M
+        member    run 12 req /  8 tool calls /  80k tokens / 2.5k output ; life 80 req / 600k
+        stock     run 14 req / 10 tool calls / 120k tokens / 3k output ; life 80 req / 600k
+      Sized from the tool budget: a member reads 2-5 files; the stock manager reads 2 files
+      and makes 2 edits per update. First live trace: a 4-call member cap refused the
+      customer assistant's parallel 5-file read batch and starved the order manager of its
+      peer consultation, so the member cap is now 8. Parallel tool calls each count.
+    lineage: |
+      v1 started all six specialists with the team. Revised in place: specialists are now
+      agent_profiles hired on first need (plus their peer), so a single-topic case only
+      starts the agents it touches.
+  shareable: false
+  public: true

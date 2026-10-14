@@ -1,0 +1,56 @@
+id: id_workspace_contracts_db
+kind: tool
+namespace: hardware-support-team
+user_id: anonymous
+model_type: akgentic.tool.workspace.WorkspaceTool
+description: Read-only client contracts and general terms of sale, scoped to @ContractingAssistant
+  by a unique workspace_id.
+payload:
+  workspace_id: hardware-support-contracts-db
+  read_only: true
+  workspace_view: false
+  workspace_list: false
+  workspace_glob: false
+  workspace_grep: false
+  expand_media_refs: false
+  workspace_read:
+    instructions: |
+      Files: contracts.csv, terms_and_conditions.md. Read each at most once per task.
+  resources:
+  - file_name: contracts.csv
+    content: |
+      contract_id,client_id,client,type,start_date,end_date,status,discount_datacenter_pct,discount_networking_pct,discount_endpoint_pct,payment_terms,incoterms,service_level,notice_and_renewal,price_protection,special_clauses
+      FA-2024-017,C-1001,Brightwater Logistics NV,Framework Supply Agreement,2024-03-01,2027-02-28,Active,8,12,6,Net 45,DAP customer site,Next-business-day onsite (Datacenter & Networking),90 days before end date,List prices frozen per contract year (March-February),"Volume commitment EUR 350k/year (2025 actual: EUR 412.6k — met). Promotional pricing may replace (not stack with) the contract discount, whichever is better for the client."
+      FA-2024-002,C-1002,Meridian Health Group,Framework Supply & Service Agreement,2024-01-01,2026-12-31,Active — renewal window open,10,10,8,Net 60,DAP customer site,4-hour onsite for Datacenter products at hospital sites; next-business-day for all other products,Renewal or termination notice due by 2026-11-01 (60 days before end date); auto-renews for 12 months on unchanged terms if no notice,12-month price protection on quoted configurations,"Healthcare data clause: failed storage drives are retained by the client (no return), replacement shipped without return requirement. Purchase orders must reference a Meridian PO number before release."
+      FA-2025-031,C-1003,Kestrel Engineering BV,Framework Supply Agreement,2025-05-01,2027-04-30,Active,6,6,9,Net 30,DAP customer site,Next-business-day onsite,60 days before end date,None,"Early-life failure clause: any endpoint failing within 30 days of delivery is swapped for a new unit, not repaired."
+      FA-2022-009,C-1004,Aurora Retail Group SA,Framework Supply Agreement,2022-07-01,2026-06-30,Expired,9,10,10,Net 45,DAP Luxembourg HQ or store,Next-business-day advance replacement,90 days before end date (lapsed without renewal),None,"Expired 2026-06-30. Since 2026-07-01 Aurora orders are priced at list with standard volume tiers (3% at 10+ units, 6% at 50+ units per SKU) and standard payment terms (Net 30). Renewal FA-2026-022 is drafted and awaiting the client's signature."
+      FA-2026-022,C-1004,Aurora Retail Group SA,Framework Supply Agreement (renewal of FA-2022-009),2026-11-01,2029-10-31,"Draft — sent to client 2026-09-18, awaiting signature",9,12,10,Net 45,DAP Luxembourg HQ or store,Next-business-day advance replacement,90 days before end date,List prices frozen for 12 months from start date,"Not yet in force. Proposed goodwill credit: the difference between list-tier pricing and the old FA-2022-009 discounts on orders placed 2026-07-01 to 2026-10-31, credited on signature."
+      EA-2025-012,C-1005,Pinecrest University,Education Framework Agreement (public tender PU-2025-ICT-04),2025-09-01,2028-08-31,Active,15,15,15,Net 30,DAP Pinecrest campus (named building loading dock),Next-business-day onsite,Tender-governed: no auto-renewal; re-tender required,Tender prices fixed for the full term on awarded lots,Delivery address changes must be requested in writing by the Procurement Officer at least 2 business days before dispatch. Orders above EUR 100k need a separate mini-competition.
+  - file_name: terms_and_conditions.md
+    content: |
+      # Voltaris Hardware — General Terms and Conditions of Sale (version 2026.1, effective 2026-01-01)
+
+      Applies to every sale unless a signed framework agreement says otherwise; where a framework agreement and these terms
+      conflict, the framework agreement wins.
+
+      1. **Quotations.** Valid for 30 days from issue. Prices in EUR, excluding VAT, delivery included within the EU for
+         orders above EUR 1,000 net (EUR 45 flat fee below that).
+      2. **Orders.** An order is binding once confirmed in writing by Voltaris Hardware. Stock is allocated at confirmation.
+         Orders on hold awaiting a client purchase order keep their allocation for 10 business days, then the allocation is released.
+      3. **Payment.** Net 30 days from invoice date unless a framework agreement specifies otherwise. Late payments bear
+         interest at 8% per year plus a EUR 40 recovery fee. Deliveries may be suspended for accounts more than 30 days overdue.
+      4. **Delivery.** DAP (Incoterms 2020) to the address on the order. Risk passes on delivery; title passes on full
+         payment. Delivery dates are estimates; partial shipments are allowed and invoiced as shipped.
+      5. **Backorders.** Backordered lines ship automatically when stock arrives, in order-date sequence. The client may
+         cancel a backordered line without fee at any time before it ships.
+      6. **Address changes.** Possible until the order is picked; after picking, a re-routing fee of EUR 75 per shipment applies.
+      7. **Cancellation.** Free until the order is picked. After picking and before shipment: 10% fee. After shipment,
+         cancellation is handled as a return.
+      8. **Returns.** Unopened products within 30 days of delivery, 15% restocking fee. Opened products are not returnable
+         unless defective. End-of-life and custom-configured products are not returnable.
+      9. **Dead on arrival (DOA).** Reported within 14 days of delivery: free replacement, return label provided.
+      10. **Warranty.** As stated per product in the product catalogue, from delivery date. Warranty excludes misuse,
+          unauthorised modification and consumables. Batteries: 2 years.
+      11. **Price changes.** List prices may change with 30 days' notice; confirmed orders keep their confirmed prices.
+      12. **Liability.** Limited to the net value of the affected order; no liability for indirect or consequential loss.
+      13. **Governing law.** Belgian law; courts of Liège have jurisdiction.

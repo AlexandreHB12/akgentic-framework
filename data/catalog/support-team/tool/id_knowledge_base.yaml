@@ -1,0 +1,613 @@
+id: id_knowledge_base
+kind: tool
+namespace: support-team
+user_id: anonymous
+model_type: akgentic.tool.workspace.WorkspaceTool
+description: FAQ, wiki, external reference, product package and calendar/math reference data
+payload:
+  workspace_id: support-team-knowledge
+  read_only: true
+  workspace_view: false
+  expand_media_refs: false
+  workspace_read:
+    instructions: digifaq_entries.csv and infoweb_documents.csv are internal FAQ/knowledge-base articles.
+      payroll_wiki_pages.csv and los21_wiki_pages.csv are internal wiki search results. external_websites.csv
+      covers RVA/ONEM, FOD WASO/SPF Emploi, RSZ/ONSS and NAR/CNT reference pages. ella_queries.csv/ella_sources.csv/ella_model_docs.csv
+      are the ELLA payroll knowledge assistant's own Q&A history and source catalog. ten_commandments.csv
+      is the termination checklist (NL/FR). belgian_holidays.csv lists 2026 public/school/bank holidays.
+      math_expressions.csv has verified payroll arithmetic examples. nbo_packages.csv describes the commercial
+      packages.
+  resources:
+  - file_name: digifaq_entries.csv
+    file_type: text
+    content: |
+      faq_id,language,question,short_answer,long_answer,topic,sme_relevant,source_url,fingerprint,relevance_score,provider
+      digifaq-1198,nl,Hoelang loopt het gewaarborgd loon voor een bediende?,"30 kalenderdagen, volledig ten laste van de werkgever.",Een bediende met een contract van onbepaalde duur heeft recht op 30 kalenderdagen gewaarborgd loon ten laste van de werkgever. Voor arbeiders geldt een gefaseerde regeling met tussenkomst van het ziekenfonds vanaf dag 15.,Ziekte,yes,https://digifaq.sd.dika.be/nl/faq/1198,7c72ced6eb50,0.9189,DigiFAQ
+      digifaq-0937,nl,Hoeveel bedraagt de maximale waarde van een maaltijdcheque?,"8,00 EUR, waarvan minimaal 1,09 EUR werknemersbijdrage.","De maximale nominale waarde van een maaltijdcheque bedraagt 8,00 EUR. De werkgeversbijdrage bedraagt maximaal 6,91 EUR en de werknemersbijdrage minimaal 1,09 EUR. Cheques worden toegekend per effectief gewerkte dag.",Loonvoordelen,yes,https://digifaq.sd.dika.be/nl/faq/0937,9ff351d32505,0.5797,DigiFAQ
+      digifaq-7305,nl,Welke opzeggingstermijn geldt bij ontslag door de werknemer?,"De helft van de werkgeverstermijn, geplafonneerd op 13 weken.","Bij ontslag door de werknemer bedraagt de opzeggingstermijn de helft van de termijn die de werkgever zou moeten respecteren, met een maximum van 13 weken. De termijn gaat in op de maandag volgend op de betekening.",Ontslag,yes,https://digifaq.sd.dika.be/nl/faq/7305,808f9886d3ce,0.5699,DigiFAQ
+      digifaq-5121,nl,Wanneer moet een Dimona-aangifte gebeuren?,Ten laatste op het moment dat de werknemer begint te werken.,"De Dimona-aangifte moet ten laatste gebeuren op het ogenblik waarop de werknemer in dienst treedt, dus voor de eerste effectieve arbeidsprestatie. Voor studenten gebeurt de aangifte per kwartaal met vermelding van het aantal uren.",Dimona,yes,https://digifaq.sd.dika.be/nl/faq/5121,c6f61a7400d5,0.5600,DigiFAQ
+      digifaq-1561,nl,Wat is het contingent voor studentenarbeid?,600 uur per kalenderjaar aan verminderde solidariteitsbijdrage.,"Studenten kunnen 600 uur per kalenderjaar werken aan een verminderde solidariteitsbijdrage van 8,14% (2,71% werknemer, 5,43% werkgever). Het saldo kan geraadpleegd worden via student@work.",Student,yes,https://digifaq.sd.dika.be/nl/faq/1561,d8a6655312d7,0.6974,DigiFAQ
+      digifaq-5801,nl,Wat is de referteperiode voor ecocheques?,Van 1 juni tot 31 mei van het volgende jaar.,De referteperiode voor ecocheques loopt standaard van 1 juni tot 31 mei. Toekenning gebeurt pro rata de effectieve prestaties en gelijkgestelde periodes binnen die referteperiode. Sectorale CAO's kunnen afwijken.,Loonvoordelen,yes,https://digifaq.sd.dika.be/nl/faq/5801,787d984ff722,0.6245,DigiFAQ
+      digifaq-1399,fr,Quelle est la duree du salaire garanti pour un employe ?,"30 jours calendrier, entierement a charge de l'employeur.","Un employe sous contrat a duree indeterminee a droit a 30 jours calendrier de salaire garanti a charge de l'employeur. Pour les ouvriers, un regime echelonne s'applique avec intervention de la mutuelle a partir du 15e jour.",Maladie,yes,https://digifaq.sd.dika.be/fr/faq/1399,a44430932137,0.6290,DigiFAQ
+      digifaq-1959,fr,Quel est le contingent pour le travail etudiant ?,600 heures par annee civile a cotisation de solidarite reduite.,"Les etudiants peuvent travailler 600 heures par annee civile a une cotisation de solidarite reduite de 8,14% (2,71% travailleur, 5,43% employeur). Le solde est consultable via student@work.",Etudiant,yes,https://digifaq.sd.dika.be/fr/faq/1959,8fd4a0f37e45,0.6899,DigiFAQ
+      digifaq-2679,fr,Quelle est la periode de reference des eco-cheques ?,Du 1er juin au 31 mai de l'annee suivante.,La periode de reference des eco-cheques court en principe du 1er juin au 31 mai. L'octroi se fait au prorata des prestations effectives et assimilees dans cette periode. Les CCT sectorielles peuvent y deroger.,Avantages,yes,https://digifaq.sd.dika.be/fr/faq/2679,89fc9c6c1f24,0.7911,DigiFAQ
+      digifaq-3260,fr,Quand la declaration Dimona doit-elle etre effectuee ?,Au plus tard au moment ou le travailleur commence a travailler.,"La declaration Dimona doit etre effectuee au plus tard au moment de l'entree en service du travailleur, donc avant la premiere prestation effective. Pour les etudiants, la declaration est trimestrielle avec le nombre d'heures.",Dimona,yes,https://digifaq.sd.dika.be/fr/faq/3260,35ef44da1cf3,0.7270,DigiFAQ
+      digifaq-5120,fr,Quel est le montant maximal d'un cheque-repas ?,"8,00 EUR, dont au minimum 1,09 EUR a charge du travailleur.","La valeur nominale maximale d'un cheque-repas est de 8,00 EUR. L'intervention patronale s'eleve a maximum 6,91 EUR et la contribution du travailleur a minimum 1,09 EUR. Les cheques sont octroyes par jour effectivement preste.",Avantages,yes,https://digifaq.sd.dika.be/fr/faq/5120,c417584c5d4b,0.8825,DigiFAQ
+      digifaq-7982,fr,Quel delai de preavis s'applique en cas de demission ?,"La moitie du delai employeur, plafonne a 13 semaines.","En cas de demission, le delai de preavis correspond a la moitie du delai que l'employeur devrait respecter, avec un maximum de 13 semaines. Le delai prend cours le lundi suivant la notification.",Licenciement,yes,https://digifaq.sd.dika.be/fr/faq/7982,37dbc37dc367,0.9283,DigiFAQ
+  - file_name: infoweb_documents.csv
+    file_type: text
+    content: |
+      page_id,language,title,doc_title,source,document_path,cite_key,fingerprint,relevance_score,content_snippet,provider
+      41396,nl,Tijdskrediet en thematische verloven,Tijdskrediet en thematische verloven,https://infoweb.sd.dika.be/nl/redirect/page?path=nederl%2Fn43Pens%2FPrem%2Fn43Pens_Prem_15_61.htm,nederl/n43Pens/Prem/n43Pens_Prem_15_61.htm,nl-41396-n43pens-prem-15-61,bd9b777d925a,0.7199,"Tijdskrediet en thematische verloven. Dit hoofdstuk beschrijft de wettelijke basis, de toepassingsvoorwaarden en de berekeningswijze, met verwijzing naar de relevante CAO's en KB's.",Infoweb
+      12709,nl,Loonbeslag en loonoverdracht,Loonbeslag en loonoverdracht,https://infoweb.sd.dika.be/nl/redirect/page?path=nederl%2Fn11Pens%2FLoon%2Fn11Pens_Loon_13_22.htm,nederl/n11Pens/Loon/n11Pens_Loon_13_22.htm,nl-12709-n11pens-loon-13-22,35698ea5d31a,0.5884,"Loonbeslag en loonoverdracht. Dit hoofdstuk beschrijft de wettelijke basis, de toepassingsvoorwaarden en de berekeningswijze, met verwijzing naar de relevante CAO's en KB's.",Infoweb
+      90197,nl,Maaltijdcheques - voorwaarden en bedragen,Maaltijdcheques - voorwaarden en bedragen,https://infoweb.sd.dika.be/nl/redirect/page?path=nederl%2Fn11Uitd%2FKost%2Fn11Uitd_Kost_14_55.htm,nederl/n11Uitd/Kost/n11Uitd_Kost_14_55.htm,nl-90197-n11uitd-kost-14-55,90cf786c0ea3,0.6696,"Maaltijdcheques - voorwaarden en bedragen. Dit hoofdstuk beschrijft de wettelijke basis, de toepassingsvoorwaarden en de berekeningswijze, met verwijzing naar de relevante CAO's en KB's.",Infoweb
+      66266,nl,Dimona - aangifteverplichtingen,Dimona - aangifteverplichtingen,https://infoweb.sd.dika.be/nl/redirect/page?path=nederl%2Fn89Prest%2FTijd%2Fn89Prest_Tijd_15_87.htm,nederl/n89Prest/Tijd/n89Prest_Tijd_15_87.htm,nl-66266-n89prest-tijd-15-87,5530e1ddf337,0.6943,"Dimona - aangifteverplichtingen. Dit hoofdstuk beschrijft de wettelijke basis, de toepassingsvoorwaarden en de berekeningswijze, met verwijzing naar de relevante CAO's en KB's.",Infoweb
+      63342,nl,Eindejaarspremie - sectorale regelingen,Eindejaarspremie - sectorale regelingen,https://infoweb.sd.dika.be/nl/redirect/page?path=nederl%2Fn79Barem%2FUitd%2Fn79Barem_Uitd_05_56.htm,nederl/n79Barem/Uitd/n79Barem_Uitd_05_56.htm,nl-63342-n79barem-uitd-05-56,9252fc6b4f69,0.7415,"Eindejaarspremie - sectorale regelingen. Dit hoofdstuk beschrijft de wettelijke basis, de toepassingsvoorwaarden en de berekeningswijze, met verwijzing naar de relevante CAO's en KB's.",Infoweb
+      43416,nl,Gewaarborgd loon bij ziekte - arbeiders,Gewaarborgd loon bij ziekte - arbeiders,https://infoweb.sd.dika.be/nl/redirect/page?path=nederl%2Fn29Hulp%2FPens%2Fn29Hulp_Pens_15_15.htm,nederl/n29Hulp/Pens/n29Hulp_Pens_15_15.htm,nl-43416-n29hulp-pens-15-15,134960397199,0.6672,"Gewaarborgd loon bij ziekte - arbeiders. Dit hoofdstuk beschrijft de wettelijke basis, de toepassingsvoorwaarden en de berekeningswijze, met verwijzing naar de relevante CAO's en KB's.",Infoweb
+      20817,nl,Berekening van het dubbel vakantiegeld,Berekening van het dubbel vakantiegeld,https://infoweb.sd.dika.be/nl/redirect/page?path=nederl%2Fn71Verl%2FUitd%2Fn71Verl_Uitd_14_62.htm,nederl/n71Verl/Uitd/n71Verl_Uitd_14_62.htm,nl-20817-n71verl-uitd-14-62,e0768940a6d3,0.5663,"Berekening van het dubbel vakantiegeld. Dit hoofdstuk beschrijft de wettelijke basis, de toepassingsvoorwaarden en de berekeningswijze, met verwijzing naar de relevante CAO's en KB's.",Infoweb
+      30003,nl,Opzeggingstermijnen bij ontslag door de werkgever,Opzeggingstermijnen bij ontslag door de werkgever,https://infoweb.sd.dika.be/nl/redirect/page?path=nederl%2Fn78Prest%2FSoc%2Fn78Prest_Soc_09_62.htm,nederl/n78Prest/Soc/n78Prest_Soc_09_62.htm,nl-30003-n78prest-soc-09-62,954736233723,0.7441,"Opzeggingstermijnen bij ontslag door de werkgever. Dit hoofdstuk beschrijft de wettelijke basis, de toepassingsvoorwaarden en de berekeningswijze, met verwijzing naar de relevante CAO's en KB's.",Infoweb
+      64990,fr,Salaire garanti en cas de maladie - ouvriers,Salaire garanti en cas de maladie - ouvriers,https://infoweb.sd.dika.be/fr/redirect/page?path=franc%2Ff72Loon%2FLoon%2Ff72Loon_Loon_13_94.htm,franc/f72Loon/Loon/f72Loon_Loon_13_94.htm,fr-64990-f72loon-loon-13-94,c06cc8b950a8,0.8463,"Salaire garanti en cas de maladie - ouvriers. Ce chapitre decrit la base legale, les conditions d'application et le mode de calcul, avec renvoi aux CCT et AR pertinents.",Infoweb
+      63715,fr,Credit-temps et conges thematiques,Credit-temps et conges thematiques,https://infoweb.sd.dika.be/fr/redirect/page?path=franc%2Ff47Hulp%2FArbo%2Ff47Hulp_Arbo_02_49.htm,franc/f47Hulp/Arbo/f47Hulp_Arbo_02_49.htm,fr-63715-f47hulp-arbo-02-49,0e0ac51eaa58,0.8744,"Credit-temps et conges thematiques. Ce chapitre decrit la base legale, les conditions d'application et le mode de calcul, avec renvoi aux CCT et AR pertinents.",Infoweb
+      84514,fr,Saisie et cession de remuneration,Saisie et cession de remuneration,https://infoweb.sd.dika.be/fr/redirect/page?path=franc%2Ff07Barem%2FUitd%2Ff07Barem_Uitd_17_00.htm,franc/f07Barem/Uitd/f07Barem_Uitd_17_00.htm,fr-84514-f07barem-uitd-17-00,5503613082cf,0.8987,"Saisie et cession de remuneration. Ce chapitre decrit la base legale, les conditions d'application et le mode de calcul, avec renvoi aux CCT et AR pertinents.",Infoweb
+      66665,fr,Prime de fin d'annee - regimes sectoriels,Prime de fin d'annee - regimes sectoriels,https://infoweb.sd.dika.be/fr/redirect/page?path=franc%2Ff48Aanw%2FAanw%2Ff48Aanw_Aanw_16_30.htm,franc/f48Aanw/Aanw/f48Aanw_Aanw_16_30.htm,fr-66665-f48aanw-aanw-16-30,1ec3b247cbff,0.8374,"Prime de fin d'annee - regimes sectoriels. Ce chapitre decrit la base legale, les conditions d'application et le mode de calcul, avec renvoi aux CCT et AR pertinents.",Infoweb
+      97908,fr,Dimona - obligations de declaration,Dimona - obligations de declaration,https://infoweb.sd.dika.be/fr/redirect/page?path=franc%2Ff15Arbo%2FCont%2Ff15Arbo_Cont_12_73.htm,franc/f15Arbo/Cont/f15Arbo_Cont_12_73.htm,fr-97908-f15arbo-cont-12-73,e1c2814917da,0.7471,"Dimona - obligations de declaration. Ce chapitre decrit la base legale, les conditions d'application et le mode de calcul, avec renvoi aux CCT et AR pertinents.",Infoweb
+      98904,fr,Delais de preavis en cas de licenciement par l'employeur,Delais de preavis en cas de licenciement par l'employeur,https://infoweb.sd.dika.be/fr/redirect/page?path=franc%2Ff15Fisc%2FFisc%2Ff15Fisc_Fisc_04_70.htm,franc/f15Fisc/Fisc/f15Fisc_Fisc_04_70.htm,fr-98904-f15fisc-fisc-04-70,19d591584dc6,0.6779,"Delais de preavis en cas de licenciement par l'employeur. Ce chapitre decrit la base legale, les conditions d'application et le mode de calcul, avec renvoi aux CCT et AR pertinents.",Infoweb
+      87767,fr,Cheques-repas - conditions et montants,Cheques-repas - conditions et montants,https://infoweb.sd.dika.be/fr/redirect/page?path=franc%2Ff15Fisc%2FSoc%2Ff15Fisc_Soc_06_19.htm,franc/f15Fisc/Soc/f15Fisc_Soc_06_19.htm,fr-87767-f15fisc-soc-06-19,06d10e9d184c,0.8613,"Cheques-repas - conditions et montants. Ce chapitre decrit la base legale, les conditions d'application et le mode de calcul, avec renvoi aux CCT et AR pertinents.",Infoweb
+      65551,fr,Calcul du double pecule de vacances,Calcul du double pecule de vacances,https://infoweb.sd.dika.be/fr/redirect/page?path=franc%2Ff91Cont%2FFisc%2Ff91Cont_Fisc_01_84.htm,franc/f91Cont/Fisc/f91Cont_Fisc_01_84.htm,fr-65551-f91cont-fisc-01-84,d1186fa3c925,0.7551,"Calcul du double pecule de vacances. Ce chapitre decrit la base legale, les conditions d'application et le mode de calcul, avec renvoi aux CCT et AR pertinents.",Infoweb
+  - file_name: payroll_wiki_pages.csv
+    file_type: text
+    content: |
+      Belgian Income Tax Legislation and Payslip Mechanics: A Comprehensive Analysis
+      1. Introduction: The Macroeconomic Context of Belgian Labor Taxation
+      The Belgian personal income tax system, formalized under the 1992 Income Tax Code (Code des Impôts sur les Revenus 1992, or CIR 92), represents one of the most intricately structured and heavily taxed fiscal environments among industrialized nations. To understand the mechanics of a Belgian payslip, one must first recognize the macroeconomic realities that necessitate such high taxation. The system is designed to finance a highly developed welfare state characterized by extensive healthcare, pension schemes, and unemployment safety nets.
+      Statistical data from the Federal Public Service (SPF) Finances underscores the scale of this system. In 2024, approximately 9.6 million Belgian residents submitted tax declarations for the 2023 income year, accounting for a total net taxable income base of nearly €275 billion1. However, the burden of funding the state falls disproportionately on labor. The Organisation for Economic Co-operation and Development (OECD) consistently identifies Belgium as the nation with the highest "tax wedge" (coin fiscal) on labor3. For a single worker earning an average wage, the tax wedge—the ratio of total taxes and social security contributions to the total labor cost for the employer—reached 52.6% in 2024, standing far above the OECD average of 34.9%5.
+      While historical data reveals a slow erosion of this burden—the tax wedge has decreased by 4.5 percentage points over the past 25 years from a peak of 57.1%—the overarching reality remains that less than half of the employer's labor cost translates into net disposable income for the average single employee5. Consequently, the Belgian payslip is characterized by a cascade of statutory withholdings, social contributions, and tax calculations designed to capture revenue at multiple levels.
+      2. Foundational Legal Framework for Labor and Remuneration
+      Before examining the fiscal architecture, it is essential to outline the foundational labor law that governs the payment of remuneration. The Law of July 3, 1978, on Employment Contracts (Loi relative aux contrats de travail) mandates that employers pay remuneration under the conditions, time, and place agreed upon9.
+      Crucially, this legislation protects the employee's net payslip from arbitrary deductions. Under Article 18, employees are only financially liable for damages caused to the employer or third parties in cases of fraud, heavy fault, or habitual minor fault11. Even when liability is established, the employer cannot unilaterally withhold the entirety of the owed amount; statutory protections limit such deductions to a maximum of one-fifth (20%) of the employee's net remuneration per pay period13. This ensures a guaranteed minimum subsistence level, regardless of civil liabilities to the employer.
+      3. The Anatomy of the Belgian Payslip: From Gross to Net
+      The transformation of gross salary to net pay is governed by a strict, sequential application of social and fiscal levies. The perception of high taxation is driven by the cumulative effect of these concurrent deductions.
+      3.1. Social Security Contributions (ONSS)
+      The primary deduction applied to the gross salary is the personal contribution to the National Social Security Office (ONSS / RSZ). For white-collar workers (employés), this is a flat rate of 13.07% applied to the entirety of the gross remuneration15. Unlike many other jurisdictions, the Belgian system imposes no wage ceiling on this contribution; the 13.07% rate applies universally from the first euro to the last18.
+      A mechanical distinction exists for blue-collar workers (ouvriers). Because their holiday pay is administered and funded through external holiday funds (caisses de vacances) rather than directly by the employer, their social security contributions are calculated on 108% of their gross monthly wage19.
+      3.2. The Special Social Security Contribution (CSSS)
+      Following the standard ONSS deduction, the payslip features a Special Social Security Contribution (Cotisation Spéciale de Sécurité Sociale, or CSSS). Introduced originally as a temporary measure, the CSSS operates on a progressive scale based on the household's quarterly income22. The exact monthly withholding depends heavily on marital status and whether the taxpayer's spouse receives professional income.
+      For a single earner, the 2026 CSSS withholding scales up progressively:
+      Gross Monthly Remuneration
+      CSSS Monthly Withholding (Single Earner)
+      Up to €1,945.38
+      €0.00
+      €1,945.39 to €2,190.18
+      4.22% of the tranche exceeding €1,945.38
+      €2,190.19 to €3,737.00
+      €10.33 + 1.10% of the tranche exceeding €2,190.18
+      €3,737.01 to €4,100.00
+      €27.35 + 3.38% of the tranche exceeding €3,737.00
+      €4,100.01 to €6,190.18
+      €39.61 + 1.10% of the tranche exceeding €4,100.00
+      Over €6,190.18
+      Maximum flat rate of €60.94
+
+      Source Data:21
+      For a dual-earner household, the maximum retention is capped lower, at €154.92 per quarter (roughly €51.64 per month)21. The legislation surrounding the CSSS is slated for reform. Starting in 2028, the calculation method will be unified for all workers regardless of family situation, the entry threshold will be raised to €1,988.18, and the maximum retention will be halved to €30.47 per month23.
+      3.3. The Withholding Tax Mechanism (Précompte Professionnel)
+      The remainder of the salary, termed the gross taxable income, is subjected to the Précompte Professionnel (Pr. P). This is a compulsory withholding tax that serves as an advance payment on the final annual personal income tax24.
+      The rules governing this calculation are enshrined in Annex III of the AR/CIR 9226. Historically, the administration utilized distinct scales (Barème I for singles, Barème II for single-earners with a dependent spouse). In modern payroll processing, this has been streamlined into a unified "key formula" (formule-clé)17.
+      The payroll engine executes the following steps:
+      Annualization: The monthly taxable gross is multiplied by 12.
+      Flat-Rate Deduction: A 30% statutory deduction for professional expenses (capped at €6,070 for 2026) is subtracted to determine the net taxable base17.
+      Bracket Application: The progressive tax brackets are applied to calculate the base annual tax25.
+      Quota and Surcharges: The tax is reduced by the tax-exempt quota and subsequently increased by an upfront 7% surcharge to anticipate average communal taxes28.
+      Monthly Conversion: The final anticipated annual tax is divided by 12 and withheld from the payslip25.
+      3.4. The Employment Bonus (Bonus à l'Emploi)
+      To counteract the disincentivizing effects of the tax wedge on low-wage workers, the system incorporates an "Employment Bonus." This acts as a structural reduction in personal ONSS contributions for individuals earning below specific thresholds (e.g., tapering out for gross salaries above €3,144.45)21. Furthermore, a corresponding "fiscal employment bonus" reduces the Précompte Professionnel, ensuring that the social security reduction translates directly into higher net pay rather than simply increasing the taxable base29.
+      4. Architecture of the Personal Income Tax (IPP)
+      While the payslip reflects the advance withholding, the final liability is determined by the Personal Income Tax (Impôt des Personnes Physiques, or IPP) calculated through the annual tax return31.
+      4.1. Progressive Tax Brackets and Indexation
+      The IPP operates on a cumulative, progressive tranche system. Under Article 178 of CIR 92, the brackets are subject to automatic annual indexation based on the smoothed health index (indice santé lissé), preventing bracket creep caused by inflation33.
+      For income earned in 2025 (Tax Year 2026) and 2026 (Tax Year 2027), the federal tax brackets are defined as follows:
+      Tranche
+      Tax Rate
+      Income Bracket (2025 / TY 2026)
+      Income Bracket (2026 / TY 2027)
+      1
+      25%
+      €0.01 – €16,320
+      €0.01 – €16,720
+      2
+      40%
+      €16,320 – €28,800
+      €16,720 – €29,510
+      3
+      45%
+      €28,800 – €49,840
+      €29,510 – €51,070
+      4
+      50%
+      Over €49,840
+      Over €51,070
+
+      Source Data:35
+      The progression is steep, rapidly elevating taxpayers into the 45% and 50% brackets. However, reaching the top marginal rate does not imply that all income is taxed at 50%. The effective average tax rate is diluted by the lower brackets. For instance, a taxpayer with a net taxable income of €42,000 faces a marginal rate of 45%, but their average effective tax rate is approximately 35.7% before family deductions32.
+      4.2. The Tax-Exempt Quota (Quotité Exemptée d'Impôt)
+      To protect subsistence income, a base portion of earnings is insulated from taxation. The base tax-exempt quota is set at €10,910 for 2025 (Tax Year 2026) and €11,180 for 2026 (Tax Year 2027)31. This quota translates into a tax reduction calculated at the lowest bracket rate (25%), equating to a base tax saving of €2,727.50 for 202531.
+      This quota is dynamically augmented by the taxpayer's family situation:
+      Demographic Factor
+      Increase to Exempt Quota (2025 / TY 2026)
+      Increase to Exempt Quota (2026 / TY 2027)
+      1 Dependent Child
+      €1,980
+      €2,030
+      2 Dependent Children
+      €5,110
+      €5,230
+      3 Dependent Children
+      €11,440
+      €11,720
+      4 Dependent Children
+      €18,510
+      €18,970
+      Dependent Senior (> 65)
+      €3,850
+      €3,850
+
+      Source Data:35
+      A child with a recognized severe disability counts as two dependents. Furthermore, dependents must not possess net resources exceeding strict statutory limits to qualify for this status; for instance, the maximum net resources for a dependent child (non-student job) cannot exceed €4,200 for 202638.
+      4.3. Communal Taxes (Centimes Additionnels)
+      The federal IPP is only the baseline. Municipalities (communes) exercise their fiscal autonomy by levying centimes additionnels, which are calculated as a percentage of the federal tax owed40. The national average is around 7% to 8%, but variances are significant. In the Walloon region, 97 communes levy a rate exceeding 8%, and the average is 7.92%40. For example, Ottignies-Louvain-la-Neuve applies a rate of 7.7% alongside 2,400 additional centimes on property tax41. These variations mean two individuals earning identical gross salaries will have different net purchasing power depending strictly on their postal code44.
+      5. Professional Expenses: Flat-Rate vs. Actual Deductions
+      Before the progressive brackets are applied, taxpayers may deduct the costs incurred to generate their income.
+      5.1. Flat-Rate Deductions (Frais Forfaitaires)
+      To eliminate the administrative burden of verifying receipts, the administration automatically applies a flat-rate deduction. For standard employees, this is set at 30% of gross taxable income, capped at €5,930 for 2025 (TY 2026) and €6,070 for 2026 (TY 2027)17. Company directors (dirigeants d'entreprise) face a much stricter regime, with a flat rate of only 3%, capped at €3,13046.
+      5.2. Actual Documented Expenses (Frais Réels)
+      Under Article 49 of CIR 92, taxpayers whose real expenses exceed the flat-rate cap can opt to declare actual expenses48. This requires stringent proof that the expense was incurred during the taxable period directly to acquire or preserve professional income46.
+      The deductibility of specific items is tightly regulated:
+      Business Meals: Deductible at 69%46.
+      Reception and Business Gifts: Deductible at 50%46.
+      Telework Allowances: Employers can grant a tax-free allowance up to €164.21 per month to cover home office costs (heating, electricity, equipment)50.
+      Commuting: If using a personal vehicle, a flat rate of €0.15 per kilometer is applied46.
+      6. Taxation of Exceptional Allocations and Pensions
+      A structural element causing frequent dissatisfaction among the workforce is the disparity in net payouts between standard monthly wages and periodic bonuses, such as the 13th month (prime de fin d'année) and holiday pay (pécule de vacances).
+      6.1. Exceptional Allocations
+      The 13th month and double holiday pay are not taxed according to the standard monthly withholding formula. Because the taxpayer's regular salary has already consumed the lowest tax brackets and the entirety of the tax-exempt quota, these exceptional allocations are stacked on top of the annual income and taxed at a dedicated marginal withholding rate51.
+      For a worker with an annual taxable income between €34,640 and €45,860, the withholding tax rate applied to a 13th-month bonus is a staggering 46.44%. If the income exceeds €59,900, the rate maxes out at 53.50%17. Consequently, the net yield of a 13th month is often less than half of its gross value51.
+      Double holiday pay is similarly penalized. Standard double holiday pay equates to 92% of a gross month's salary. Social security is uniquely levied via a special 13.07% deduction on 85% of the gross wage (the remaining 7% escapes ONSS), after which a specialized withholding tax (often exceeding 40%) is applied51.
+      6.2. Holiday Pay for Pensioners
+      Retirees also navigate a complex holiday pay system. Former salaried workers receive a fixed holiday pay amount in May, restricted to €1,219.23 for single pensioners and €1,524.04 for households (as of March 2026)54. This amount is subject to withholding tax scaling up to 36% if the monthly pension exceeds €4,60054. Notably, self-employed retirees do not receive statutory holiday pay, highlighting a disparity between the social regimes54.
+      7. Alternative Remuneration and Benefits in Kind (ATN)
+      To bypass the severe tax wedge on cash compensation, Belgian remuneration strategies rely heavily on Benefits in Kind (Avantages de Toute Nature, or ATN) and tax-exempt vouchers.
+      7.1. Company Cars and the CO2 Coefficient
+      The company car is the cornerstone of Belgian extralegal compensation. However, private usage of the vehicle generates a taxable ATN55. The valuation formula is rigorously tied to the vehicle's catalog value, age, and environmental impact (CO2 emissions)55.
+      The standard formula is: Catalog Value × 6/7 × Age Coefficient × CO2 Coefficient55.
+      The CO2 coefficient compares the car's emissions against a government-determined annual reference point. For the 2026 income year, the reference emissions have been aggressively tightened to 58 g/km for diesel vehicles and 70 g/km for petrol/gas vehicles (down from 59 g/km and 71 g/km in 2025, respectively)58.
+      Because the reference drops, traditional combustion engine vehicles see their ATN increase mechanically year over year, resulting in lower net pay for the employee57. Conversely, zero-emission vehicles (fully electric or hydrogen) benefit from a guaranteed minimum CO2 coefficient of 4%, making them highly advantageous fiscally58. The statutory minimum ATN for any vehicle in 2026 is set at €1,690 per year60.
+      Furthermore, "false hybrids" (plug-in hybrids with insufficient battery capacity relative to vehicle weight, or emissions above 50 g/km) are penalized; their ATN is calculated using the emissions of an equivalent non-hybrid model, or multiplied by a factor of 2.557.
+      7.2. Meal Vouchers (Chèques-Repas)
+      Under Article 38/1 of CIR 92, meal vouchers represent a highly optimized form of compensation, as they are fully exempt from personal income tax and ONSS62. To maintain this exemption, the face value of a voucher cannot exceed €10, the employer's maximum contribution is €8.91, and the employee must contribute at least €1.0963. They must be granted collectively based on actual days worked63. By providing up to €1,960 in tax-free net purchasing power annually, meal vouchers circumvent the 50% marginal tax trap entirely63.
+      8. Specific Income Streams and Favorable Tax Regimes
+      Beyond standard salaried employment, the Belgian system encompasses diverse income streams, each with specific taxation rules designed to stimulate certain behaviors or investments.
+      8.1. Real Estate Income (Revenu Cadastral)
+      For property owners, the taxation of real estate income is unique. Instead of taxing actual rental income for properties rented to private individuals for residential purposes, Belgium utilizes a fictitious income known as the Revenu Cadastral (RC). To determine the taxable base for the IPP, the base RC is first indexed, and then increased by a statutory 40% majoration65. For example, a base RC of €1,000 in 2026 (assuming an index of 2.3) results in a taxable base of €3,220 (€1,000 × 2.3 × 1.4)65.
+      8.2. Independent Contractors (Cotisations Sociales)
+      Self-employed individuals face a different contribution structure than salaried employees. Rather than a flat 13.07%, independent workers pay a tiered rate calculated on their net professional income. For principal independent workers in 2026, the rate is 20.50% on income up to €75,024.54, and 14.16% on income between €75,024.55 and €110,562.4267.
+      Crucially, minimum contributions are enforced. A principal independent must pay contributions calculated on a minimum threshold of €17,374.08, resulting in a minimum quarterly payment of roughly €926.48 (including management fees)67. A reduced threshold of €8,972.07 exists for "primostarters" in their early stages of operation67.
+      8.3. Flexi-Jobs
+      To combat the black market in the hospitality, retail, and specific service sectors, the government introduced "flexi-jobs." This regime allows workers employed at least 4/5ths time, or retirees, to earn secondary income free of personal income tax and personal ONSS71.
+      A recent reform established a cap: the tax exemption is limited to €12,000 annually (or €18,440 under specific parameters); earnings beyond this are taxed at standard progressive rates (though pensioners face no cap)71. For the employer, flexi-job wages are subject to a special solidarity contribution, which was increased from 25% to 28% at the beginning of 202471.
+      8.4. The Inbound Taxpayer Regime (RSII / RSICI)
+      In a bid to remain competitive in the global talent market despite the high overall tax wedge, Belgium reformed its expatriate tax regime in 2022, creating the Special Tax Regime for Inbound Taxpayers (RSII) and Researchers (RSICI)74.
+      Following a legislative update retroactively applied from January 1, 2025, the regime became vastly more attractive:
+      The tax-free allowance for "costs proper to the employer" was increased from 30% to 35% of the gross remuneration74.
+      The previous absolute cap of €90,000 per year was abolished for fiscal purposes, though a divergence remains as social security authorities still apply the cap75.
+      The minimum gross salary threshold to qualify for the RSII was lowered from €75,000 to €70,00075.
+      This regime effectively shields over a third of a high-earning expatriate's salary from the steep 45% and 50% tax brackets, making Belgium a viable destination for international executives and scientists75.
+      9. Tax Reductions and Declarative Mechanics
+      Taxpayers can recuperate a portion of withheld taxes through strategic investments and expenditures declared via the annual return, generally accessible via the government's digital platform, MyMinfin (Tax-on-web)80. The standard deadline for specific complex incomes is typically mid-October (e.g., October 16, 2026)80.
+      9.1. Pension Savings (Épargne-Pension)
+      To alleviate the burden on the state pension system, taxpayers are incentivized to invest in a "third pillar" pension81. Two fiscal ceilings dictate the tax reduction:
+      Standard Ceiling: Contributions up to €1,050 yield a 30% tax reduction (a maximum gain of €315)81.
+      Elevated Ceiling: Contributions up to €1,350 yield a 25% tax reduction (a maximum gain of €337.50)81.
+      If opting for the elevated ceiling, taxpayers must contribute at least €1,260; otherwise, the 25% rate will yield a lower absolute return than the 30% rate applied to the standard ceiling82.
+      9.2. Service Vouchers (Titres-Services)
+      Expenditures on domestic help via service vouchers (titres-services) are eligible for a tax reduction, capped at an expenditure of €1,850 for 2025 and €1,890 for 202684. However, regional fiscal autonomy has led to a fragmented landscape: while Brussels and Wallonia maintain the reduction, the Flemish Region officially abolished the tax benefit for vouchers purchased as of January 1, 202584.
+      10. Future Trajectories: The Tax Reform Landscape
+      The complexities and the punitive nature of the tax wedge have prompted extensive debate regarding structural reform. The proposals formulated by Finance Minister Vincent Van Peteghem (often referred to as the Van Peteghem blueprint) aim to modernize the system, shifting the burden away from labor85.
+      Key parameters currently under debate or partial implementation include:
+      Increasing the Tax-Exempt Quota: Expanding the base quota to €13,390 (or scaling toward €15,600 by 2030), which would drastically reduce the base taxable income for all workers85.
+      Restructuring Overtime: Increasing the limit for tax-advantaged voluntary overtime from 130 to 180 hours87.
+      Phasing Out Specific Reductions: Proposals include the gradual extinction of tax reductions for specific replacement incomes (like pensions) beyond certain thresholds (e.g., suppressing the reduction for pensions exceeding approximately €70,570 indexed) to simplify the code87.
+      11. Conclusion
+      The Belgian personal income tax framework is a delicate, highly engineered mechanism designed to sustain a robust social safety net. The resulting payslip is a reflection of this reality. The high tax wedge—driven by uncapped social security contributions of 13.07% and rapid progression into 45% and 50% marginal tax brackets—results in a significant erosion of gross labor costs5.
+      However, the architecture of the CIR 92 is not purely punitive. It features a sophisticated array of deductions, from family-based tax-exempt quotas and employment bonuses to highly optimized extralegal benefits like company cars and meal vouchers36. Additionally, targeted regimes for flexi-jobs and inbound expatriates demonstrate the legislature's willingness to create fiscal bypasses to maintain economic competitiveness71.
+      Understanding a Belgian payslip requires looking beyond the bottom-line net figure; it requires comprehending the intricate balance of federal solidarity, regional autonomy, and statutory exemptions that dictate the flow of capital from the employer to the state, and finally, to the employee. Until comprehensive, systemic reforms are fully ratified, navigating this environment will continue to rely heavily on structured, extralegal compensation strategies.
+      Works cited
+      Revenus fiscaux | Statbel, https://statbel.fgov.be/fr/themes/menages/revenus-fiscaux
+      Gestion et prestation de service | SPF Finances - Belgium.be, https://finances.belgium.be/fr/statistiques_et_analyses/chiffres-operationnels/gestion-et-prestation-de-service
+      OECD: Taxes are highest in Belgium, Germany and Hungary | Euractiv, https://www.euractiv.com/news/oecd-taxes-are-highest-in-belgium-germany-and-hungary/
+      Improving labour market outcomes for all: OECD Economic Surveys, https://www.oecd.org/en/publications/2024/09/oecd-economic-surveys-belgium-2024_578fb44b/full-report/component-6.html
+      La Belgique reste championne du coin fiscal: un record qui coûte cher, https://blog.forumforthefuture.be/fr/article/la-belgique-reste-championne-du-coin-fiscal-un-record-qui-coute-cher/27473
+      Taxes on labour continue to rise across OECD countries, https://www.oecd.org/en/about/news/press-releases/2026/04/taxes-on-labour-continue-to-rise-across-oecd-countries.html
+      Taxing Wages 2025: discover the OECD's annual study and its main, https://blog.oeccbb.be/en/article/taxing-wages-2025-discover-the-oecds-annual-study-and-its-main-conclusions-with-belgium-still-in-first-place/26999
+      Pourquoi la Belgique reste championne de la pression fiscale sur le, https://blog.oeccbb.be/fr/article/pourquoi-la-belgique-reste-championne-de-la-pression-fiscale-sur-le-travail/27000
+      Le paiement de la rémunération - Actualités du droit belge, https://www.actualitesdroitbelge.be/droit-du-travail/droit-du-travail-abreges-juridiques/le-paiement-de-la-remuneration/le-paiement-de-la-remuneration
+      Notion du contrat de travail - Droit belge, https://www.droitbelge.be/fiches_detail.asp?idcat=25&id=918
+      ORBi - 3 JUILLET 1978. - Loi relative aux contrats de travail, https://orbi.uliege.be/bitstream/2268/198939/1/LCT.pdf
+      Les retenues sur la rémunération du travailleur : Actualités du droit, https://www.actualitesdroitbelge.be/droit-des-affaires/concurrence/les-retenues-sur-la-remuneration-du-travailleur/les-retenues-sur-la-remuneration-du-travailleur
+      Obligations du travailleur et de l'employeur - SPF Emploi - Belgium.be, https://emploi.belgique.be/fr/themes/contrats-de-travail/execution-du-contrat-de-travail/obligations-du-travailleur-et-de
+      retenue – compensation » lors de la rupture du contrat de travail, https://www.terralaboris.be/spip.php?article2975
+      Belgian net salary calculator — gross to net 2026 - Decisio.be, https://decisio.be/en/net-salary-calculator-belgium/
+      From gross to net salary: discover the difference here - ING Belgium, https://www.ing.be/en/individuals/my-life/studies-and-work/from-gross-to-net-salary
+      Précompte professionnel Belgique 2026 : 26,75 %, vraiment ?, https://calculateur-de-salaire.be/guide/precompte-professionnel-belgique
+      Cotisations ONSS 2026 en Belgique : taux, calcul et déclarations, https://choisirunsecretariatsocial.be/guides/cotisations-onss-2026/
+      Barèmes de précompte professionnel à partir du 1er janvier 2022, https://www.uvcw.be/no_index/files/9263-annexe-baremes-de-precompte-professionnel-2022.pdf
+      Cotisation spéciale pour la sécurité sociale, https://www.socialsecurity.be/employer/instructions/dmfa/fr/latest/instructions/special_contributions/other_specialcontributions/specialsocialsecuritycontribution.html
+      Calcul des cotisations sociales, https://refli.be/fr/documentation/computation/contribution
+      Cotisation spéciale de sécurité sociale (CSSS) en Belgique 2026, https://www.aureussocial.be/blog/cotisation-speciale-securite-sociale
+      Nouvelle baisse de la cotisation spéciale pour la sécurité sociale en, https://www.liantis.be/fr/nouvelles/nouvelle-baisse-de-la-cotisation-sp%C3%A9ciale-pour-la-s%C3%A9curit%C3%A9-sociale-en-2028
+      L'annexe III en bref | Securex, https://www.securex.be/fr/lex4you/employeur/themes/remunerer/charges-salariales-le-precompte-professionel/l-annexe-iii-en-bref
+      Précompte professionnel - SYNOVA, https://www.synova.be/fr/fiscalite-impot-personnes-physiques/pr%C3%A9compte-professionnel
+      Arrêté royal modifiant, en matière de précompte professionnel, l'AR, https://refli.be/fr/lex/2025009487
+      Notions préalables (points 1 à 30) | Securex, https://www.securex.be/fr/lex4you/employeur/themes/remunerer/charges-salariales-le-precompte-professionel/notions-prealables-(points-1-a-33)
+      Formule-clé à partir du 1er janvier 2022 - SPF Finances, https://finances.belgium.be/sites/default/files/Formule-cl%C3%A9%20%C3%A0%20partir%20du%201er%20janvier%202022.pdf
+      Modification des règles de calcul du précompte professionnel, https://www.partena-professional.be/fr/modification-de-lannexe-iii-de-larcir-92-nouvelles-regles-pour-le-precompte-professionnel
+      Le précompte professionnel en 2025 - Attentia, https://www.attentia.be/fr/actualites/le-precompte-professionnel-en-2025
+      Taux d'imposition - SPF Finances - Belgium.be, https://fin.belgium.be/fr/particuliers/declaration-impot/revenus/taux-imposition
+      Calculateur IPP : simulez votre impôt des personnes physiques (2026), https://www.myfid.be/calculateur/impots-ipp/
+      d'impôts sur les revenus - Exercice d'imposition 2024 Service Public, https://www.pyxis.be/Documents/Document/202402081549425801-Indexation_automatique_-_revenus_2023_-_exercice_dimposition_2024.pdf
+      Index search | Statbel, https://statbel.fgov.be/fr/themes/prix-la-consommation/index-search
+      Tranches d'Imposition et d'Abattements en Belgique (2026) - myfid, https://www.myfid.be/ressources/comptabilite/tranches-imposition/
+      Tranches d'imposition IPP 2026 : combien allez-vous payer ? - BILLY, https://billy.tech/guide/fiscalite/impot/ipp/tranches-imposition-ipp/
+      Barèmes d'imposition des revenus de l'Impôt des Personnes, https://www.pyxis.be/fr/outils/baremes-fiscaux/baremes-dimposition-des-revenus-de-limpot-des-personnes-physiques.aspx
+      Récapitulatif des principaux plafonds fiscaux dans l'impôt des, https://assets.contenthub.wolterskluwer.com/api/public/content/3084229-plafonds-fiscaux-3a47085543?v=a71da905
+      Ressources nettes | SPF Finances - Belgium.be, https://fin.belgium.be/fr/particuliers/declaration-impot/situation-personnelle/personnes-a-charge/ressources-nettes
+      L'impôt des personnes physiques (IPP) - UVCW, https://www.uvcw.be/focus/finances/art-2416
+      Centimes additionnels au précompte immobilier et taxe ... - OLLN, https://www.olln.be/fr/vie-communale/administration-communale/taxes-et-redevances/taxes-et-redevances-2019-2025/centimes-additionnels-precompte-immobilier-taxe-additionnelle-ipp
+      Taux de la taxe communale | SPF Finances, https://fin.belgium.be/sites/default/files/media/documents/taux-taxe-communale-2025_1.pdf
+      Budget 2026 - OLLN, https://www.olln.be/fr/actualites/budget-2026?u=ee0daa9ab63048d59f67e5783e03e775
+      Les taux additionnels à l'impôt des personnes physiques ... - UVCW, https://www.uvcw.be/finances/etudes/art-1871
+      Quels impôts payez-vous dans votre commune? | L'Echo, https://multimedia.lecho.be/ipp-precompte-immobilier-commune/
+      Calculateur de frais professionnels : forfait ou frais réels ? - myfid, https://www.myfid.be/calculateur/frais-professionnels/
+      Revenus professionnels | SPF Finances - Belgium.be, https://fin.belgium.be/fr/particuliers/declaration-impot/revenus/revenus-professionnels
+      Frais professionnels déductibles : conditions et preuves, https://bktconsulting.be/frais-professionnels-deductibles-conditions-preuves-limites/
+      Nouveau : frais professionnels forfaitaires sur les bénéfices d'une, https://blog.liantis.be/fr/comptable-et-expert-comptable/nouveau-frais-professionnels-forfaitaires
+      Tableau des frais forfaitaires (ONSS) | Securex, https://www.securex.be/fr/lex4you/employeur/montants-actuels/montants-socio-juridiques/tableau-des-frais-forfaitaires-(onss)
+      13 e mois et pécule de vacances : ce qui reste vraiment, https://www.monsalaire-net.be/prime-fin-annee-pecule-vacances-belgique.html
+      Prime de fin d'année et 13ème mois - Salaire - CSC, https://www.lacsc.be/vos-droits/travailler-dans-le-secteur-prive/salaire/prime-de-fin-d-annee-et-13eme-mois
+      Précompte professionnel allocations exceptionnelles | Securex, https://www.securex.be/fr/lex4you/employeur/montants-actuels/montants-fiscaux/pecule-de-vacances-et-allocations-exceptionnelles-(habitants-du-royaume)
+      Pécule de vacances | Service fédéral des Pensions, https://www.sfpd.fgov.be/fr/montant-de-la-pension/pecule-de-vacances
+      Avantage de toute nature (ATN) voiture de société : coefficient CO2, https://www.groups.be/fr/hr-news/avantage-de-toute-nature-atn-voiture-de-societe-coefficient-co2-pour-2026
+      Voiture de société en 2026 : que devez-vous savoir ? | UCM, https://www.ucm.be/actualites/voiture-de-societe-en-2026-que-devez-vous-savoir
+      Calcul de l'ATN pour les voitures de société en 2026, https://www.mobilitysolutionsbydieteren.be/fr/news/articles/atn-voiture-de-societe-voici-les-cles
+      Taux d'émission de CO2 de référence pour 2026 | Securex, https://www.securex.be/fr/lex4you/employeur/actualites/les-voitures-de-societe-et-le-taux-d-emission-de-co2-de-reference-pour-2026
+      Avantage imposable pour les voitures de société en 2026 - Acerta, https://www.acerta.be/fr/inspiration/avantage-imposable-pour-les-voitures-de-societe-en-2026
+      Comment calculer l'ATN belge en 2026 et le réduire ? | LIZY.be, https://www.lizy.be/fr/blog/calculer-atn-2021
+      Calculez votre avantage de toute nature pour les voitures de société, https://vaa.dragintra.com/fr/avantage-toute-nature-2026/standalone/
+      Titres-repas | SPF Emploi - Travail et Concertation sociale, https://emploi.belgique.be/fr/themes/remuneration/titres-repas
+      Déductibilité fiscale des chèques-repas - Pluxee, https://www.pluxee.be/fr/blog/deduction-fiscale-des-pluxee-lunch-ce-quil-faut-savoir/
+      3.1.302 a. base légale, https://www.socialsecurity.be/lambda/portail%5Cinstructions%5Cidmfa%5C2006_04_f.nsf/LinkByID/x38BC55D2E8ED7922C12568D400245E97?OpenDocument
+      Quelle fiscalité pour votre logement ou votre seconde résidence en, https://www.wikifin.be/fr/impots-emploi-et-revenus/declaration-dimpots/vos-revenus-immobiliers/quelle-fiscalite-pour-votre
+      Guide complet du revenu cadastral et de la fiscalité immobilière - NIBC, https://www.nibc.be/fr/blog/les-bases-du-revenu-cadastral-et-son-influence-sur-vos-impots/
+      Cotisations sociales 2026, https://socialsecurity.belgium.be/sites/default/files/content/docs/fr/elaboration-politique-sociale/independants/note_de_cotisations_2026_tableau_fr.pdf
+      Tableau des cotisations2026 - Liantis, https://www.liantis.be/sites/default/files/uploads/tableau_cotisations_2026_1225_FR_digitaal.pdf
+      Calcul et barème des cotisations sociales dues en 2026 | UCM, https://www.ucm.be/documents/je-gere-mon-activite/note-dinfo-calcul-des-cotisations-sociales-2026
+      Barème des cotisations trimestrielles indépendants pour 2026, https://www.partena-professional.be/sites/default/files/uploads/Administratieve%20docs%20%26%20forms%20FR/ASI/FR-Bareme%202026.pdf
+      Qu'est-ce qu'un flexi-job ? - Sécurité sociale, https://www.socialsecurity.be/site_fr/employer/infos/flexi-jobs.htm
+      Nouvelle circulaire sur les flexi-jobs - Prato, https://www.prato.be/fr/nouvelle-circulaire-sur-les-flexi-jobs/
+      Circulaire 2024/C/41 relative aux flexi-jobs: plafond de l'exonération, https://blog.forumforthefuture.be/fr/article/circulaire-2024c41-relative-aux-flexi-jobs-plafond-de-lexoneration-fiscale-et-extension-du-champ-dapplication/23318
+      Régime fiscal spécial RSII-RSICI plus avantageux - Attentia, https://www.attentia.be/fr/actualites/regime-fiscal-special-rsii-rsici-plus-avantageux
+      Régime spécial d'imposition pour impatriés en Belgique, https://blog.forumforthefuture.be/fr/article/regime-special-dimposition-pour-impatries-en-belgique-nouveautes-de-decembre-2025/30015
+      Contribuables impatriés - régime spécial d'imposition - SPF Finances, https://finances.belgium.be/fr/entreprises/personnel_et_remuneration/contribuables-et-chercheurs-impatries
+      Régime spécial d'imposition pour les contribuables et chercheurs, https://www.claeysengels.be/fr-be/nouvelles-evenements/regime-special-dimposition-pour-les-contribuables-et-chercheurs-impatries
+      La loi dispositions diverses modifie le paysage fiscal | Securex, https://www.securex.be/fr/lex4you/employeur/actualites/publication-de-la-loi-dispositions-diverses-qui-a-notamment-un-impact-sur-la-fiscalite-automobile
+      Nouveau régime fiscal belge pour les impatriés et les chercheurs, https://www.grantthornton.be/fr/the-field/articles/Nouveau-regime-fiscal-belge-pour-les-impatries-et-les-chercheurs-impatries-interessant/
+      Déclaration d'impôt 2026 - SPF Finances - Belgium.be, https://fin.belgium.be/fr/particuliers/declaration-impot/rentrer-declaration/declaration-impot
+      L'épargne-pension - Wikifin, https://www.wikifin.be/fr/impots-emploi-et-revenus/declaration-dimpots/reductions-fiscales/lepargne-pension
+      Épargne-pension en 2026: choix entre 2 plafonds fiscaux - CBC, https://www.cbc.be/particuliers/fr/epargne-pension/plafonds-fiscaux.html
+      Épargne-pension pour 2026 : plafonds fiscaux - Fintro, https://www.fintro.be/fr/public/particuliers/epargner-et-placer/campagne-epargne-pension-regles-fiscales
+      Titres-services ou chèques ALE - SPF Finances - Belgium.be, https://fin.belgium.be/fr/particuliers/avantages-fiscaux/titres-services-ale-cheques
+      Combien gagnerez-vous en plus si la réforme fiscale de Van, https://fr.businessam.be/combien-gagnerez-vous-en-plus-reforme-fiscale/
+      Le Gouvernement fédéral approuve le projet de loi de réforme de l, https://kpmg.com/be/fr/insights/my-tax-compass/people-services-insights/le-gouvernement-federal-approuve-le-projet-de-loi-de-reforme-de-l-impot-des-personnes-physiques.html
+      La réforme de l'impôt des personnes physiques votée à la Chambre, https://blog.oeccbb.be/fr/article/la-reforme-de-limpot-des-personnes-physiques-votee-a-la-chambre-parametres-seuils-et-calendrier.-tout-ce-que-le-professionnel-doit-retenir/31747
+  - file_name: los21_wiki_pages.csv
+    file_type: text
+    content: |
+      page_id,language,title,url,relevance_score,content,provider
+      los21-wiki-5634,nl,LOS21 - Simulatie van een nettoloon uitvoeren,https://los21wiki.sd.dika.be/nl/simulatie-van-een-nettoloon-uitvoeren,0.9113,"## LOS21 - Simulatie van een nettoloon uitvoeren
+
+      Stap 1: open het betreffende scherm.
+      Stap 2: controleer de verplichte velden.
+      Stap 3: bevestig en valideer het resultaat.
+      Let op: wijzigingen na de afsluitdatum schuiven door naar de volgende periode.",LOS21 Wiki
+      los21-wiki-6305,nl,LOS21 - Kostenplaats toewijzen aan een contract,https://los21wiki.sd.dika.be/nl/kostenplaats-toewijzen-aan-een-contract,0.9074,"## LOS21 - Kostenplaats toewijzen aan een contract
+
+      Stap 1: open het betreffende scherm.
+      Stap 2: controleer de verplichte velden.
+      Stap 3: bevestig en valideer het resultaat.
+      Let op: wijzigingen na de afsluitdatum schuiven door naar de volgende periode.",LOS21 Wiki
+      los21-wiki-6484,nl,LOS21 - Historiek van een loonlijn opvragen,https://los21wiki.sd.dika.be/nl/historiek-van-een-loonlijn-opvragen,0.6538,"## LOS21 - Historiek van een loonlijn opvragen
+
+      Stap 1: open het betreffende scherm.
+      Stap 2: controleer de verplichte velden.
+      Stap 3: bevestig en valideer het resultaat.
+      Let op: wijzigingen na de afsluitdatum schuiven door naar de volgende periode.",LOS21 Wiki
+      los21-wiki-4595,nl,LOS21 - Exporteren naar de boekhoudkundige interface,https://los21wiki.sd.dika.be/nl/exporteren-naar-de-boekhoudkundige-interface,0.6520,"## LOS21 - Exporteren naar de boekhoudkundige interface
+
+      Stap 1: open het betreffende scherm.
+      Stap 2: controleer de verplichte velden.
+      Stap 3: bevestig en valideer het resultaat.
+      Let op: wijzigingen na de afsluitdatum schuiven door naar de volgende periode.",LOS21 Wiki
+      los21-wiki-6838,nl,LOS21 - Batchverwerking opnieuw starten,https://los21wiki.sd.dika.be/nl/batchverwerking-opnieuw-starten,0.8599,"## LOS21 - Batchverwerking opnieuw starten
+
+      Stap 1: open het betreffende scherm.
+      Stap 2: controleer de verplichte velden.
+      Stap 3: bevestig en valideer het resultaat.
+      Let op: wijzigingen na de afsluitdatum schuiven door naar de volgende periode.",LOS21 Wiki
+      los21-wiki-1526,nl,LOS21 - Toegangsrechten van een dossierbeheerder,https://los21wiki.sd.dika.be/nl/toegangsrechten-van-een-dossierbeheerder,0.6631,"## LOS21 - Toegangsrechten van een dossierbeheerder
+
+      Stap 1: open het betreffende scherm.
+      Stap 2: controleer de verplichte velden.
+      Stap 3: bevestig en valideer het resultaat.
+      Let op: wijzigingen na de afsluitdatum schuiven door naar de volgende periode.",LOS21 Wiki
+      los21-wiki-8571,nl,LOS21 - Bankgegevens van een werknemer aanpassen,https://los21wiki.sd.dika.be/nl/bankgegevens-van-een-werknemer-aanpassen,0.7842,"## LOS21 - Bankgegevens van een werknemer aanpassen
+
+      Stap 1: open het betreffende scherm.
+      Stap 2: controleer de verplichte velden.
+      Stap 3: bevestig en valideer het resultaat.
+      Let op: wijzigingen na de afsluitdatum schuiven door naar de volgende periode.",LOS21 Wiki
+      los21-wiki-1784,fr,LOS21 - Exporter vers l interface comptable,https://los21wiki.sd.dika.be/fr/exporter-vers-l-interface-comptable,0.5566,"## LOS21 - Exporter vers l interface comptable
+
+      Etape 1 : ouvrez l'ecran concerne.
+      Etape 2 : verifiez les champs obligatoires.
+      Etape 3 : confirmez et validez le resultat.
+      Attention : les modifications apres la date de cloture sont reportees a la periode suivante.",LOS21 Wiki
+      los21-wiki-4684,fr,LOS21 - Consulter l historique d une ligne de salaire,https://los21wiki.sd.dika.be/fr/consulter-l-historique-d-une-ligne-de-salaire,0.7392,"## LOS21 - Consulter l historique d une ligne de salaire
+
+      Etape 1 : ouvrez l'ecran concerne.
+      Etape 2 : verifiez les champs obligatoires.
+      Etape 3 : confirmez et validez le resultat.
+      Attention : les modifications apres la date de cloture sont reportees a la periode suivante.",LOS21 Wiki
+      los21-wiki-2159,fr,LOS21 - Relancer un traitement par lot,https://los21wiki.sd.dika.be/fr/relancer-un-traitement-par-lot,0.7232,"## LOS21 - Relancer un traitement par lot
+
+      Etape 1 : ouvrez l'ecran concerne.
+      Etape 2 : verifiez les champs obligatoires.
+      Etape 3 : confirmez et validez le resultat.
+      Attention : les modifications apres la date de cloture sont reportees a la periode suivante.",LOS21 Wiki
+      los21-wiki-4418,fr,LOS21 - Attribuer un centre de couts a un contrat,https://los21wiki.sd.dika.be/fr/attribuer-un-centre-de-couts-a-un-contrat,0.8282,"## LOS21 - Attribuer un centre de couts a un contrat
+
+      Etape 1 : ouvrez l'ecran concerne.
+      Etape 2 : verifiez les champs obligatoires.
+      Etape 3 : confirmez et validez le resultat.
+      Attention : les modifications apres la date de cloture sont reportees a la periode suivante.",LOS21 Wiki
+      los21-wiki-2393,fr,LOS21 - Droits d acces d un gestionnaire de dossier,https://los21wiki.sd.dika.be/fr/droits-d-acces-d-un-gestionnaire-de-dossier,0.7502,"## LOS21 - Droits d acces d un gestionnaire de dossier
+
+      Etape 1 : ouvrez l'ecran concerne.
+      Etape 2 : verifiez les champs obligatoires.
+      Etape 3 : confirmez et validez le resultat.
+      Attention : les modifications apres la date de cloture sont reportees a la periode suivante.",LOS21 Wiki
+      los21-wiki-0598,fr,LOS21 - Lancer une simulation de salaire net,https://los21wiki.sd.dika.be/fr/lancer-une-simulation-de-salaire-net,0.7015,"## LOS21 - Lancer une simulation de salaire net
+
+      Etape 1 : ouvrez l'ecran concerne.
+      Etape 2 : verifiez les champs obligatoires.
+      Etape 3 : confirmez et validez le resultat.
+      Attention : les modifications apres la date de cloture sont reportees a la periode suivante.",LOS21 Wiki
+      los21-wiki-6019,fr,LOS21 - Modifier les coordonnees bancaires d un travailleur,https://los21wiki.sd.dika.be/fr/modifier-les-coordonnees-bancaires-d-un-travaill,0.7234,"## LOS21 - Modifier les coordonnees bancaires d un travailleur
+
+      Etape 1 : ouvrez l'ecran concerne.
+      Etape 2 : verifiez les champs obligatoires.
+      Etape 3 : confirmez et validez le resultat.
+      Attention : les modifications apres la date de cloture sont reportees a la periode suivante.",LOS21 Wiki
+  - file_name: external_websites.csv
+    file_type: text
+    content: |
+      doc_id,language,site,title,url,relevance_score,content,provider
+      ext-8391,nl,RVA,Infoblad T30 - Tijdskrediet in de privesector,https://www.rva.be/nl/infoblad-t30-tijdskrediet-in-de-privesector,0.8584,"Infoblad T30 - Tijdskrediet in de privesector — officiele toelichting met de toepassingsvoorwaarden, de te volgen procedure en de geldende bedragen voor het lopende jaar.",External Websites
+      ext-8974,nl,RVA,Infoblad T19 - Tijdelijke werkloosheid wegens economische oorzaken,https://www.rva.be/nl/infoblad-t19-tijdelijke-werkloosheid-wegens-economische-,0.9278,"Infoblad T19 - Tijdelijke werkloosheid wegens economische oorzaken — officiele toelichting met de toepassingsvoorwaarden, de te volgen procedure en de geldende bedragen voor het lopende jaar.",External Websites
+      ext-7760,nl,FOD WASO,Jaarlijkse vakantie - vakantiegeld werknemers,https://werk.belgie.be/nl/jaarlijkse-vakantie-vakantiegeld-werknemers,0.7823,"Jaarlijkse vakantie - vakantiegeld werknemers — officiele toelichting met de toepassingsvoorwaarden, de te volgen procedure en de geldende bedragen voor het lopende jaar.",External Websites
+      ext-1763,nl,FOD WASO,Beeindiging van de arbeidsovereenkomst - opzeggingstermijnen,https://werk.belgie.be/nl/beeindiging-van-de-arbeidsovereenkomst-opzeggingstermijn,0.7861,"Beeindiging van de arbeidsovereenkomst - opzeggingstermijnen — officiele toelichting met de toepassingsvoorwaarden, de te volgen procedure en de geldende bedragen voor het lopende jaar.",External Websites
+      ext-7379,nl,RSZ,Administratieve instructies DmfA - kwartaalaangifte,https://www.socialsecurity.be/nl/administratieve-instructies-dmfa-kwartaalaangifte,0.9423,"Administratieve instructies DmfA - kwartaalaangifte — officiele toelichting met de toepassingsvoorwaarden, de te volgen procedure en de geldende bedragen voor het lopende jaar.",External Websites
+      ext-6914,nl,NAR,Overzicht interprofessionele CAO's,https://www.cnt-nar.be/nl/overzicht-interprofessionele-cao-s,0.8936,"Overzicht interprofessionele CAO's — officiele toelichting met de toepassingsvoorwaarden, de te volgen procedure en de geldende bedragen voor het lopende jaar.",External Websites
+      ext-5413,fr,ONEM,Feuille info T30 - Credit-temps dans le secteur prive,https://www.onem.be/fr/feuille-info-t30-credit-temps-dans-le-secteur-prive,0.6179,"Feuille info T30 - Credit-temps dans le secteur prive — explication officielle reprenant les conditions d'application, la procedure a suivre et les montants en vigueur pour l'annee en cours.",External Websites
+      ext-6239,fr,ONEM,Feuille info T19 - Chomage temporaire pour causes economiques,https://www.onem.be/fr/feuille-info-t19-chomage-temporaire-pour-causes-economiq,0.8242,"Feuille info T19 - Chomage temporaire pour causes economiques — explication officielle reprenant les conditions d'application, la procedure a suivre et les montants en vigueur pour l'annee en cours.",External Websites
+      ext-0059,fr,SPF Emploi,Vacances annuelles - pecule de vacances des travailleurs,https://emploi.belgique.be/fr/vacances-annuelles-pecule-de-vacances-des-travailleurs,0.7362,"Vacances annuelles - pecule de vacances des travailleurs — explication officielle reprenant les conditions d'application, la procedure a suivre et les montants en vigueur pour l'annee en cours.",External Websites
+      ext-8146,fr,SPF Emploi,Fin du contrat de travail - delais de preavis,https://emploi.belgique.be/fr/fin-du-contrat-de-travail-delais-de-preavis,0.6953,"Fin du contrat de travail - delais de preavis — explication officielle reprenant les conditions d'application, la procedure a suivre et les montants en vigueur pour l'annee en cours.",External Websites
+      ext-1676,fr,ONSS,Instructions administratives DmfA - declaration trimestrielle,https://www.socialsecurity.be/fr/instructions-administratives-dmfa-declaration-trimestrie,0.9003,"Instructions administratives DmfA - declaration trimestrielle — explication officielle reprenant les conditions d'application, la procedure a suivre et les montants en vigueur pour l'annee en cours.",External Websites
+      ext-2160,fr,CNT,Apercu des CCT interprofessionnelles,https://www.cnt-nar.be/fr/apercu-des-cct-interprofessionnelles,0.8033,"Apercu des CCT interprofessionnelles — explication officielle reprenant les conditions d'application, la procedure a suivre et les montants en vigueur pour l'annee en cours.",External Websites
+  - file_name: ella_queries.csv
+    file_type: text
+    content: |
+      query_id,language,query,topic,joint_committee,response,source_count,latency_ms,status
+      ella-q141,nl,Hoe bereken ik het dubbel vakantiegeld voor een bediende die in mei in dienst is getreden?,dubbel vakantiegeld,124,"Op basis van de Belgische arbeidswetgeving geldt het volgende voor 'dubbel vakantiegeld' [1]. De concrete toepassing hangt af van de anciënniteit, het statuut en het bevoegde paritair comite [2]. Controleer steeds de sectorale CAO, die kan afwijken van de algemene regeling [3].",2,32997,ok
+      ella-q492,nl,Wat zijn de regels rond tijdskrediet met motief zorg voor een kind jonger dan 8 jaar?,tijdskrediet,124,"Op basis van de Belgische arbeidswetgeving geldt het volgende voor 'tijdskrediet' [1]. De concrete toepassing hangt af van de anciënniteit, het statuut en het bevoegde paritair comite [2]. Controleer steeds de sectorale CAO, die kan afwijken van de algemene regeling [3].",4,41218,ok
+      ella-q115,nl,Welke formele vereisten gelden bij een ontslag om dringende reden en binnen welke termijn moet dit gebeuren?,dringende reden,,"Op basis van de Belgische arbeidswetgeving geldt het volgende voor 'dringende reden' [1]. De concrete toepassing hangt af van de anciënniteit, het statuut en het bevoegde paritair comite [2]. Controleer steeds de sectorale CAO, die kan afwijken van de algemene regeling [3].",3,50143,ok
+      ella-q410,nl,Wat is de wettelijke opzeggingstermijn voor een bediende met 7 jaar anciënniteit die door de werkgever wordt ontslagen?,opzeggingstermijn,124,"Op basis van de Belgische arbeidswetgeving geldt het volgende voor 'opzeggingstermijn' [1]. De concrete toepassing hangt af van de anciënniteit, het statuut en het bevoegde paritair comite [2]. Controleer steeds de sectorale CAO, die kan afwijken van de algemene regeling [3].",2,55904,ok
+      ella-q596,nl,Mag een werkgever ecocheques vervangen door een equivalent in loon?,ecocheques,200,"Op basis van de Belgische arbeidswetgeving geldt het volgende voor 'ecocheques' [1]. De concrete toepassing hangt af van de anciënniteit, het statuut en het bevoegde paritair comite [2]. Controleer steeds de sectorale CAO, die kan afwijken van de algemene regeling [3].",3,56456,ok
+      ella-q106,nl,Welke regels gelden voor studentenarbeid en het contingent van 600 uur?,studentenarbeid,,"Op basis van de Belgische arbeidswetgeving geldt het volgende voor 'studentenarbeid' [1]. De concrete toepassing hangt af van de anciënniteit, het statuut en het bevoegde paritair comite [2]. Controleer steeds de sectorale CAO, die kan afwijken van de algemene regeling [3].",4,52530,ok
+      ella-q152,nl,Hoe wordt het gewaarborgd loon berekend bij ziekte van een arbeider tijdens de eerste maand arbeidsongeschiktheid?,gewaarborgd loon,124,"Op basis van de Belgische arbeidswetgeving geldt het volgende voor 'gewaarborgd loon' [1]. De concrete toepassing hangt af van de anciënniteit, het statuut en het bevoegde paritair comite [2]. Controleer steeds de sectorale CAO, die kan afwijken van de algemene regeling [3].",2,54786,ok
+      ella-q632,nl,Welke ontslagbescherming geldt voor een zwangere werkneemster?,ontslagbescherming zwangerschap,,"Op basis van de Belgische arbeidswetgeving geldt het volgende voor 'ontslagbescherming zwangerschap' [1]. De concrete toepassing hangt af van de anciënniteit, het statuut en het bevoegde paritair comite [2]. Controleer steeds de sectorale CAO, die kan afwijken van de algemene regeling [3].",2,35347,ok
+      ella-q529,fr,Comment calculer le pecule de vacances de sortie pour un employe ?,pecule de vacances de sortie,124,"Sur base de la legislation belge du travail, la regle suivante s'applique a 'pecule de vacances de sortie' [1]. L'application concrete depend de l'anciennete, du statut et de la commission paritaire competente [2]. Verifiez toujours la CCT sectorielle, qui peut deroger au regime general [3].",2,56392,ok
+      ella-q142,fr,Quelles sont les regles du credit-temps avec motif soins a un enfant de moins de 8 ans ?,credit-temps,200,"Sur base de la legislation belge du travail, la regle suivante s'applique a 'credit-temps' [1]. L'application concrete depend de l'anciennete, du statut et de la commission paritaire competente [2]. Verifiez toujours la CCT sectorielle, qui peut deroger au regime general [3].",2,55591,ok
+      ella-q783,fr,Quelles sont les regles applicables au travail interimaire en Belgique pour un employeur utilisateur ?,travail interimaire,,"Sur base de la legislation belge du travail, la regle suivante s'applique a 'travail interimaire' [1]. L'application concrete depend de l'anciennete, du statut et de la commission paritaire competente [2]. Verifiez toujours la CCT sectorielle, qui peut deroger au regime general [3].",4,44400,ok
+      ella-q417,fr,Quelle protection contre le licenciement s'applique a une travailleuse enceinte ?,protection licenciement grossesse,,"Sur base de la legislation belge du travail, la regle suivante s'applique a 'protection licenciement grossesse' [1]. L'application concrete depend de l'anciennete, du statut et de la commission paritaire competente [2]. Verifiez toujours la CCT sectorielle, qui peut deroger au regime general [3].",4,59902,ok
+      ella-q885,fr,Un employeur peut-il remplacer les eco-cheques par un equivalent en salaire ?,eco-cheques,200,"Sur base de la legislation belge du travail, la regle suivante s'applique a 'eco-cheques' [1]. L'application concrete depend de l'anciennete, du statut et de la commission paritaire competente [2]. Verifiez toujours la CCT sectorielle, qui peut deroger au regime general [3].",4,40350,ok
+      ella-q390,fr,Quel est le delai de preavis legal pour un employe avec 7 ans d'anciennete licencie par l'employeur ?,delai de preavis,200,"Sur base de la legislation belge du travail, la regle suivante s'applique a 'delai de preavis' [1]. L'application concrete depend de l'anciennete, du statut et de la commission paritaire competente [2]. Verifiez toujours la CCT sectorielle, qui peut deroger au regime general [3].",2,46629,ok
+      ella-q245,fr,Quelles sont les conditions formelles d'un licenciement pour motif grave et dans quel delai ?,motif grave,124,"Sur base de la legislation belge du travail, la regle suivante s'applique a 'motif grave' [1]. L'application concrete depend de l'anciennete, du statut et de la commission paritaire competente [2]. Verifiez toujours la CCT sectorielle, qui peut deroger au regime general [3].",4,53810,ok
+      ella-q629,fr,Comment calculer le salaire garanti en cas de maladie d'un ouvrier pendant le premier mois d'incapacite ?,salaire garanti,,"Sur base de la legislation belge du travail, la regle suivante s'applique a 'salaire garanti' [1]. L'application concrete depend de l'anciennete, du statut et de la commission paritaire competente [2]. Verifiez toujours la CCT sectorielle, qui peut deroger au regime general [3].",3,41143,ok
+  - file_name: ella_sources.csv
+    file_type: text
+    content: |
+      query_id,index,cite_key,title,url,page,content_snippet,provider
+      ella-q141,1,ella-q141-1,ELLA [1],https://www.onem.be/dubbel-vakantiegeld/6947,36,Uittreksel uit de bron over dubbel vakantiegeld: de wettelijke bepaling legt de voorwaarden en termijnen vast die in dit geval van toepassing zijn.,ELLA
+      ella-q141,2,ella-q141-2,ELLA [2],https://www.socialsecurity.be/dubbel-vakantiegeld/6513,187,Uittreksel uit de bron over dubbel vakantiegeld: de wettelijke bepaling legt de voorwaarden en termijnen vast die in dit geval van toepassing zijn.,ELLA
+      ella-q492,1,ella-q492-1,ELLA [1],https://www.sdworx.be/tijdskrediet/5216,103,Uittreksel uit de bron over tijdskrediet: de wettelijke bepaling legt de voorwaarden en termijnen vast die in dit geval van toepassing zijn.,ELLA
+      ella-q492,2,ella-q492-2,ELLA [2],https://werk.belgie.be/tijdskrediet/1402,216,Uittreksel uit de bron over tijdskrediet: de wettelijke bepaling legt de voorwaarden en termijnen vast die in dit geval van toepassing zijn.,ELLA
+      ella-q492,3,ella-q492-3,ELLA [3],https://www.cnt-nar.be/tijdskrediet/8972,82,Uittreksel uit de bron over tijdskrediet: de wettelijke bepaling legt de voorwaarden en termijnen vast die in dit geval van toepassing zijn.,ELLA
+      ella-q492,4,ella-q492-4,ELLA [4],https://www.ejustice.just.fgov.be/tijdskrediet/3245,149,Uittreksel uit de bron over tijdskrediet: de wettelijke bepaling legt de voorwaarden en termijnen vast die in dit geval van toepassing zijn.,ELLA
+      ella-q115,1,ella-q115-1,ELLA [1],https://www.ejustice.just.fgov.be/dringende-reden/1723,113,Uittreksel uit de bron over dringende reden: de wettelijke bepaling legt de voorwaarden en termijnen vast die in dit geval van toepassing zijn.,ELLA
+      ella-q115,2,ella-q115-2,ELLA [2],https://werk.belgie.be/dringende-reden/3924,200,Uittreksel uit de bron over dringende reden: de wettelijke bepaling legt de voorwaarden en termijnen vast die in dit geval van toepassing zijn.,ELLA
+      ella-q115,3,ella-q115-3,ELLA [3],https://emploi.belgique.be/dringende-reden/4042,70,Uittreksel uit de bron over dringende reden: de wettelijke bepaling legt de voorwaarden en termijnen vast die in dit geval van toepassing zijn.,ELLA
+      ella-q410,1,ella-q410-1,ELLA [1],https://www.rva.be/opzeggingstermijn/441,102,Uittreksel uit de bron over opzeggingstermijn: de wettelijke bepaling legt de voorwaarden en termijnen vast die in dit geval van toepassing zijn.,ELLA
+      ella-q410,2,ella-q410-2,ELLA [2],https://www.onem.be/opzeggingstermijn/5345,56,Uittreksel uit de bron over opzeggingstermijn: de wettelijke bepaling legt de voorwaarden en termijnen vast die in dit geval van toepassing zijn.,ELLA
+      ella-q596,1,ella-q596-1,ELLA [1],https://www.sdworx.be/ecocheques/8079,180,Uittreksel uit de bron over ecocheques: de wettelijke bepaling legt de voorwaarden en termijnen vast die in dit geval van toepassing zijn.,ELLA
+      ella-q596,2,ella-q596-2,ELLA [2],https://www.sdworx.be/ecocheques/6055,218,Uittreksel uit de bron over ecocheques: de wettelijke bepaling legt de voorwaarden en termijnen vast die in dit geval van toepassing zijn.,ELLA
+      ella-q596,3,ella-q596-3,ELLA [3],https://werk.belgie.be/ecocheques/5189,84,Uittreksel uit de bron over ecocheques: de wettelijke bepaling legt de voorwaarden en termijnen vast die in dit geval van toepassing zijn.,ELLA
+      ella-q106,1,ella-q106-1,ELLA [1],https://www.cnt-nar.be/studentenarbeid/5697,96,Uittreksel uit de bron over studentenarbeid: de wettelijke bepaling legt de voorwaarden en termijnen vast die in dit geval van toepassing zijn.,ELLA
+      ella-q106,2,ella-q106-2,ELLA [2],https://www.ejustice.just.fgov.be/studentenarbeid/4913,136,Uittreksel uit de bron over studentenarbeid: de wettelijke bepaling legt de voorwaarden en termijnen vast die in dit geval van toepassing zijn.,ELLA
+      ella-q106,3,ella-q106-3,ELLA [3],https://werk.belgie.be/studentenarbeid/4812,27,Uittreksel uit de bron over studentenarbeid: de wettelijke bepaling legt de voorwaarden en termijnen vast die in dit geval van toepassing zijn.,ELLA
+      ella-q106,4,ella-q106-4,ELLA [4],https://emploi.belgique.be/studentenarbeid/793,115,Uittreksel uit de bron over studentenarbeid: de wettelijke bepaling legt de voorwaarden en termijnen vast die in dit geval van toepassing zijn.,ELLA
+      ella-q152,1,ella-q152-1,ELLA [1],https://emploi.belgique.be/gewaarborgd-loon/4374,128,Uittreksel uit de bron over gewaarborgd loon: de wettelijke bepaling legt de voorwaarden en termijnen vast die in dit geval van toepassing zijn.,ELLA
+      ella-q152,2,ella-q152-2,ELLA [2],https://www.rva.be/gewaarborgd-loon/6251,30,Uittreksel uit de bron over gewaarborgd loon: de wettelijke bepaling legt de voorwaarden en termijnen vast die in dit geval van toepassing zijn.,ELLA
+      ella-q632,1,ella-q632-1,ELLA [1],https://www.socialsecurity.be/ontslagbescherming-zwangerschap/1925,124,Uittreksel uit de bron over ontslagbescherming zwangerschap: de wettelijke bepaling legt de voorwaarden en termijnen vast die in dit geval van toepassing zijn.,ELLA
+      ella-q632,2,ella-q632-2,ELLA [2],https://www.sdworx.be/ontslagbescherming-zwangerschap/1300,60,Uittreksel uit de bron over ontslagbescherming zwangerschap: de wettelijke bepaling legt de voorwaarden en termijnen vast die in dit geval van toepassing zijn.,ELLA
+      ella-q529,1,ella-q529-1,ELLA [1],https://werk.belgie.be/pecule-de-vacances-de-sortie/5669,23,Extrait de la source relative a pecule de vacances de sortie : la disposition legale fixe les conditions et delais applicables en l'espece.,ELLA
+      ella-q529,2,ella-q529-2,ELLA [2],https://www.cnt-nar.be/pecule-de-vacances-de-sortie/809,31,Extrait de la source relative a pecule de vacances de sortie : la disposition legale fixe les conditions et delais applicables en l'espece.,ELLA
+      ella-q142,1,ella-q142-1,ELLA [1],https://werk.belgie.be/credit-temps/3356,118,Extrait de la source relative a credit-temps : la disposition legale fixe les conditions et delais applicables en l'espece.,ELLA
+      ella-q142,2,ella-q142-2,ELLA [2],https://emploi.belgique.be/credit-temps/4142,142,Extrait de la source relative a credit-temps : la disposition legale fixe les conditions et delais applicables en l'espece.,ELLA
+      ella-q783,1,ella-q783-1,ELLA [1],https://www.onem.be/travail-interimaire/5886,76,Extrait de la source relative a travail interimaire : la disposition legale fixe les conditions et delais applicables en l'espece.,ELLA
+      ella-q783,2,ella-q783-2,ELLA [2],https://www.socialsecurity.be/travail-interimaire/6448,138,Extrait de la source relative a travail interimaire : la disposition legale fixe les conditions et delais applicables en l'espece.,ELLA
+      ella-q783,3,ella-q783-3,ELLA [3],https://www.sdworx.be/travail-interimaire/5735,85,Extrait de la source relative a travail interimaire : la disposition legale fixe les conditions et delais applicables en l'espece.,ELLA
+      ella-q783,4,ella-q783-4,ELLA [4],https://www.sdworx.be/travail-interimaire/298,166,Extrait de la source relative a travail interimaire : la disposition legale fixe les conditions et delais applicables en l'espece.,ELLA
+      ella-q417,1,ella-q417-1,ELLA [1],https://www.sdworx.be/protection-licenciement-grossesse/4378,74,Extrait de la source relative a protection licenciement grossesse : la disposition legale fixe les conditions et delais applicables en l'espece.,ELLA
+      ella-q417,2,ella-q417-2,ELLA [2],https://werk.belgie.be/protection-licenciement-grossesse/7464,68,Extrait de la source relative a protection licenciement grossesse : la disposition legale fixe les conditions et delais applicables en l'espece.,ELLA
+      ella-q417,3,ella-q417-3,ELLA [3],https://www.cnt-nar.be/protection-licenciement-grossesse/9081,158,Extrait de la source relative a protection licenciement grossesse : la disposition legale fixe les conditions et delais applicables en l'espece.,ELLA
+      ella-q417,4,ella-q417-4,ELLA [4],https://www.ejustice.just.fgov.be/protection-licenciement-grossesse/4755,152,Extrait de la source relative a protection licenciement grossesse : la disposition legale fixe les conditions et delais applicables en l'espece.,ELLA
+      ella-q885,1,ella-q885-1,ELLA [1],https://www.ejustice.just.fgov.be/eco-cheques/2835,19,Extrait de la source relative a eco-cheques : la disposition legale fixe les conditions et delais applicables en l'espece.,ELLA
+      ella-q885,2,ella-q885-2,ELLA [2],https://werk.belgie.be/eco-cheques/9892,180,Extrait de la source relative a eco-cheques : la disposition legale fixe les conditions et delais applicables en l'espece.,ELLA
+      ella-q885,3,ella-q885-3,ELLA [3],https://emploi.belgique.be/eco-cheques/3889,132,Extrait de la source relative a eco-cheques : la disposition legale fixe les conditions et delais applicables en l'espece.,ELLA
+      ella-q885,4,ella-q885-4,ELLA [4],https://www.rva.be/eco-cheques/8314,128,Extrait de la source relative a eco-cheques : la disposition legale fixe les conditions et delais applicables en l'espece.,ELLA
+      ella-q390,1,ella-q390-1,ELLA [1],https://www.rva.be/delai-de-preavis/9973,142,Extrait de la source relative a delai de preavis : la disposition legale fixe les conditions et delais applicables en l'espece.,ELLA
+      ella-q390,2,ella-q390-2,ELLA [2],https://www.onem.be/delai-de-preavis/5052,160,Extrait de la source relative a delai de preavis : la disposition legale fixe les conditions et delais applicables en l'espece.,ELLA
+      ella-q245,1,ella-q245-1,ELLA [1],https://www.sdworx.be/motif-grave/6799,152,Extrait de la source relative a motif grave : la disposition legale fixe les conditions et delais applicables en l'espece.,ELLA
+      ella-q245,2,ella-q245-2,ELLA [2],https://www.sdworx.be/motif-grave/350,44,Extrait de la source relative a motif grave : la disposition legale fixe les conditions et delais applicables en l'espece.,ELLA
+      ella-q245,3,ella-q245-3,ELLA [3],https://werk.belgie.be/motif-grave/9867,88,Extrait de la source relative a motif grave : la disposition legale fixe les conditions et delais applicables en l'espece.,ELLA
+      ella-q245,4,ella-q245-4,ELLA [4],https://www.cnt-nar.be/motif-grave/3216,195,Extrait de la source relative a motif grave : la disposition legale fixe les conditions et delais applicables en l'espece.,ELLA
+      ella-q629,1,ella-q629-1,ELLA [1],https://www.cnt-nar.be/salaire-garanti/9496,14,Extrait de la source relative a salaire garanti : la disposition legale fixe les conditions et delais applicables en l'espece.,ELLA
+      ella-q629,2,ella-q629-2,ELLA [2],https://www.ejustice.just.fgov.be/salaire-garanti/767,178,Extrait de la source relative a salaire garanti : la disposition legale fixe les conditions et delais applicables en l'espece.,ELLA
+      ella-q629,3,ella-q629-3,ELLA [3],https://werk.belgie.be/salaire-garanti/9800,56,Extrait de la source relative a salaire garanti : la disposition legale fixe les conditions et delais applicables en l'espece.,ELLA
+  - file_name: ella_model_docs.csv
+    file_type: text
+    content: |
+      doc_id,language,file_name,contract_type,policy_category,access_type,charge_message,url,status,example_score
+      md-nl-001,NL,NL_001_arbeidsovereenkomst-bepaalde-duur-arbeider.docx,Arbeidsovereenkomst bepaalde duur arbeider,Aanwerving,on-request,Meerprijs van toepassing - contacteer uw dossierbeheerder,https://ella.sdworx.be/nl/model-documents/arbeidsovereenkomst-bepaalde-duur-arbeider,completed,0.5930
+      md-fr-001,FR,FR_001_reglement-cheques-repas.docx,Reglement cheques-repas,Remuneration et avantages,standard,Supplement applicable - contactez votre gestionnaire,https://ella.sdworx.be/fr/model-documents/reglement-cheques-repas,completed,0.6419
+      md-nl-002,NL,NL_002_attest-klein-verlet.docx,Attest klein verlet,Verlof en afwezigheid,standard,Gratis voor klanten met Ondernemerspakket,https://ella.sdworx.be/nl/model-documents/attest-klein-verlet,completed,0.6509
+      md-fr-002,FR,FR_002_contrat-de-travail-a-duree-indeterminee-employe.docx,Contrat de travail a duree indeterminee employe,Recrutement,on-request,Supplement applicable - contactez votre gestionnaire,https://ella.sdworx.be/fr/model-documents/contrat-de-travail-a-duree-indeterminee-employe,completed,0.5487
+      md-nl-003,NL,NL_003_ontslagbrief-om-dringende-reden.docx,Ontslagbrief om dringende reden,Beeindiging,on-request,Inbegrepen in uw abonnement,https://ella.sdworx.be/nl/model-documents/ontslagbrief-om-dringende-reden,completed,0.5290
+      md-fr-003,FR,FR_003_car-policy-vehicule-de-societe.docx,Car policy vehicule de societe,Remuneration et avantages,premium,Inclus dans votre abonnement,https://ella.sdworx.be/fr/model-documents/car-policy-vehicule-de-societe,completed,0.6943
+      md-nl-004,NL,NL_004_aanvraag-tijdskrediet.docx,Aanvraag tijdskrediet,Verlof en afwezigheid,on-request,Gratis voor klanten met Ondernemerspakket,https://ella.sdworx.be/nl/model-documents/aanvraag-tijdskrediet,completed,0.6952
+      md-fr-004,FR,FR_004_lettre-de-rupture-avec-indemnite.docx,Lettre de rupture avec indemnite,Fin de contrat,on-request,Inclus dans votre abonnement,https://ella.sdworx.be/fr/model-documents/lettre-de-rupture-avec-indemnite,completed,0.5353
+      md-nl-005,NL,NL_005_flexi-job-arbeidsovereenkomst.docx,Flexi-job arbeidsovereenkomst,Aanwerving,standard,Inbegrepen in uw abonnement,https://ella.sdworx.be/nl/model-documents/flexi-job-arbeidsovereenkomst,completed,0.7226
+      md-fr-005,FR,FR_005_attestation-de-petit-chomage.docx,Attestation de petit chomage,Conges et absences,on-request,Inclus dans votre abonnement,https://ella.sdworx.be/fr/model-documents/attestation-de-petit-chomage,completed,0.6357
+      md-nl-006,NL,NL_006_aanvraag-ouderschapsverlof.docx,Aanvraag ouderschapsverlof,Verlof en afwezigheid,on-request,Meerprijs van toepassing - contacteer uw dossierbeheerder,https://ella.sdworx.be/nl/model-documents/aanvraag-ouderschapsverlof,completed,0.6513
+      md-fr-006,FR,FR_006_demande-de-conge-parental.docx,Demande de conge parental,Conges et absences,on-request,Inclus dans votre abonnement,https://ella.sdworx.be/fr/model-documents/demande-de-conge-parental,completed,0.6820
+      md-nl-007,NL,NL_007_opzeggingsbrief-door-de-werkgever.docx,Opzeggingsbrief door de werkgever,Beeindiging,premium,Gratis voor klanten met Ondernemerspakket,https://ella.sdworx.be/nl/model-documents/opzeggingsbrief-door-de-werkgever,completed,0.5945
+      md-fr-007,FR,FR_007_contrat-d-occupation-d-etudiant.docx,Contrat d'occupation d'etudiant,Recrutement,standard,Supplement applicable - contactez votre gestionnaire,https://ella.sdworx.be/fr/model-documents/contrat-d-occupation-d-etudiant,completed,0.7531
+      md-nl-008,NL,NL_008_car-policy-bedrijfswagen.docx,Car policy bedrijfswagen,Loon en voordelen,standard,Meerprijs van toepassing - contacteer uw dossierbeheerder,https://ella.sdworx.be/nl/model-documents/car-policy-bedrijfswagen,completed,0.6096
+      md-fr-008,FR,FR_008_contrat-de-travail-flexi-job.docx,Contrat de travail flexi-job,Recrutement,premium,Gratuit pour les clients avec le Pack Entrepreneur,https://ella.sdworx.be/fr/model-documents/contrat-de-travail-flexi-job,completed,0.7744
+      md-nl-009,NL,NL_009_arbeidsovereenkomst-onbepaalde-duur-bediende.docx,Arbeidsovereenkomst onbepaalde duur bediende,Aanwerving,premium,Inbegrepen in uw abonnement,https://ella.sdworx.be/nl/model-documents/arbeidsovereenkomst-onbepaalde-duur-bediende,completed,0.7714
+      md-fr-009,FR,FR_009_avenant-clause-de-non-concurrence.docx,Avenant clause de non-concurrence,Politique d'entreprise,standard,Gratuit pour les clients avec le Pack Entrepreneur,https://ella.sdworx.be/fr/model-documents/avenant-clause-de-non-concurrence,completed,0.7793
+      md-nl-010,NL,NL_010_ontslagbrief-met-vergoeding-verbreking.docx,Ontslagbrief met vergoeding (verbreking),Beeindiging,standard,Gratis voor klanten met Ondernemerspakket,https://ella.sdworx.be/nl/model-documents/ontslagbrief-met-vergoeding-verbreking,completed,0.7399
+      md-fr-010,FR,FR_010_contrat-de-remplacement.docx,Contrat de remplacement,Recrutement,standard,Gratuit pour les clients avec le Pack Entrepreneur,https://ella.sdworx.be/fr/model-documents/contrat-de-remplacement,completed,0.6680
+      md-nl-011,NL,NL_011_reglement-maaltijdcheques.docx,Reglement maaltijdcheques,Loon en voordelen,standard,Meerprijs van toepassing - contacteer uw dossierbeheerder,https://ella.sdworx.be/nl/model-documents/reglement-maaltijdcheques,completed,0.5677
+      md-fr-011,FR,FR_011_demande-de-credit-temps.docx,Demande de credit-temps,Conges et absences,standard,Inclus dans votre abonnement,https://ella.sdworx.be/fr/model-documents/demande-de-credit-temps,completed,0.6532
+      md-nl-012,NL,NL_012_arbeidsreglement-modelversie.docx,Arbeidsreglement modelversie,Bedrijfsbeleid,premium,Gratis voor klanten met Ondernemerspakket,https://ella.sdworx.be/nl/model-documents/arbeidsreglement-modelversie,completed,0.5961
+      md-fr-012,FR,FR_012_contrat-de-travail-a-duree-determinee-ouvrier.docx,Contrat de travail a duree determinee ouvrier,Recrutement,standard,Inclus dans votre abonnement,https://ella.sdworx.be/fr/model-documents/contrat-de-travail-a-duree-determinee-ouvrier,completed,0.5291
+      md-nl-013,NL,NL_013_overeenkomst-structureel-telewerk.docx,Overeenkomst structureel telewerk,Arbeidsduur,on-request,Meerprijs van toepassing - contacteer uw dossierbeheerder,https://ella.sdworx.be/nl/model-documents/overeenkomst-structureel-telewerk,completed,0.6379
+      md-fr-013,FR,FR_013_reglement-de-travail-version-modele.docx,Reglement de travail version modele,Politique d'entreprise,premium,Gratuit pour les clients avec le Pack Entrepreneur,https://ella.sdworx.be/fr/model-documents/reglement-de-travail-version-modele,completed,0.7059
+      md-nl-014,NL,NL_014_beeindiging-in-onderling-akkoord.docx,Beeindiging in onderling akkoord,Beeindiging,on-request,Inbegrepen in uw abonnement,https://ella.sdworx.be/nl/model-documents/beeindiging-in-onderling-akkoord,completed,0.5581
+      md-fr-014,FR,FR_014_lettre-de-preavis-par-l-employeur.docx,Lettre de preavis par l'employeur,Fin de contrat,on-request,Inclus dans votre abonnement,https://ella.sdworx.be/fr/model-documents/lettre-de-preavis-par-l-employeur,completed,0.5725
+      md-nl-015,NL,NL_015_policy-ongewenst-gedrag-op-het-werk.docx,Policy ongewenst gedrag op het werk,Bedrijfsbeleid,standard,Inbegrepen in uw abonnement,https://ella.sdworx.be/nl/model-documents/policy-ongewenst-gedrag-op-het-werk,completed,0.6794
+      md-fr-015,FR,FR_015_avenant-augmentation-salariale.docx,Avenant augmentation salariale,Remuneration et avantages,on-request,Inclus dans votre abonnement,https://ella.sdworx.be/fr/model-documents/avenant-augmentation-salariale,completed,0.6346
+      md-nl-016,NL,NL_016_arbeidsovereenkomst-deeltijdse-arbeid.docx,Arbeidsovereenkomst deeltijdse arbeid,Arbeidsduur,on-request,Inbegrepen in uw abonnement,https://ella.sdworx.be/nl/model-documents/arbeidsovereenkomst-deeltijdse-arbeid,completed,0.5585
+      md-fr-016,FR,FR_016_lettre-de-licenciement-pour-motif-grave.docx,Lettre de licenciement pour motif grave,Fin de contrat,on-request,Gratuit pour les clients avec le Pack Entrepreneur,https://ella.sdworx.be/fr/model-documents/lettre-de-licenciement-pour-motif-grave,completed,0.7738
+      md-nl-017,NL,NL_017_concurrentiebeding-bijlage.docx,Concurrentiebeding bijlage,Bedrijfsbeleid,premium,Meerprijs van toepassing - contacteer uw dossierbeheerder,https://ella.sdworx.be/nl/model-documents/concurrentiebeding-bijlage,completed,0.7325
+      md-fr-017,FR,FR_017_rupture-de-commun-accord.docx,Rupture de commun accord,Fin de contrat,standard,Gratuit pour les clients avec le Pack Entrepreneur,https://ella.sdworx.be/fr/model-documents/rupture-de-commun-accord,completed,0.6510
+      md-nl-018,NL,NL_018_studentenovereenkomst.docx,Studentenovereenkomst,Aanwerving,on-request,Gratis voor klanten met Ondernemerspakket,https://ella.sdworx.be/nl/model-documents/studentenovereenkomst,completed,0.6511
+      md-fr-018,FR,FR_018_convention-de-teletravail-structurel.docx,Convention de teletravail structurel,Temps de travail,premium,Supplement applicable - contactez votre gestionnaire,https://ella.sdworx.be/fr/model-documents/convention-de-teletravail-structurel,completed,0.5415
+      md-nl-019,NL,NL_019_bijlage-loonsverhoging.docx,Bijlage loonsverhoging,Loon en voordelen,standard,Gratis voor klanten met Ondernemerspakket,https://ella.sdworx.be/nl/model-documents/bijlage-loonsverhoging,completed,0.7124
+      md-fr-019,FR,FR_019_politique-comportements-indesirables-au-travail.docx,Politique comportements indesirables au travail,Politique d'entreprise,standard,Gratuit pour les clients avec le Pack Entrepreneur,https://ella.sdworx.be/fr/model-documents/politique-comportements-indesirables-au-travail,completed,0.6963
+      md-nl-020,NL,NL_020_vervangingsovereenkomst.docx,Vervangingsovereenkomst,Aanwerving,premium,Gratis voor klanten met Ondernemerspakket,https://ella.sdworx.be/nl/model-documents/vervangingsovereenkomst,completed,0.6335
+      md-fr-020,FR,FR_020_contrat-de-travail-a-temps-partiel.docx,Contrat de travail a temps partiel,Temps de travail,standard,Supplement applicable - contactez votre gestionnaire,https://ella.sdworx.be/fr/model-documents/contrat-de-travail-a-temps-partiel,completed,0.5400
+  - file_name: ten_commandments.csv
+    file_type: text
+    content: |
+      language,number,title,content,source_file
+      fr,1,Mode de licenciement,"Preavis (delai), rupture (indemnite), licenciement pour motif grave, fin pour force majeure medicale. Utilisez la langue legalement prescrite.",ten_commandments_fr.md
+      fr,2,Type de contrat et anciennete,Duree indeterminee/determinee ou remplacement; ouvrier ou employe; debut avant ou depuis 2014 (sac a dos); ex-interimaire; anciennete reprise.,ten_commandments_fr.md
+      fr,3,Reduction des prestations et travail a temps partiel,Calcul du sac a dos pour employes a temps partiel au 31.12.2013 sur salaire temps plein fictif; conges thematiques et credit-temps comme sans reduction.,ten_commandments_fr.md
+      fr,4,Age,"Outplacement (regime residuaire 45+), RCC, age de pension 66+ avec delai de preavis reduit en vue de la mise a la retraite.",ten_commandments_fr.md
+      fr,5,Protection contre le licenciement,"Repos de maternite, conge parental, credit-temps, membres CPPT/CE, delegues syndicaux, conseiller en prevention, conge-education, clause de securite d'emploi.",ten_commandments_fr.md
+      fr,6,Motivation du licenciement,"Mentionnez le motif reel sur le C4. Motivation a la demande du travailleur: licenciement manifestement deraisonnable, abus de droit. Motif grave: motiver en detail.",ten_commandments_fr.md
+      fr,7,Outplacement,"Regime general: preavis ou indemnite d'au moins 30 semaines. Regime residuaire: 45+, au moins 1 an d'anciennete, offre spontanee.",ten_commandments_fr.md
+      fr,8,Mesures favorisant l'employabilite,"Pour travailleurs avec preavis ou indemnite d'au moins 30 semaines: formation, coaching, outplacement complementaire. Max. 1.800 EUR d'intervention ONEM.",ten_commandments_fr.md
+      fr,9,Licenciement de plusieurs travailleurs a court terme,"Licenciement multiple, licenciement collectif ou fermeture d'entreprise: regles generales et/ou regles sectorielles et d'entreprise.",ten_commandments_fr.md
+      fr,10,Remplacement,RCC et obligation de premier emploi (min. 50 travailleurs): obligation eventuelle de remplacement en cas de licenciement d'un jeune.,ten_commandments_fr.md
+      fr,11,Obligations entre parties,"Employeur: conge de sollicitation, decompte de sortie, solde du droit a la formation, DIMONA sortie, eco-cheques, assurances. Travailleur: restitution du materiel.",ten_commandments_fr.md
+      nl,1,Wijze van ontslag,"Opzegging (termijn), verbreking (vergoeding), ontslag om dringende reden, einde wegens medische overmacht. Gebruik de wettelijk voorgeschreven taal.",ten_commandments_nl.md
+      nl,2,Type arbeidsovereenkomst en anciënniteit,Onbepaalde/bepaalde duur of vervanging; arbeider of bediende; aanvang voor of vanaf 2014 (rugzak); voorheen uitzendkracht; overgenomen anciënniteit.,ten_commandments_nl.md
+      nl,3,Vermindering arbeidsprestaties en deeltijdse arbeid,Rugzak-berekening voor deeltijdse bedienden op 31.12.2013 op fictief voltijds loon; thematisch verlof en tijdskrediet alsof er geen vermindering was.,ten_commandments_nl.md
+      nl,4,Leeftijd,"Outplacement (residuair 45+), SWT, pensioenleeftijd 66+ met verkorte opzeggingstermijn bij ontslag met oog op oppensioenstelling.",ten_commandments_nl.md
+      nl,5,Ontslagbescherming,"Moederschapsrust, ouderschapsverlof, tijdskrediet, leden CPBW/OR, syndicaal afgevaardigden, preventieadviseur, educatief verlof, werkzekerheidsclausule.",ten_commandments_nl.md
+      nl,6,Ontslagmotivering,"Vermeld de werkelijke reden op het C4. Motivering op verzoek van de werknemer: kennelijk onredelijk ontslag, rechtsmisbruik. Dringende reden: uitvoerig motiveren.",ten_commandments_nl.md
+      nl,7,Outplacement,"Algemeen: opzeggingstermijn of -vergoeding van minstens 30 weken. Residuair: 45+, minstens 1 jaar anciënniteit, spontaan aanbod.",ten_commandments_nl.md
+      nl,8,Inzetbaarheidsbevorderende maatregelen,"Voor werknemers met opzegging of vergoeding vanaf 30 weken: opleiding, coaching, bijkomend outplacement. Max. 1.800 EUR tussenkomst RVA, strikte voorwaarden.",ten_commandments_nl.md
+      nl,9,Ontslag meerdere werknemers op korte termijn,"Meervoudig ontslag, collectief ontslag of sluiting onderneming: algemene regels en/of sectorale en ondernemingsregels.",ten_commandments_nl.md
+      nl,10,Vervanging,SWT en startbaanverplichting (min. 50 werknemers): bij ontslag van een jongere eventueel vervangingsplicht.,ten_commandments_nl.md
+      nl,11,Verplichtingen tussen partijen,"Werkgever: sollicitatieverlof, uitdienstberekening, openstaand opleidingsrecht, DIMONA uit dienst, ecocheques, verzekeringen. Werknemer: teruggave materiaal.",ten_commandments_nl.md
+  - file_name: belgian_holidays.csv
+    file_type: text
+    content: |
+      year,type,startDate,endDate,name_nl,name_fr,nationwide
+      2026,Bank,2026-01-01,2026-01-01,Nieuwjaar,Nouvel An,true
+      2026,Bank,2026-04-06,2026-04-06,Paasmaandag,Lundi de Paques,true
+      2026,Bank,2026-05-01,2026-05-01,Feest van de Arbeid,Fete du Travail,true
+      2026,Bank,2026-05-14,2026-05-14,Onze-Lieve-Heer-Hemelvaart,Ascension,true
+      2026,Bank,2026-05-25,2026-05-25,Pinkstermaandag,Lundi de Pentecote,true
+      2026,Bank,2026-07-21,2026-07-21,Nationale feestdag,Fete nationale,true
+      2026,Bank,2026-08-15,2026-08-15,Onze-Lieve-Vrouw-Hemelvaart,Assomption,true
+      2026,Bank,2026-11-01,2026-11-01,Allerheiligen,Toussaint,true
+      2026,Bank,2026-11-11,2026-11-11,Wapenstilstand,Armistice,true
+      2026,Bank,2026-12-25,2026-12-25,Kerstmis,Noel,true
+      2026,Public,2026-01-01,2026-01-01,Nieuwjaar,Nouvel An,true
+      2026,Public,2026-04-06,2026-04-06,Paasmaandag,Lundi de Paques,true
+      2026,Public,2026-05-01,2026-05-01,Feest van de Arbeid,Fete du Travail,true
+      2026,Public,2026-05-14,2026-05-14,Onze-Lieve-Heer-Hemelvaart,Ascension,true
+      2026,Public,2026-05-25,2026-05-25,Pinkstermaandag,Lundi de Pentecote,true
+      2026,Public,2026-07-21,2026-07-21,Nationale feestdag,Fete nationale,true
+      2026,Public,2026-08-15,2026-08-15,Onze-Lieve-Vrouw-Hemelvaart,Assomption,true
+      2026,Public,2026-11-01,2026-11-01,Allerheiligen,Toussaint,true
+      2026,Public,2026-11-11,2026-11-11,Wapenstilstand,Armistice,true
+      2026,Public,2026-12-25,2026-12-25,Kerstmis,Noel,true
+      2026,School,2026-02-16,2026-02-22,Krokusvakantie,Conge de detente,true
+      2026,School,2026-04-06,2026-04-19,Paasvakantie,Vacances de printemps,true
+      2026,School,2026-07-01,2026-08-31,Zomervakantie,Vacances d'ete,true
+      2026,School,2026-10-26,2026-11-01,Herfstvakantie,Conge d'automne,true
+      2026,School,2026-12-21,2027-01-03,Kerstvakantie,Vacances d'hiver,true
+  - file_name: math_expressions.csv
+    file_type: text
+    content: |
+      case_id,expression,expected_result,note
+      math-001,3200 / 38 * 1.5,126.3157894736842,Overuurtarief 50% op maandloon-basis
+      math-002,(3200 * 13.92) / 12,3712.0,"Gemiddeld maandloon incl. 13,92 maandloonfactor"
+      math-003,3200 * 0.1307,418.24,"RSZ werknemersbijdrage 13,07%"
+      math-004,(3200 - 418.24) * 0.2675,744.1208,Bedrijfsvoorheffing op belastbaar loon
+      math-005,3200 * 0.9208 * 0.92,2710.8352,Netto-schatting na RSZ en voorheffing
+      math-006,38 * 4.33,164.54,Gemiddeld aantal uren per maand
+      math-007,20 * 8.00 - 20 * 1.09,138.2,Werkgeverskost maaltijdcheques over 20 dagen
+      math-008,250 * 0.36,90.0,"Fietsvergoeding 250 km aan 0,36 EUR/km"
+      math-009,3200 * 3 + 3200 * 13.92 / 12 * 3,20736.0,Opzeggingsvergoeding 3 maanden incl. premies
+      math-010,(7 * 3 + 6) / 4,6.75,Opzeggingstermijn in weken bij 7 jaar anciënniteit
+      math-011,1800 / 12,150.0,Maandelijkse spreiding van de RVA-tussenkomst
+      math-012,(2400 * 0.0785) * 2,376.8,"Dubbel vakantiegeld 7,85% voor 2 maanden"
+      math-013,600 - 431,169,Resterend studentencontingent in uren
+      math-014,38 / 5,7.6,Dagelijkse arbeidsduur bij een 38-urenweek
+      math-015,(3200 / 22) * 4,581.8181818181819,Loon voor 4 dagen in een maand van 22 dagen
+  - file_name: nbo_packages.csv
+    file_type: text
+    content: |
+      name,description,features,modules,case_triggers,profile_triggers,url_info,url_detail
+      Total Business Bundle,"Workforce analytics dashboards on payroll cost, absenteeism, turnover and benchmarking against sector peers.",Payroll cost dashboards | Absenteeism analytics | Turnover and retention metrics | Sector benchmarking | Budget forecasting | Scheduled report export,Dashboards | Benchmark | Forecast,Requests for cost overviews | Questions about absenteeism figures | Budget planning questions,Companies over 20 employees | Companies with high absenteeism | Companies in a growth or restructuring phase,https://www.sdworx.be/nl/total-business-bundle,https://www.sdworx.be/nl/total-business-bundle/detail
+      Modular Reward Plan (MRP),"All-in payroll and HR administration bundle for SMEs: payroll processing, social-legal support, and statutory declarations.",Full payroll processing | Dimona and DmfA declarations | Social-legal helpdesk | Annual account statements | Holiday and absence administration | Employment contract templates,Payroll Core | Legal Desk | Document Vault,Repeated administrative payroll questions | Errors in statutory declarations | Requests for contract templates,Companies with 5-50 employees | Companies without an internal HR function | Companies growing past 10 employees,https://www.sdworx.be/nl/modular-reward-plan,https://www.sdworx.be/nl/modular-reward-plan/detail
+      Workforce Analytics,Flexible remuneration plan letting employees convert part of their gross package into tax-efficient benefits.,Cafeteria plan configuration | Employee self-service budget | Company car and bike options | Extra holiday purchase | Pension top-up | Automatic payroll integration,Budget Engine | Benefit Catalog | Employee Portal,Questions about benefits in kind | Requests for salary optimisation | Company car policy questions,Companies with white-collar staff | Companies competing for scarce profiles | Companies asking about net optimisation,https://www.sdworx.be/nl/workforce-analytics,https://www.sdworx.be/nl/workforce-analytics/detail
+      Juria,"Guided HR policy and compliance companion covering job classification, salary scales, and sector obligations.",Job classification guidance | Sector salary scale lookup | Compliance checklists | Policy templates | Joint committee obligation tracker | Annual index simulation,Classification | Scales | Compliance,Questions about barema or salary scales | Job classification disputes | Index application questions,Companies in sectors with strict classification rules | Companies with blue-collar staff | Companies recently changing joint committee,https://www.sdworx.be/nl/juria,https://www.sdworx.be/nl/juria/detail
+      Staff Portal,AI-powered Belgian labor law knowledge assistant with source-cited answers on socio-legal questions.,Natural language socio-legal Q&A | Belgian labor law knowledge base | Collective labor agreement lookups | Joint committee information | Regulatory update notifications | Source-cited answers,,Frequent questions about labor law or regulations | Cases about dismissal procedures | Inquiries about collective labor agreements,Companies in sectors with complex labor regulations | Companies with multiple joint committees | Companies with HR staff needing quick legal reference,https://www.sdworx.be/nl/staff-portal,https://www.sdworx.be/nl/staff-portal/detail
+      Navigator,"Employee and manager self-service portal for leave requests, payslips, and personal data updates.",Digital payslip access | Leave request workflow | Personal data self-update | Manager approval flows | Mobile app | Document signing,Employee Portal | Manager Cockpit | e-Signature,Repeated payslip copy requests | Manual leave registration questions | Address change requests by email,Companies over 15 employees | Companies with field or shift workers | Companies digitising HR administration,https://www.sdworx.be/nl/navigator,https://www.sdworx.be/nl/navigator/detail

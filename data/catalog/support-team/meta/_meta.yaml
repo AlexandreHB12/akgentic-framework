@@ -1,0 +1,62 @@
+id: _meta
+kind: meta
+namespace: support-team
+user_id: anonymous
+model_type: akgentic.catalog.models.namespace_meta.NamespaceMeta
+description: Team Coordinator that triages incoming queries, creates tasks, and dynamically
+  hires a Customer Engagement Assistant (Salesforce), Payroll Assistant (payroll data),
+  Knowledge Assistant (FAQ/wiki/CCT knowledge + DigiFAQ crawl), Troubleshooter
+  (payroll-run error diagnosis) or Payroll Quality Assistant (timesheet validation)
+  based on message context.
+payload:
+  name: Payroll Support Team
+  description: Team Coordinator that triages incoming queries, creates tasks, and
+    dynamically hires a Customer Engagement Assistant (Salesforce), Payroll Assistant
+    (payroll data), Knowledge Assistant (FAQ/wiki/CCT knowledge + DigiFAQ crawl),
+    Troubleshooter (payroll-run error diagnosis) or Payroll Quality Assistant
+    (timesheet validation) based on message context.
+  properties:
+    overview: |
+      @Team Coordinator is the only agent spawned at startup (behind
+      @Human). @Customer Engagement Assistant, @Payroll Assistant,
+      @Knowledge Assistant, @Troubleshooter, @Payroll Quality Assistant and
+      @Client are declared as agent_profiles — registered with the
+      orchestrator for discovery but not instantiated — so the coordinator
+      hires whichever one a message needs via the built-in hire_members
+      tool (or hire_client for @Client, which additionally takes a name
+      and whichever contact channels — WhatsApp number, phone number,
+      email address — were given).
+    tools: |
+      @Customer Engagement Assistant carries id_salesforce_data (5 curated
+      demo cases tied to real payroll figures) and id_payroll_calendar (a
+      dummy per-employer payroll computation calendar — completed periods
+      match los21_payroll_run_status.csv exactly, upcoming/scheduled
+      periods let it proactively flag what's due soon). @Payroll Assistant
+      carries
+      id_calculated_payroll_data (contracts, calculated salary data, wage
+      codes). @Knowledge Assistant carries id_knowledge_base (FAQ/wiki/
+      external reference data) and id_digifaq_crawl (a web-crawl tool over
+      the SD Worx DigiFAQ payroll site, via Tavily — requires
+      TAVILY_API_KEY). @Troubleshooter carries id_troubleshooter_data
+      (payroll-run status/errors + contracts/calculated-data + knowledge
+      base, combined into one workspace since an agent can only carry one
+      WorkspaceTool). @Payroll Quality Assistant carries
+      id_calculated_payroll_data (to cross-check timesheets against
+      contracts/birthDate) and id_checklist_tool (a bespoke tool, not a
+      WorkspaceTool, exposing get_checklist/set_checklist over a checklist
+      persisted on its own agent state — default 3 checks, replaceable at
+      any time). @Team Coordinator carries global.id_planning for task
+      creation, id_trillo_client for hiring @Client and reaching them over
+      WhatsApp, phone call, SMS or email (send_sms, make_call,
+      send_whatsapp_message, send_email — each needs that channel's
+      contact detail to have been given at hire time; update_contact_info
+      changes a channel on an already-hired Client, via a plain method on
+      ClientProxy called through proxy_ask so it runs safely inside that
+      actor's own thread rather than mutating its config externally), and
+      id_team_memory
+      (a bespoke file-backed memory, one line of text per memory —
+      list_memories, remember, forget, forget_all — persisted to
+      data/memory/team_coordinator_memories.txt, independent of agent
+      state or catalog data).
+  shareable: false
+  public: true

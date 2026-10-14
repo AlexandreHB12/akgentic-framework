@@ -1,0 +1,16 @@
+id: client
+kind: agent
+namespace: hardware-support-team
+user_id: anonymous
+model_type: akgentic.core.AgentCard
+description: The client contact, reachable over WhatsApp or email — hired by @SupportLead
+  with hire_client, never started with the team
+payload:
+  description: The client contact, reachable over WhatsApp or email. The phone number
+    you receive is used for WhatsApp.
+  agent_class: client_proxy.agent.ClientProxy
+  skills: []
+  config:
+    name: '@Client'
+    role: Client
+  can_be_hired: true

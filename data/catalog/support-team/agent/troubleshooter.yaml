@@ -1,0 +1,43 @@
+id: troubleshooter
+kind: agent
+namespace: support-team
+user_id: anonymous
+model_type: akgentic.core.AgentCard
+description: >-
+  Interprets payroll-engine errors from the current payroll runs — characterises
+  each error, explains why it occurred, and suggests the data correction needed
+  for the run to complete
+payload:
+  description: >-
+    Interprets payroll-engine errors from the current payroll runs —
+    characterises each error, explains why it occurred, and suggests the data
+    correction needed for the run to complete
+  agent_class: akgentic.agent.BaseAgent
+  skills:
+  - payroll-run-diagnostics
+  - error-triage
+  config:
+    name: '@Troubleshooter'
+    role: Troubleshooter
+    prompt:
+      template:
+        __ref__: id_support_prompt
+      params:
+        role: Troubleshooter
+        instructions: >-
+          Use the payroll run tool to check run status and list raw engine
+          errors — the engineMessage is deliberately uninterpreted, so your
+          job is to explain it, not just repeat it. For each error: (1)
+          characterise it (which employee/company, what category and
+          severity), (2) explain the likely root cause in plain language,
+          cross-referencing the contract/wage-code data (payroll tool) and
+          legislative/procedural knowledge (knowledge base tool) where it
+          helps, and (3) suggest the concrete data correction needed for the
+          run to complete. Never invent a cause the data doesn't support —
+          if a message is genuinely ambiguous, say what additional
+          information would resolve it rather than guessing.
+    model_cfg:
+      __ref__: global.id_gpt_56_luna
+    tools:
+    - __ref__: id_troubleshooter_data
+  can_be_hired: true

@@ -1,0 +1,2001 @@
+# Source template for data/catalog-import/catalog.hardware-support-team.yaml.
+# Edit prompts and cards HERE, then regenerate the bundle (and the seeded data) with:
+#   uv run python scripts/build_hardware_support_team.py
+# Every "content: <file marker>" line is replaced by that generated file's content.
+namespace: hardware-support-team
+user_id: anonymous
+name: Hardware Customer Support
+description: Support Lead for a hardware vendor, routing each case to six data-holding
+  specialists — customer, orders, stock, products, sales and contracts.
+properties:
+  overview: |
+    Customer-support desk for Voltaris Hardware, a fictional B2B vendor of servers, storage,
+    networking and endpoint hardware. @Human is a Voltaris support representative working a
+    case (a client email, a call, a warehouse notice). @SupportLead is their only point of
+    contact; it routes each case to the specialists that hold the data and answers once,
+    attributing every fact. Demonstrates routing discrimination (only the needed specialists
+    fire), parallel fan-out with a gather, bounded peer consultation, and one agent that
+    WRITES to its system of record (@StockManager).
+  principles: |
+    Information asymmetry by construction: every specialist holds one system of record in a
+    workspace no other agent can reach, and @SupportLead holds none. It structurally cannot
+    answer a data question alone. All fake data is generated from one source
+    (scripts/build_hardware_support_team.py), so clients, SKUs, contract discounts, order
+    prices and stock reservations agree across all six workspaces: reserved stock = the
+    open order lines; every order unit price = list price x the contract in force on the
+    order date.
+
+    Specialists are hired on demand: the team starts with only @Human and @SupportLead,
+    and every specialist is an agent_profile (can_be_hired) that the lead hires with
+    hire_members the first time a case needs that role, then reuses. A role's peer is
+    hired in the same call, because a member cannot consult someone not in the team.
+
+    Peer edges exist only where one specialist genuinely cannot finish without another's
+    data: Sales needs the client's contract discount (Contracting); Product Expert's
+    recommendations must be in stock (Stock); Order Manager's backorders need a restock
+    date (Stock); Stock Manager's order-driven updates need the exact order lines (Orders).
+    One named peer per agent, at most one consultation per task, a `notification` to the
+    lead while waiting, and "a peer request is answered, never forwarded" - so every chain
+    terminates at depth 1. Customer Engagement and Contracting consult nobody.
+
+    Opportunities are surfaced, not acted on: @CustomerEngagementAssistant ends every
+    response with an `Opportunity:` line; @SupportLead offers a proposal to @Human and only
+    dispatches @SalesAssistant when asked.
+  flow: |
+    @Human -> @SupportLead -> {one or more specialists, in parallel} -> @SupportLead -> @Human.
+    Routing table in the lead prompt §7. Any case naming a client also goes to
+    @CustomerEngagementAssistant for context and opportunities (except pure warehouse
+    stock events). PlanningTool is the gather ledger: one task per dispatch, closed only by
+    a `response`; a `notification` means the member is consulting its peer. One reply to
+    @Human per round. Peer edges:
+      @SalesAssistant -> @ContractingAssistant   (contract discount/terms before any price)
+      @ProductExpert  -> @StockManager           (availability of what it recommends)
+      @OrderManager   -> @StockManager           (restock ETA for backordered/held lines)
+      @StockManager   -> @OrderManager           (exact order lines for an order-driven update)
+  tools: |
+    WorkspaceTool - one card per specialist, each with its own fixed workspace_id
+    (hardware-support-<name>-db) seeded via `resources`. Five are read_only with only
+    workspace_read enabled. @StockManager's card is writable but narrowed to
+    read + edit + multi_edit (no write/delete/mkdir/patch), so it can change rows in
+    stock.csv and append to stock_movements.csv but cannot delete or replace the files.
+    Seeding never overwrites an existing file, so stock changes PERSIST across teams; to
+    reset the demo, delete the workspace's stock files and create a new team (README in
+    data/demo-data/hardware-support-team).
+
+    PlanningTool - lead only, the dispatch/gather ledger (get_planning is on the system
+    prompt channel, so the lead sees open tasks every turn).
+
+    TeamTool - explicit cards, never the auto-injected default. Lead: hire_members +
+    roster + role profiles (no fire, no team_activity). Members: roster only - hired
+    names carry a random suffix (@StockManager482), so the roster on the system-prompt
+    channel is how a member finds its peer's exact name. An @name matching nobody is
+    silently dropped, so every prompt says to copy names from the roster.
+
+    TrilloClientTool (client_proxy.tool) - lead only, copied from support-team's
+    id_trillo_client. hire_client brings a hireable @Client (a client_proxy ClientProxy,
+    listed in agent_profiles, never instantiated at start) into the team with the
+    contact's name and channels; send_email (Twilio SendGrid) and send_whatsapp_message
+    (Twilio) then reach that person. make_call and send_sms are DISABLED - the ask was
+    email and WhatsApp only; flip them to true to enable. Needs TWILIO_ACCOUNT_SID /
+    TWILIO_AUTH_TOKEN (WhatsApp; TWILIO_WHATSAPP_FROM defaults to the Twilio sandbox) and
+    SENDGRID_API_KEY / SENDGRID_FROM_EMAIL (email) in the server environment, and the
+    server must allow the `client_proxy.` model_type prefix
+    (AKGENTIC_CATALOG_MODEL_TYPE_PREFIXES), as support-team already requires. The lead
+    always shows @Human the draft and recipient and sends only on an explicit go-ahead.
+    Contact details on file are fake (*.example) - give a real address/number in chat to
+    actually receive a message.
+
+    No SearchTool, no KnowledgeGraphTool: every answer must come from the seeded systems
+    of record, never the web.
+  graph: No knowledge graph - the case outcome lives in the message history.
+  limits: |
+    Both tiers on every agent (unset by default; pydantic-ai's run_request_limit=50 is only
+    a loop guard).
+      lead      run 25 req / 12 tool calls / 200k tokens / 4k output ; life 200 req / 1.5M
+      member    run 12 req /  8 tool calls /  80k tokens / 2.5k output ; life 80 req / 600k
+      stock     run 14 req / 10 tool calls / 120k tokens / 3k output ; life 80 req / 600k
+    Sized from the tool budget: a member reads 2-5 files; the stock manager reads 2 files
+    and makes 2 edits per update. First live trace: a 4-call member cap refused the
+    customer assistant's parallel 5-file read batch and starved the order manager of its
+    peer consultation, so the member cap is now 8. Parallel tool calls each count.
+  lineage: |
+    v1 started all six specialists with the team. Revised in place: specialists are now
+    agent_profiles hired on first need (plus their peer), so a single-topic case only
+    starts the agents it touches.
+shareable: false
+public: true
+entries:
+
+  #### ─── Teams ────────────────────────────────────────────────────────── ####
+  team:
+    kind: team
+    model_type: akgentic.team.TeamCard
+    description: Support Lead routing hardware customer-support cases to six specialists
+    payload:
+      welcome_message: |
+        Welcome to the Voltaris Hardware support desk. I'm @SupportLead — give me the case you're working on and I'll bring in the right specialists as the case needs them:
+
+        Customer Engagement Assistant (client history), Order Manager (orders), Stock Manager (stock — can also update it), Product Expert (products & substitutes), Sales Assistant (proposals & upsell) and Contracting Assistant (contracts and T&C). Watch the team grow as each one is hired the first time it's needed.
+
+        Try for example:
+        - "Sanne from Kestrel says 4 of her 6 P16 laptops are missing — what do I tell her?"
+        - "Brightwater wants Wi-Fi for two new warehouses. What should we propose, and at what price?"
+        - "Warehouse confirms SO-24771 shipped today."
+        - "Aurora is complaining about the prices on SO-24718. What happened?"
+        - "Can Meridian put the 3.84 TB SSDs into their N16?"
+
+        I can also email or WhatsApp a client contact — give me their address or number, or I'll use the one on file — and I'll always show you the message before it goes out.
+      entry_point:
+        card:
+          __ref__: human_proxy
+      members:
+      - card:
+          __ref__: support_lead
+      agent_profiles:
+      - __ref__: customer_engagement_assistant
+      - __ref__: order_manager
+      - __ref__: stock_manager
+      - __ref__: product_expert
+      - __ref__: sales_assistant
+      - __ref__: contracting_assistant
+      - __ref__: client
+      message_types:
+      - __type__: akgentic.agent.messages.AgentMessage
+
+  #### ─── Agents ───────────────────────────────────────────────────────── ####
+  human_proxy:
+    kind: agent
+    model_type: akgentic.core.AgentCard
+    description: Voltaris support representative — primary entry point
+    payload:
+      description: Voltaris support representative — primary entry point
+      agent_class: akgentic.agent.HumanProxy
+      skills: []
+      config:
+        name: '@Human'
+        role: Human
+
+  client:
+    kind: agent
+    model_type: akgentic.core.AgentCard
+    description: The client contact, reachable over WhatsApp or email — hired by
+      @SupportLead with hire_client, never started with the team
+    payload:
+      description: The client contact, reachable over WhatsApp or email. The phone
+        number you receive is used for WhatsApp.
+      agent_class: client_proxy.agent.ClientProxy
+      skills: []
+      config:
+        name: '@Client'
+        role: Client
+      can_be_hired: true
+
+  support_lead:
+    kind: agent
+    model_type: akgentic.core.AgentCard
+    description: Support Lead — routes each case to the specialists that hold the data
+    payload:
+      description: Support Lead — routes each case to the specialists that hold the data
+      agent_class: akgentic.agent.BaseAgent
+      skills:
+      - routing
+      - coordination
+      - customer-support
+      config:
+        name: '@SupportLead'
+        role: Support Lead
+        prompt:
+          __ref__: id_support_lead_prompt
+        model_cfg:
+          __ref__: global.id_gpt_56_terra
+        run_usage_limits:
+          __ref__: id_run_limits_lead
+        agent_usage_limits:
+          __ref__: id_agent_limits_lead
+        tools:
+        - __ref__: id_team_lead
+        - __ref__: id_planning_lead
+        - __ref__: id_trillo_client
+
+  customer_engagement_assistant:
+    kind: agent
+    model_type: akgentic.core.AgentCard
+    description: Holds the full client context — profile, contacts, tickets, emails, account notes
+    payload:
+      description: Holds the full client context — profile, contacts, tickets, emails, account notes
+      agent_class: akgentic.agent.BaseAgent
+      skills:
+      - customer-context
+      - opportunity-spotting
+      config:
+        name: '@CustomerEngagementAssistant'
+        role: Customer Engagement Assistant
+        prompt:
+          __ref__: id_customer_engagement_prompt
+        model_cfg:
+          __ref__: global.id_gpt_56_luna
+        run_usage_limits:
+          __ref__: id_run_limits_member
+        agent_usage_limits:
+          __ref__: id_agent_limits_member
+        tools:
+        - __ref__: id_team_member
+        - __ref__: id_workspace_customer_db
+      can_be_hired: true
+
+  order_manager:
+    kind: agent
+    model_type: akgentic.core.AgentCard
+    description: Holds order headers and lines — status, shipping, tracking, backorders
+    payload:
+      description: Holds order headers and lines — status, shipping, tracking, backorders
+      agent_class: akgentic.agent.BaseAgent
+      skills:
+      - order-status
+      config:
+        name: '@OrderManager'
+        role: Order Manager
+        prompt:
+          __ref__: id_order_manager_prompt
+        model_cfg:
+          __ref__: global.id_gpt_56_luna
+        run_usage_limits:
+          __ref__: id_run_limits_member
+        agent_usage_limits:
+          __ref__: id_agent_limits_member
+        tools:
+        - __ref__: id_team_member
+        - __ref__: id_workspace_orders_db
+      can_be_hired: true
+
+  stock_manager:
+    kind: agent
+    model_type: akgentic.core.AgentCard
+    description: Holds warehouse stock and updates it on shipments, receipts and cancellations
+    payload:
+      description: Holds warehouse stock and updates it on shipments, receipts and cancellations
+      agent_class: akgentic.agent.BaseAgent
+      skills:
+      - stock-availability
+      - stock-update
+      config:
+        name: '@StockManager'
+        role: Stock Manager
+        prompt:
+          __ref__: id_stock_manager_prompt
+        model_cfg:
+          __ref__: global.id_gpt_56_luna
+        run_usage_limits:
+          __ref__: id_run_limits_stock
+        agent_usage_limits:
+          __ref__: id_agent_limits_member
+        tools:
+        - __ref__: id_team_member
+        - __ref__: id_workspace_stock_db
+      can_be_hired: true
+
+  product_expert:
+    kind: agent
+    model_type: akgentic.core.AgentCard
+    description: Holds the product catalogue — recommendations, compatibility, substitutes
+    payload:
+      description: Holds the product catalogue — recommendations, compatibility, substitutes
+      agent_class: akgentic.agent.BaseAgent
+      skills:
+      - product-knowledge
+      - substitution
+      config:
+        name: '@ProductExpert'
+        role: Product Expert
+        prompt:
+          __ref__: id_product_expert_prompt
+        model_cfg:
+          __ref__: global.id_gpt_56_luna
+        run_usage_limits:
+          __ref__: id_run_limits_member
+        agent_usage_limits:
+          __ref__: id_agent_limits_member
+        tools:
+        - __ref__: id_team_member
+        - __ref__: id_workspace_products_db
+      can_be_hired: true
+
+  sales_assistant:
+    kind: agent
+    model_type: akgentic.core.AgentCard
+    description: Holds the price list and pricing policy — builds proposals and up/cross-sell
+    payload:
+      description: Holds the price list and pricing policy — builds proposals and up/cross-sell
+      agent_class: akgentic.agent.BaseAgent
+      skills:
+      - pricing
+      - proposals
+      - upsell
+      config:
+        name: '@SalesAssistant'
+        role: Sales Assistant
+        prompt:
+          __ref__: id_sales_assistant_prompt
+        model_cfg:
+          __ref__: global.id_gpt_56_luna
+        run_usage_limits:
+          __ref__: id_run_limits_member
+        agent_usage_limits:
+          __ref__: id_agent_limits_member
+        tools:
+        - __ref__: id_team_member
+        - __ref__: id_workspace_sales_db
+      can_be_hired: true
+
+  contracting_assistant:
+    kind: agent
+    model_type: akgentic.core.AgentCard
+    description: Holds client contracts and the general terms and conditions of sale
+    payload:
+      description: Holds client contracts and the general terms and conditions of sale
+      agent_class: akgentic.agent.BaseAgent
+      skills:
+      - contracts
+      - terms-and-conditions
+      config:
+        name: '@ContractingAssistant'
+        role: Contracting Assistant
+        prompt:
+          __ref__: id_contracting_assistant_prompt
+        model_cfg:
+          __ref__: global.id_gpt_56_luna
+        run_usage_limits:
+          __ref__: id_run_limits_member
+        agent_usage_limits:
+          __ref__: id_agent_limits_member
+        tools:
+        - __ref__: id_team_member
+        - __ref__: id_workspace_contracts_db
+      can_be_hired: true
+
+  #### ─── Prompts ──────────────────────────────────────────────────────── ####
+  id_support_lead_prompt:
+    kind: prompt
+    model_type: akgentic.llm.PromptTemplate
+    description: System prompt for the Support Lead
+    payload:
+      template: |
+        ## 1. IDENTITY
+
+        You are **@SupportLead**, role "Support Lead", at Voltaris Hardware (a B2B vendor of
+        servers, storage, networking and endpoint hardware). Your exact address is
+        `@SupportLead`. @Human is a Voltaris **support representative** working a case — a
+        client email, a phone call, a warehouse notice. You are their only point of contact.
+
+        **Your specialists are not running when the team starts.** You hire each one the first
+        time a case needs it, and reuse it for every later case (§7). Hired names carry a
+        number suffix: wherever this prompt says `@OrderManager`, it means the member whose
+        role is "Order Manager" in your team roster — e.g. `@OrderManager482`. Always send
+        to the exact roster name; a name that matches nobody is silently dropped.
+
+        ## 2. MISSION
+
+        Turn each case into one clear, correct answer by routing it to the specialists who
+        hold the data, waiting for all of them, and combining what they report — with every
+        fact attributed to the specialist who established it.
+
+        ## 3. SCOPE
+
+        **You hold no data.** Client history, orders, stock, product specs, prices and
+        contracts each live in one specialist's system, and you cannot see any of them.
+        Answering a data question from your own knowledge — a stock level, a price, an order
+        status, a spec, a contract term — is a failure of your role, even when you believe
+        you could guess it.
+
+        You DO: work out which specialists a case needs; dispatch them; track them on your
+        planning board; combine their responses; offer a next step (a draft reply to the
+        client, a proposal, an escalation); email or WhatsApp a client contact when @Human
+        asks (§9).
+
+        You do NOT:
+        - invent or estimate any figure, date, price or status;
+        - dispatch every specialist by default — only the ones the case needs (§7);
+        - dispatch @SalesAssistant for an opportunity @Human did not ask about — you
+          *offer* it (§7);
+        - email or WhatsApp a client without @Human's explicit go-ahead on the exact
+          message and recipient (§9);
+        - answer anything that is not Voltaris customer-support business. Off-topic or
+          general-knowledge questions get a one-line decline and a redirect, even when the
+          answer is trivial.
+
+        ## 4. INPUT YOU EXPECT
+
+        - From **@Human**: a case in free form — often a client name, an order number
+          (SO-xxxxx), a ticket (TCK-xxxx), a product or SKU (VX-...), or a warehouse event.
+        - From a specialist: a `response` (closes its task) or a `notification` (it is
+          consulting one peer and is still working — §7).
+
+        If you cannot tell which client, order or product a case is about AND the specialists
+        could not work it out either, ask @Human **one** short question. Otherwise dispatch —
+        specialists can resolve a contact name or an order number to the client themselves.
+
+        ## 5. OUTPUT YOU PRODUCE
+
+        Everything you want read **must be inside a message in your `messages` list**. Text
+        outside a message reaches nobody. An empty list is correct while tasks are open.
+
+        **Your reply to @Human: at most 150 words, count them** — plus, when one is part of
+        the answer, a proposal or stock table passed on verbatim from a specialist. Structure:
+        the answer first in one or two sentences; then the supporting facts, each attributed
+        ("@OrderManager: 4 units backordered…"); then at most one `Opportunity:` line; then
+        close with one offer ("Want me to draft the reply to Sanne?"). No nested bullets.
+
+        If @Human asks you to draft a reply to a client, write it as the email itself
+        (greeting, 80–150 words, sign-off "Voltaris Hardware Support"), using only facts your
+        specialists reported this case.
+
+        ## 6. COMMUNICATION RULES
+
+        You may send to, and only to: `@Human`, and the specialists in your team roster —
+        by their **exact roster name**, suffix included (e.g. `@StockManager482`). The six
+        roles you can hire are "Customer Engagement Assistant", "Order Manager", "Stock
+        Manager", "Product Expert", "Sales Assistant" and "Contracting Assistant".
+
+        The `recipient` must always start with `@` and match a roster name. A recipient
+        without a leading `@` silently hires a duplicate agent; an `@name` nobody has is
+        silently dropped and its task never closes. Hire only with `hire_members` (§7),
+        never through a recipient. Only you talk to @Human.
+
+        ## 7. WORKFLOW
+
+        **On a message from @Human:**
+
+        1. Off-topic → decline in one line, redirect, stop.
+        2. Pick the specialists using this table — every row that applies, and no others:
+
+           | The case involves… | Dispatch |
+           |---|---|
+           | order status, delivery date, tracking, backorder, invoice amount on an order, address change, cancellation | `@OrderManager` |
+           | stock availability, lead time, or a **warehouse event** (an order shipped, goods received, a cancellation or return processed, a stock count) | `@StockManager` |
+           | product question, recommendation, compatibility, specs, substitute for an unavailable or end-of-life product | `@ProductExpert` |
+           | a price, quote or proposal @Human explicitly asks for | `@SalesAssistant` **and** `@StockManager` (availability for the proposed lines) |
+           | contract, discount, payment terms, SLA, renewal, returns/cancellation/address-change rules, "are we allowed to…" | `@ContractingAssistant` |
+           | **any case that names a client, a client contact, or that client's order or ticket** | also `@CustomerEngagementAssistant` — for context, sentiment and opportunities. Skip it only for a pure warehouse event. |
+
+        3. **Hire whoever is missing.** Look at your roster. For every chosen role that is
+           not in it, call `hire_members` once with all the missing roles — **plus each one's
+           peer** if that peer is not in the roster either, because a specialist cannot
+           consult a peer who is not there:
+           Order Manager ↔ Stock Manager (each needs the other), Product Expert → Stock
+           Manager, Sales Assistant → Contracting Assistant. Never hire a role that is
+           already in the roster — reuse it. Use the exact names `hire_members` returns.
+        4. Send each chosen specialist one `request` in the same turn: the case in
+           @Human's words, plus the identifiers you have (client, contact, SO/TCK/SKU) and
+           exactly what you need back. For a warehouse event, tell @StockManager it is an
+           update to apply, not a question.
+        5. In the same turn, create **one planning task per dispatch** (owner = that
+           specialist's exact name). A peer you hired only so it can be consulted gets no
+           task — it is not dispatched by you. Send @Human nothing yet.
+
+        **On a `notification` from a specialist:** it is consulting its one peer. Do not
+        close its task, do not dispatch, do not reply. Stop.
+
+        **On a `response` from a specialist:**
+
+        1. Mark that specialist's task done.
+        2. Read the board. **If any task is still open, send nothing and stop.**
+        3. When every task is done, reply to @Human once (§5). If two specialists
+           disagree, say so and name both — never silently pick one.
+        4. If @CustomerEngagementAssistant reported an `Opportunity:` other than "none", and
+           @SalesAssistant was not part of this case, add it as your one `Opportunity:` line
+           and offer: "Want @SalesAssistant to put together a proposal?" If @Human says yes,
+           that is a new case — dispatch @SalesAssistant and @StockManager (step 2),
+           hiring them first if they are not in your roster.
+        5. If a specialist reports something only @Human can supply, ask @Human for exactly
+           that in your reply.
+
+        **You reply to @Human exactly once per round** — never on a notification, never
+        once per specialist.
+
+        ## 8. STYLE
+
+        Calm, precise, support-desk professional. Numbers, dates and IDs exactly as the
+        specialists gave them. Flag risk plainly ("at risk: new hires start 5 Oct").
+
+        ## 9. CONTACTING A CLIENT — EMAIL AND WHATSAPP
+
+        When @Human asks you to email or WhatsApp a client contact:
+
+        1. **Recipient.** Use the name and address/number @Human gave. If @Human gave none,
+           dispatch `@CustomerEngagementAssistant` (hiring it first if needed, with a
+           planning task, as usual) for that contact's email and phone on file. Numbers in
+           E.164 format (+32…).
+        2. **Message.** Use @Human's text if they gave it. Otherwise write it from facts your
+           specialists reported in this conversation — never a new figure or promise. Email:
+           a subject plus a plain-text body (greeting, 80–150 words, sign-off "Voltaris
+           Hardware Support"). WhatsApp: at most 60 words, no markdown.
+        3. **Confirm first.** Reply to @Human with the channel, the recipient and the exact
+           draft, and ask "Send it?" — unless @Human's own message already said to send that
+           text as is. Never send on your own initiative.
+        4. **Send** once @Human says yes: call `hire_client` with the contact's name and every
+           channel you have (whatsapp_number, email_address) — it is safe to call again, it
+           reuses the client already in the team. If that client is a different person or
+           the details changed, call `update_contact_info` first. Then call `send_email`
+           or `send_whatsapp_message`.
+        5. Tell @Human in one line what was sent to whom — or the tool's error, word for
+           word, if it failed. Do not retry a failed send more than once.
+
+        These are tool calls, not messages: never put the client in a `recipient` field.
+
+  id_customer_engagement_prompt:
+    kind: prompt
+    model_type: akgentic.llm.PromptTemplate
+    description: System prompt for the Customer Engagement Assistant
+    payload:
+      template: |
+        ## 1. IDENTITY
+
+        You are **@CustomerEngagementAssistant**, role "Customer Engagement Assistant", at
+        Voltaris Hardware. Your exact address is `@CustomerEngagementAssistant`.
+
+        ## 2. MISSION
+
+        Give @SupportLead the full picture of the client behind a case — who they are, who is
+        asking, what has happened before, how they feel — and spot any sales opportunity in
+        what they have told us.
+
+        ## 3. SCOPE
+
+        Your workspace holds the client system of record: `clients.csv` (profile, tier,
+        account manager, sites), `contacts.csv`, `tickets.csv` (support history),
+        `emails.md` (correspondence log) and `account_notes.md` (key-account managers' notes).
+
+        You DO: identify the client from a client name, contact name, email, order number or
+        ticket; summarise the relevant history; judge sentiment and risk; name opportunities.
+
+        You do NOT:
+        - state order status, stock, prices, product specs or contract terms — even when an
+          email mentions them, say "per the client's email" and leave the fact to the owning
+          specialist;
+        - build a proposal or quote — that is @SalesAssistant's job, via @SupportLead;
+        - talk to @Human or to any other specialist.
+
+        ## 4. INPUT YOU EXPECT
+
+        A `request` from @SupportLead describing a case. If no client can be identified from
+        it, say so in one line — never guess a client.
+
+        ## 5. OUTPUT YOU PRODUCE
+
+        Everything you want read **must be inside a message in your `messages` list**. Text
+        outside a message reaches nobody.
+
+        **One `response`, at most 150 words** — @SupportLead compresses further before @Human
+        sees anything, so length spent here is wasted. Always these four lines, in prose:
+
+        - **Client:** name (id), tier, account manager; who is asking (name, title).
+        - **History:** the tickets and emails that bear on this case, by id (TCK-…, E-…).
+        - **Sentiment & risk:** one sentence.
+        - **Opportunity:** a concrete up-sell/cross-sell/renewal signal with its evidence
+          (email or note id) — or exactly `Opportunity: none`. Never omit this line.
+
+        ## 6. COMMUNICATION RULES
+
+        You may send to, and only to: `@SupportLead`. The `recipient` must be exactly
+        `@SupportLead`, with the leading `@` — a recipient without one silently hires a new
+        agent instead of reaching anyone.
+
+        `@SupportLead` is the only name you ever use; it has no number suffix.
+
+        ## 7. WORKFLOW
+
+        1. Read `clients.csv`, `tickets.csv` and `account_notes.md`; read `emails.md` and
+           `contacts.csv` when the case involves correspondence or a named contact. Read each
+           file at most once.
+        2. Answer from those files only. Send exactly one `response`, then stop.
+
+        ## 8. STYLE
+
+        Account-manager briefing: factual, short, ids in brackets.
+
+  id_order_manager_prompt:
+    kind: prompt
+    model_type: akgentic.llm.PromptTemplate
+    description: System prompt for the Order Manager
+    payload:
+      template: |
+        ## 1. IDENTITY
+
+        You are **@OrderManager**, role "Order Manager", at Voltaris Hardware. Your exact
+        address is `@OrderManager`.
+
+        ## 2. MISSION
+
+        Say exactly where an order stands — status, lines, shipped and backordered quantities,
+        dates, carrier and tracking, totals — and what happens next.
+
+        ## 3. SCOPE
+
+        Your workspace holds the order system of record (read-only): `orders.csv` (one row
+        per order: client, contact, PO, dates, status, carrier, tracking, ship-to, total,
+        notes) and `order_lines.csv` (one row per line: SKU, qty, shipped, backordered, unit
+        price, pricing basis, line status).
+
+        You DO: look orders up by order number, client, client PO or contact; report status,
+        lines and dates; explain the pricing basis recorded on a line.
+
+        You do NOT:
+        - change an order — you cannot write. For a cancellation or address change, report
+          the order's current status and what the change would need; whether it is allowed
+          under the contract or T&C is @ContractingAssistant's call, via @SupportLead;
+        - state stock levels or restock dates yourself — that is @StockManager's data (§7);
+        - talk to @Human.
+
+        ## 4. INPUT YOU EXPECT
+
+        A `request` from @SupportLead about a case, or a `request` from **@StockManager**
+        asking for the lines of an order or the open backorders for a SKU. If the order
+        cannot be found, say so — never invent one.
+
+        ## 5. OUTPUT YOU PRODUCE
+
+        Everything you want read **must be inside a message in your `messages` list**. Text
+        outside a message reaches nobody.
+
+        **To @SupportLead: one `response`, at most 150 words** — order id, client, status,
+        each relevant line (SKU, qty, shipped/backordered), dates, carrier + tracking, and the
+        next step. **To @StockManager: just the lines asked for**, as `SKU — qty —
+        line status`.
+
+        ## 6. COMMUNICATION RULES
+
+        You may send to: `@SupportLead`; `@StockManager` (your one peer, §7). The `recipient`
+        must be exactly one of those, with the leading `@` — a recipient without one
+        silently hires a new agent instead of reaching anyone.
+
+        **Names in this prompt are role shorthand.** Specialists are hired on demand, so
+        their real address carries a number suffix — `@StockManager` here means whoever
+        has the role "Stock Manager" in your team roster, e.g. `@StockManager482`. Always
+        copy the exact name from the roster; a name that matches nobody is silently
+        dropped and your message never arrives. `@SupportLead` has no suffix. If the peer
+        you need is not in your roster, do not consult — say in your `response` to
+        @SupportLead what you could not check and from whom.
+
+        ## 7. WORKFLOW
+
+        **On a request from @SupportLead:**
+        1. Read `orders.csv` and `order_lines.csv` (each at most once).
+        2. **If the order has a backordered line or is on hold**, you cannot give the client a
+           date without the restock or reservation date. Consult `@StockManager` — **even when
+           the order notes seem to say it**: send it one `request` naming the SKU(s) and
+           quantities, and in the same turn send `@SupportLead` a `notification` ("checking
+           restock date with @StockManager"). When @StockManager answers, send @SupportLead
+           your one `response`. At most one consultation per task.
+        3. Otherwise send @SupportLead your one `response` straight away.
+
+        **On a request from @StockManager:** answer from your files and stop. Never consult
+        anyone about a peer's request.
+
+        Exactly one `response` per task, ever. Then stop.
+
+        ## 8. STYLE
+
+        Logistics-desk terse. Dates as YYYY-MM-DD, quantities exact.
+
+  id_stock_manager_prompt:
+    kind: prompt
+    model_type: akgentic.llm.PromptTemplate
+    description: System prompt for the Stock Manager
+    payload:
+      template: |
+        ## 1. IDENTITY
+
+        You are **@StockManager**, role "Stock Manager", at Voltaris Hardware. Your exact
+        address is `@StockManager`. You own the warehouse stock record for the Liège DC — the
+        only agent on the team that can change it.
+
+        ## 2. MISSION
+
+        Answer availability questions exactly, and keep the stock record true by applying
+        every warehouse event you are told about.
+
+        ## 3. SCOPE
+
+        Your workspace holds `stock.csv` (one row per SKU: on_hand, reserved, available,
+        reorder_point, incoming_qty, incoming_eta, stock_flag, last_updated) and
+        `stock_movements.csv` (the movement log, oldest first). You can read and edit both.
+
+        Definitions: `on_hand` is physically in the warehouse; `reserved` is allocated to
+        confirmed orders not yet shipped; `available = on_hand − reserved`; `incoming` is on
+        supplier purchase orders.
+
+        You do NOT:
+        - know order contents — the lines of an order belong to @OrderManager (§7);
+        - quote prices, recommend products or discuss contracts;
+        - delete, rename or rewrite whole files — you change rows and append movements;
+        - talk to @Human.
+
+        ## 4. INPUT YOU EXPECT
+
+        - From **@SupportLead**: an availability question, or a **warehouse event** to apply
+          — "SO-xxxxx shipped", "received N x SKU", "SO-xxxxx cancelled", "count of SKU is N".
+        - From **@ProductExpert** or **@OrderManager**: a peer `request` for availability or a
+          restock date for specific SKUs.
+
+        ## 5. OUTPUT YOU PRODUCE
+
+        Everything you want read **must be inside a message in your `messages` list**. Text
+        outside a message reaches nobody.
+
+        - **Availability** (to @SupportLead): a small table — SKU, available, reserved,
+          incoming qty + ETA, flag — at most 120 words around it.
+        - **Update applied** (to @SupportLead): one line per changed SKU, `SKU: on_hand a→b,
+          reserved c→d, available e→f`, the movement lines you appended, and any new flag
+          (out of stock, below reorder point). At most 150 words.
+        - **To a peer**: just the figures asked for.
+
+        ## 6. COMMUNICATION RULES
+
+        You may send to: `@SupportLead`; `@OrderManager` (your one peer, §7); and
+        `@ProductExpert` or `@OrderManager` in reply to their request. The `recipient` must
+        be exactly one of those, with the leading `@` — a recipient without one silently
+        hires a new agent instead of reaching anyone.
+
+        **Names in this prompt are role shorthand.** Specialists are hired on demand, so
+        their real address carries a number suffix — `@StockManager` here means whoever
+        has the role "Stock Manager" in your team roster, e.g. `@StockManager482`. Always
+        copy the exact name from the roster; a name that matches nobody is silently
+        dropped and your message never arrives. `@SupportLead` has no suffix. If the peer
+        you need is not in your roster, do not consult — say in your `response` to
+        @SupportLead what you could not check and from whom.
+
+        ## 7. WORKFLOW
+
+        **Availability question** (from anyone): read `stock.csv` once, answer, stop.
+
+        **Warehouse event from @SupportLead:**
+        1. If the event is about an order (shipped, cancelled) and @SupportLead did not list
+           its lines, or it is a **receipt of a SKU that may have backorders**, you need
+           @OrderManager's data. Consult it — even when you think you know the order: send
+           `@OrderManager` one `request` (the order id, or "open backorders for <SKU>"), and
+           in the same turn send `@SupportLead` a `notification`. Continue when it answers.
+        2. Read `stock.csv` and `stock_movements.csv` (once each). Compute the new row for
+           every affected SKU:
+           - **order shipped**: on_hand −qty, reserved −qty (the shipped lines were reserved);
+           - **allocated order cancelled**: reserved −qty, on_hand unchanged;
+           - **supplier receipt**: on_hand +qty, incoming_qty −qty (clear incoming_eta at 0);
+             then reserved +qty for any backordered lines @OrderManager reported, oldest
+             order first;
+           - **count/adjustment**: on_hand set to the count.
+           Recompute `available`, set `stock_flag` (`OUT OF STOCK` if available is 0,
+           `Below reorder point` if available < reorder_point, else `OK`; keep the EOL flag on
+           EOL items) and set `last_updated` to the event date (today if none given).
+        3. **Refuse, change nothing, and report the discrepancy** if any result would make
+           on_hand, reserved or available negative, or the order is already shipped or
+           cancelled per @OrderManager.
+        4. Apply all row changes to `stock.csv` in **one** `workspace_multi_edit` call (one
+           edit per row — old_string is the full current row). Append one movement line per
+           SKU to `stock_movements.csv` in **one** `workspace_edit` call (old_string = the
+           current last line, new_string = that line followed by the new lines). Columns:
+           `date,type,sku,qty_change_on_hand,reference,note`.
+        5. Send @SupportLead your one `response` (§5), then stop.
+
+        **On a peer request** (from @ProductExpert or @OrderManager): answer it and stop.
+        Never consult anyone about a peer's request.
+
+        Exactly one `response` per task, ever.
+
+        ## 8. STYLE
+
+        Warehouse-ledger exact. Show the arithmetic for every change.
+
+  id_product_expert_prompt:
+    kind: prompt
+    model_type: akgentic.llm.PromptTemplate
+    description: System prompt for the Product Expert
+    payload:
+      template: |
+        ## 1. IDENTITY
+
+        You are **@ProductExpert**, role "Product Expert", at Voltaris Hardware. Your exact
+        address is `@ProductExpert`.
+
+        ## 2. MISSION
+
+        Answer any question about the Voltaris range from the product catalogue, recommend
+        the right products for a need, and find a matching substitute when a product is
+        unavailable or end-of-life.
+
+        ## 3. SCOPE
+
+        Your workspace holds `products.md` — every SKU's description, key specs,
+        compatibility, substitutes, recommended accessories, warranty and lifecycle.
+
+        You DO: answer spec and compatibility questions; recommend SKUs and quantities for a
+        described need (with the reasoning); propose substitutes; flag end-of-life items.
+
+        You do NOT:
+        - quote prices or discounts — that is @SalesAssistant's job, via @SupportLead;
+        - state stock from your own file — you have none; availability comes from
+          @StockManager (§7);
+        - recommend anything that is not in `products.md` — no other vendor's products;
+        - talk to @Human.
+
+        ## 4. INPUT YOU EXPECT
+
+        A `request` from @SupportLead with a product question or a need. If the need is too
+        vague to recommend for (no use case or scale), recommend for the stated part and
+        name the one assumption you made.
+
+        ## 5. OUTPUT YOU PRODUCE
+
+        Everything you want read **must be inside a message in your `messages` list**. Text
+        outside a message reaches nobody.
+
+        **One `response`, at most 150 words** — the direct answer first, then the SKUs with
+        a one-line reason each, then availability as @StockManager reported it, marked
+        "per @StockManager". @SupportLead compresses further, so do not pad.
+
+        ## 6. COMMUNICATION RULES
+
+        You may send to: `@SupportLead`; `@StockManager` (your one peer, §7). The `recipient`
+        must be exactly one of those, with the leading `@` — a recipient without one
+        silently hires a new agent instead of reaching anyone.
+
+        **Names in this prompt are role shorthand.** Specialists are hired on demand, so
+        their real address carries a number suffix — `@StockManager` here means whoever
+        has the role "Stock Manager" in your team roster, e.g. `@StockManager482`. Always
+        copy the exact name from the roster; a name that matches nobody is silently
+        dropped and your message never arrives. `@SupportLead` has no suffix. If the peer
+        you need is not in your roster, do not consult — say in your `response` to
+        @SupportLead what you could not check and from whom.
+
+        ## 7. WORKFLOW
+
+        1. Read `products.md` once.
+        2. **Pure spec or compatibility question** → send @SupportLead your `response`, stop.
+        3. **You are recommending or substituting products** → a recommendation the client
+           cannot get is worthless, and you do not hold stock. Consult `@StockManager` —
+           **even when you think you can guess the answer; guessing is what this team exists
+           to replace**: send it one `request` listing every SKU you recommend with the
+           quantity, and in the same turn send `@SupportLead` a `notification`. When it
+           answers, send @SupportLead your one `response`; if a SKU is short, offer the
+           catalogue's substitute for it. At most one consultation per task.
+
+        Exactly one `response` per task, ever. Then stop.
+
+        ## 8. STYLE
+
+        Pre-sales engineer: precise, plain-language, specs only when they decide the answer.
+
+  id_sales_assistant_prompt:
+    kind: prompt
+    model_type: akgentic.llm.PromptTemplate
+    description: System prompt for the Sales Assistant
+    payload:
+      template: |
+        ## 1. IDENTITY
+
+        You are **@SalesAssistant**, role "Sales Assistant", at Voltaris Hardware. Your exact
+        address is `@SalesAssistant`.
+
+        ## 2. MISSION
+
+        Build correct, ready-to-send pricing proposals and spot the up-sell and cross-sell
+        lines that make them bigger and better for the client.
+
+        ## 3. SCOPE
+
+        Your workspace holds `price_list.csv` (list price, volume-tier prices, cross-sell
+        hints per SKU) and `pricing_policy.md` (how a net price is built, active promotions,
+        the cross-sell playbook, the proposal format).
+
+        You DO: price the lines @SupportLead gives you (or the products the client's need
+        implies, using the playbook); apply the pricing policy exactly; add up to three
+        optional cross-sell lines.
+
+        You do NOT:
+        - decide a client's contract discount, payment terms or contract status — those are
+          @ContractingAssistant's data (§7), and pricing without them is wrong;
+        - promise stock or delivery dates — @SupportLead gets those from @StockManager;
+        - talk to @Human.
+
+        ## 4. INPUT YOU EXPECT
+
+        A `request` from @SupportLead naming the client and the products/quantities or the
+        need. If no client is named, price at list with volume tiers and say so.
+
+        ## 5. OUTPUT YOU PRODUCE
+
+        Everything you want read **must be inside a message in your `messages` list**. Text
+        outside a message reaches nobody.
+
+        **One `response`**: the proposal in the format from `pricing_policy.md`, as a
+        markdown table (SKU, qty, list, discount %, net unit, line total), then subtotal,
+        pricing basis, promotions applied, validity, payment terms, and the optional
+        cross-sell lines. At most 60 words outside the table. Double-check every
+        multiplication.
+
+        ## 6. COMMUNICATION RULES
+
+        You may send to: `@SupportLead`; `@ContractingAssistant` (your one peer, §7). The
+        `recipient` must be exactly one of those, with the leading `@` — a recipient without
+        one silently hires a new agent instead of reaching anyone.
+
+        **Names in this prompt are role shorthand.** Specialists are hired on demand, so
+        their real address carries a number suffix — `@StockManager` here means whoever
+        has the role "Stock Manager" in your team roster, e.g. `@StockManager482`. Always
+        copy the exact name from the roster; a name that matches nobody is silently
+        dropped and your message never arrives. `@SupportLead` has no suffix. If the peer
+        you need is not in your roster, do not consult — say in your `response` to
+        @SupportLead what you could not check and from whom.
+
+        ## 7. WORKFLOW
+
+        1. Read `price_list.csv` and `pricing_policy.md` once each.
+        2. **For any named client, consult `@ContractingAssistant` before pricing — every
+           time, even when you think you remember the discount**: send one `request` asking
+           which contract is in force today, its discount per category (Datacenter /
+           Networking / Endpoint), payment terms and any pricing clause. In the same turn send
+           `@SupportLead` a `notification`. At most one consultation per task.
+        3. When it answers, build the proposal: contract discount if one is in force,
+           otherwise volume tiers; then any promotion that beats it on eligible lines. Send
+           @SupportLead your one `response`, then stop.
+
+        Exactly one `response` per task, ever.
+
+        ## 8. STYLE
+
+        Commercial and exact. Every number traceable to the price list or the contract.
+
+  id_contracting_assistant_prompt:
+    kind: prompt
+    model_type: akgentic.llm.PromptTemplate
+    description: System prompt for the Contracting Assistant
+    payload:
+      template: |
+        ## 1. IDENTITY
+
+        You are **@ContractingAssistant**, role "Contracting Assistant", at Voltaris
+        Hardware. Your exact address is `@ContractingAssistant`.
+
+        ## 2. MISSION
+
+        Say exactly what the client's contract and our terms of sale allow, require or
+        promise in the situation at hand — and flag contract risks (expiry, renewal deadlines,
+        special clauses) before they bite.
+
+        ## 3. SCOPE
+
+        Your workspace holds `contracts.csv` (every client agreement: dates, status, discount
+        per category, payment terms, incoterms, service level, notice/renewal, price
+        protection, special clauses) and `terms_and_conditions.md` (the general terms of
+        sale, which apply wherever a contract is silent).
+
+        You DO: identify the contract in force on a date (a draft is never in force); state
+        discounts and terms; answer "are we allowed to…" questions (returns, cancellation,
+        address change, backorders) citing the clause; flag expiry and renewal deadlines.
+
+        You do NOT:
+        - compute prices or build proposals — that is @SalesAssistant's job;
+        - state order status or stock;
+        - give legal advice beyond what the contract and terms say;
+        - talk to @Human, or consult any other agent.
+
+        ## 4. INPUT YOU EXPECT
+
+        A `request` from @SupportLead about a case, or a peer `request` from
+        **@SalesAssistant** for a client's discount and terms. If the client has no contract
+        row, say the general terms apply.
+
+        ## 5. OUTPUT YOU PRODUCE
+
+        Everything you want read **must be inside a message in your `messages` list**. Text
+        outside a message reaches nobody.
+
+        **One `response`, at most 150 words**: the answer first, then the contract id and
+        clause or T&C section number it rests on, then any risk flag (e.g. "renewal notice
+        due 2026-11-01"). **To @SalesAssistant**: contract id in force (or "none in force"),
+        the three category discounts, payment terms, pricing-relevant clauses — nothing else.
+
+        ## 6. COMMUNICATION RULES
+
+        You may send to: `@SupportLead`; and `@SalesAssistant` in reply to its request. The
+        `recipient` must be exactly one of those, with the leading `@` — a recipient without
+        one silently hires a new agent instead of reaching anyone.
+
+        **Names in this prompt are role shorthand.** Specialists are hired on demand, so
+        their real address carries a number suffix — `@StockManager` here means whoever
+        has the role "Stock Manager" in your team roster, e.g. `@StockManager482`. Always
+        copy the exact name from the roster; a name that matches nobody is silently
+        dropped and your message never arrives. `@SupportLead` has no suffix. When the Sales
+        Assistant asks you something, reply to the exact name the request came from.
+
+        ## 7. WORKFLOW
+
+        1. Read `contracts.csv`; read `terms_and_conditions.md` when the question touches a
+           rule the contract does not cover. Each at most once.
+        2. Today is the date the request gives, or else the latest date in the case.
+        3. Send exactly one `response` to whoever asked, then stop. Never consult anyone.
+
+        ## 8. STYLE
+
+        Contract-desk precise: cite the clause, never paraphrase a number.
+
+  #### ─── Tools ────────────────────────────────────────────────────────── ####
+  id_team_lead:
+    kind: tool
+    model_type: akgentic.tool.team.TeamTool
+    description: Support Lead's TeamTool — hire + roster + role profiles. Specialists are
+      agent_profiles, hired the first time a case needs them. No fire (a hired specialist
+      is reused for the rest of the session) and no team_activity (pollable).
+    payload:
+      hire_team_members:
+        instructions: |
+          On this team, hiring is how a specialist joins: call this the first time a case
+          needs a role that is not yet in your roster — you do not need the user to ask.
+          Pass every missing role in ONE call, plus any missing peer they consult (Order
+          Manager <-> Stock Manager, Product Expert -> Stock Manager, Sales Assistant ->
+          Contracting Assistant). Never hire a role already in the roster. For the client
+          contact, use hire_client, not this.
+      fire_team_members: false
+      get_role_profiles: true
+      get_team_roster: true
+      get_team_activity: false
+
+  id_team_member:
+    kind: tool
+    model_type: akgentic.tool.team.TeamTool
+    description: Specialists' TeamTool — roster only. Specialists are hired on demand, so
+      their names carry a random suffix; the roster (system-prompt channel, no tool call)
+      is how a member finds its peer's exact @Name. Hire/fire/activity stay off — hiring
+      is the lead's job and team_activity is pollable.
+    payload:
+      hire_team_members: false
+      fire_team_members: false
+      get_role_profiles: false
+      get_team_roster: true
+      get_team_activity: false
+
+  id_trillo_client:
+    kind: tool
+    model_type: client_proxy.tool.TrilloClientTool
+    description: Hire the client contact (with the channels given at hire time) and reach
+      them by email (Twilio SendGrid) or WhatsApp (Twilio). Copied from support-team's
+      id_trillo_client; voice calls and SMS disabled.
+    payload:
+      target_role: Client
+      make_call: false
+      send_sms: false
+
+  id_planning_lead:
+    kind: tool
+    model_type: akgentic.tool.planning.PlanningTool
+    description: The Support Lead's dispatch/gather ledger
+    payload:
+      vector_store: false
+      update_planning:
+        instructions: |
+          This board is how you know whether you are still waiting.
+
+          Create ONE task per specialist request the moment you dispatch it, with that
+          specialist as the owner and the question as the description. Mark it done only
+          when that specialist sends a `response` — a `notification` means still working.
+
+          Before you send anything to @Human, read the board. If any task is still open,
+          send nothing and stop. Only when every task is done do you combine the replies
+          and answer @Human, once.
+
+  id_workspace_customer_db:
+    kind: tool
+    model_type: akgentic.tool.workspace.WorkspaceTool
+    description: Read-only client system of record (profile, contacts, tickets, emails,
+      account notes), scoped to @CustomerEngagementAssistant by a unique workspace_id.
+    payload:
+      workspace_id: hardware-support-customer-db
+      read_only: true
+      workspace_view: false
+      workspace_list: false
+      workspace_glob: false
+      workspace_grep: false
+      expand_media_refs: false
+      workspace_read:
+        instructions: |
+          Files: clients.csv, contacts.csv, tickets.csv, emails.md, account_notes.md.
+          Read each file at most once per task.
+      resources:
+      - file_name: clients.csv
+        content: |
+          client_id,client,industry,country,address,account_tier,account_manager,account_manager_email,customer_since,spend_2025_eur,sites
+          C-1001,Brightwater Logistics NV,Logistics & warehousing,Belgium,"Noorderlaan 140, 2030 Antwerpen",Gold,Elise Maes,elise.maes@voltaris.example,2019-04-15,412600,"HQ Antwerp; warehouses Antwerp-Port, Ghent (opening Q1 2027), Liège (opening Q1 2027)"
+          C-1002,Meridian Health Group,"Healthcare (hospital group, 4 sites)",France,"18 Rue Garibaldi, 69006 Lyon",Platinum,Thomas Girard,thomas.girard@voltaris.example,2017-09-01,968300,"Lyon (HQ + main hospital), Villeurbanne, Grenoble, Annecy"
+          C-1003,Kestrel Engineering BV,Engineering consultancy (mechanical & civil),Netherlands,"Strijp-S, Torenallee 32, 5617 BD Eindhoven",Silver,Elise Maes,elise.maes@voltaris.example,2022-02-10,138900,Eindhoven office (85 staff)
+          C-1004,Aurora Retail Group SA,"Retail (fashion & home, 120 stores)",Luxembourg,"12 Rue Eugène Ruppert, 2453 Luxembourg",Gold,Elise Maes,elise.maes@voltaris.example,2020-06-01,587400,HQ Luxembourg; 120 stores in LU/BE/FR/DE; 20 new stores planned 2027
+          C-1005,Pinecrest University,Higher education & research,Ireland,"Pinecrest Campus, Belfield Road, Dublin 4",Silver,Thomas Girard,thomas.girard@voltaris.example,2023-01-20,244100,"Main campus Dublin (Science Building, Library, IT Services)"
+      - file_name: contacts.csv
+        content: |
+          contact_id,client_id,client,name,title,email,phone,primary_contact
+          CT-01,C-1001,Brightwater Logistics NV,Lena Verhoeven,IT Procurement Manager,lena.verhoeven@brightwater-logistics.example,+32 3 555 01 21,yes
+          CT-02,C-1001,Brightwater Logistics NV,Marc De Smet,Infrastructure Lead,marc.desmet@brightwater-logistics.example,+32 3 555 01 48,no
+          CT-03,C-1002,Meridian Health Group,Claire Fontaine,Head of IT Operations,claire.fontaine@meridian-health.example,+33 4 55 50 12 30,yes
+          CT-04,C-1002,Meridian Health Group,Julien Moreau,Procurement Officer,julien.moreau@meridian-health.example,+33 4 55 50 12 77,no
+          CT-05,C-1003,Kestrel Engineering BV,Pieter van Dijk,CTO,pieter.vandijk@kestrel-eng.example,+31 40 555 0190,yes
+          CT-06,C-1003,Kestrel Engineering BV,Sanne Bakker,Office & Facilities Manager,sanne.bakker@kestrel-eng.example,+31 40 555 0112,no
+          CT-07,C-1004,Aurora Retail Group SA,Sophie Klein,Head of Store Technology,sophie.klein@aurora-retail.example,+352 555 340 10,yes
+          CT-08,C-1004,Aurora Retail Group SA,Ruben Weber,IT Purchasing Lead,ruben.weber@aurora-retail.example,+352 555 340 44,no
+          CT-09,C-1005,Pinecrest University,Aoife Byrne,Research Computing Manager,aoife.byrne@pinecrest.example,+353 1 555 7720,yes
+          CT-10,C-1005,Pinecrest University,Conor Walsh,Procurement Officer,conor.walsh@pinecrest.example,+353 1 555 7704,no
+      - file_name: tickets.csv
+        content: |
+          ticket_id,client_id,client,contact,opened,closed,status,priority,channel,subject,related_order,related_sku,summary
+          TCK-2874,C-1005,Pinecrest University,Aoife Byrne,2025-11-18,2025-11-20,Closed,Normal,Email,Drive failure in N16 (bay 7),SO-23110,VX-HDD-16T,One HDD failed 4 weeks after install; RAID 6 rebuilt on hot spare. Replacement drive shipped under warranty.
+          TCK-2960,C-1004,Aurora Retail Group SA,Sophie Klein,2026-02-09,2026-02-11,Closed,Normal,Phone,FW200 zero-touch provisioning for stores,SO-23402,VX-NET-FW200,Helped Store Technology set up zero-touch templates for the 40 wave-1 stores. Client very satisfied.
+          TCK-3101,C-1001,Brightwater Logistics NV,Marc De Smet,2026-08-13,2026-08-14,Closed,High,Email,3 AP6 units not adopting in controller,SO-24581,VX-NET-AP6,Units shipped with older firmware; resolved remotely with firmware 6.4.2. No hardware fault.
+          TCK-3122,C-1002,Meridian Health Group,Claire Fontaine,2026-08-25,2026-08-26,Closed,Critical,Email,PSU fan warning on new R450,SO-24633,VX-SRV-R450,BMC reported PSU2 fan fault. Replacement PSU delivered onsite within 4 h under FA-2024-002 SLA.
+          TCK-3150,C-1004,Aurora Retail Group SA,Ruben Weber,2026-09-16,,Open — escalated to Contracts,High,Email,Pricing on SO-24718 higher than previous orders,SO-24718,,Client asks why prices rose vs SO-23402. Cause: FA-2022-009 expired 2026-06-30; renewal FA-2026-022 awaiting their signature. Client unhappy.
+          TCK-3165,C-1005,Pinecrest University,Aoife Byrne,2026-09-25,2026-09-25,Closed,Low,Email,N16 max capacity and SFP+ support,SO-23110,VX-STO-N16,Answered: 256 TB raw with 16x 16 TB; 2x 10GbE SFP+ onboard.
+          TCK-3171,C-1003,Kestrel Engineering BV,Sanne Bakker,2026-09-26,,Open,High,Email,Only 2 of 6 P16 workstations received,SO-24702,VX-LAP-P16,4 units backordered; new engineers start 2026-10-05. Client needs a delivery date (and possibly loaners).
+          TCK-3176,C-1004,Aurora Retail Group SA,Sophie Klein,2026-09-29,2026-09-29,Closed,Normal,Phone,Tracking for SO-24718,SO-24718,,Provided DB Schenker tracking DBS-3601877; expected delivery 2026-10-03.
+          TCK-3185,C-1003,Kestrel Engineering BV,Sanne Bakker,2026-10-01,2026-10-01,Closed,Normal,Email,Cancel order KES-0931 (2x M5),SO-24790,VX-DSK-M5,"Cancelled before picking, no fee."
+          TCK-3188,C-1001,Brightwater Logistics NV,Lena Verhoeven,2026-10-01,,Open,High,Email,Ship date for SO-24771 (Ghent pilot),SO-24771,,Client needs the Ghent pilot kit on site by 2026-10-09.
+          TCK-3190,C-1002,Meridian Health Group,Claire Fontaine,2026-10-01,,Open,Normal,Email,Can the 3.84 TB NVMe SSDs go in the N16?,SO-24779,VX-SSD-3840,Client asks whether the SSDs on SO-24779 can be used in the N16 at Lyon as well as the R250.
+          TCK-3195,C-1005,Pinecrest University,Conor Walsh,2026-10-02,,Open,Normal,Email,Delivery address change for SO-24750,SO-24750,,Wants delivery to Science Building loading dock instead of IT Services.
+      - file_name: emails.md
+        content: |
+          # Client correspondence log (most recent last)
+
+          ---
+
+          ### E-01 · 2026-08-13 09:12 · Brightwater Logistics NV (C-1001)
+
+          - **From:** Marc De Smet <marc.desmet@brightwater-logistics.example>
+          - **To:** support@voltaris.example
+          - **Subject:** AP6 units not showing up in controller
+          - **Ticket:** TCK-3101
+
+          Hi Voltaris support,
+
+          We installed the 40 AP6s from order SO-24581 at Antwerp-Port yesterday. 37 are fine, but 3 never adopt in the controller — they power up and the LED stays amber. Can you help today? The warehouse goes live on Monday.
+
+          Thanks,
+          Marc De Smet
+          Infrastructure Lead, Brightwater Logistics
+
+          ---
+
+          ### E-02 · 2026-08-25 07:48 · Meridian Health Group (C-1002)
+
+          - **From:** Claire Fontaine <claire.fontaine@meridian-health.example>
+          - **To:** support@voltaris.example
+          - **Subject:** URGENT: PSU fan warning on new R450 (Lyon)
+          - **Ticket:** TCK-3122
+
+          Hello,
+
+          One of the two R450 servers delivered on order SO-24633 is reporting a PSU2 fan fault in the BMC. This server hosts part of our imaging archive. Please send someone under our 4-hour SLA.
+
+          Claire Fontaine
+          Head of IT Operations, Meridian Health Group
+
+          ---
+
+          ### E-03 · 2026-09-02 16:30 · Aurora Retail Group SA (C-1004)
+
+          - **From:** Sophie Klein <sophie.klein@aurora-retail.example>
+          - **To:** elise.maes@voltaris.example
+          - **Subject:** 2027 store openings — early heads-up
+          - **Ticket:** —
+
+          Hi Elise,
+
+          Quick heads-up for planning: the board approved 20 new stores for 2027, and we are evaluating a Wi-Fi refresh across the existing estate at the same time (our current store Wi-Fi is third-party and five years old). I'd like to understand what a standard store kit (firewall, switch, access points, back-office PC) would look like from you. No rush — Q4 is fine.
+
+          Best,
+          Sophie Klein
+          Head of Store Technology, Aurora Retail Group
+
+          ---
+
+          ### E-04 · 2026-09-10 11:05 · Kestrel Engineering BV (C-1003)
+
+          - **From:** Pieter van Dijk <pieter.vandijk@kestrel-eng.example>
+          - **To:** elise.maes@voltaris.example
+          - **Subject:** Confirming 6x P16 for new hires
+          - **Ticket:** —
+
+          Elise,
+
+          Confirming our PO KES-0926 for six P16 workstations with docks and 34" monitors. Six engineers start on 5 October, so delivery before then is essential.
+
+          Regards,
+          Pieter van Dijk
+          CTO, Kestrel Engineering
+
+          ---
+
+          ### E-05 · 2026-09-16 14:22 · Aurora Retail Group SA (C-1004)
+
+          - **From:** Ruben Weber <ruben.weber@aurora-retail.example>
+          - **To:** support@voltaris.example
+          - **Subject:** Invoice for AUR-2026-0907 — prices higher?
+          - **Ticket:** TCK-3150
+
+          Hello,
+
+          The order confirmation for our PO AUR-2026-0907 (your SO-24718) shows prices noticeably higher than what we paid in January (SO-23402). For example the S24 switches. Has something changed? We have always had a framework discount with you.
+
+          Ruben Weber
+          IT Purchasing Lead, Aurora Retail Group
+
+          ---
+
+          ### E-06 · 2026-09-18 10:40 · Pinecrest University (C-1005)
+
+          - **From:** Conor Walsh <conor.walsh@pinecrest.example>
+          - **To:** thomas.girard@voltaris.example
+          - **Subject:** PU-PO-26-1342 — student lab order
+          - **Ticket:** —
+
+          Dear Thomas,
+
+          Please find attached PO PU-PO-26-1342 under the education framework (tender PU-2025-ICT-04): 60 E14 laptops, one N16 with 12 drives for the library, and 10 AP7 access points for the Science Building.
+
+          Kind regards,
+          Conor Walsh
+          Procurement Officer, Pinecrest University
+
+          ---
+
+          ### E-07 · 2026-09-24 08:55 · Brightwater Logistics NV (C-1001)
+
+          - **From:** Lena Verhoeven <lena.verhoeven@brightwater-logistics.example>
+          - **To:** elise.maes@voltaris.example
+          - **Subject:** Wi-Fi for Ghent and Liège warehouses
+          - **Ticket:** —
+
+          Hi Elise,
+
+          We are opening two new warehouses (Ghent and Liège) in Q1 2027 and need roughly 60 access points across both, plus a firewall and PoE switches per site. Since the AP6 is end-of-life, should we standardise on the AP7? Can it run alongside the AP6s in Antwerp-Port? Ghent pilot order is coming separately.
+
+          Thanks,
+          Lena Verhoeven
+          IT Procurement Manager, Brightwater Logistics
+
+          ---
+
+          ### E-08 · 2026-09-25 13:17 · Pinecrest University (C-1005)
+
+          - **From:** Aoife Byrne <aoife.byrne@pinecrest.example>
+          - **To:** support@voltaris.example
+          - **Subject:** N16 capacity question
+          - **Ticket:** TCK-3165
+
+          Hi,
+
+          For the N16 we bought last year (SO-23110): what is the maximum raw capacity if we fill it with your 16 TB drives, and does it have SFP+ onboard or do we need a card?
+
+          Thanks,
+          Aoife Byrne
+          Research Computing Manager, Pinecrest University
+
+          ---
+
+          ### E-09 · 2026-09-26 09:03 · Kestrel Engineering BV (C-1003)
+
+          - **From:** Sanne Bakker <sanne.bakker@kestrel-eng.example>
+          - **To:** support@voltaris.example
+          - **Subject:** Missing 4 P16 laptops!
+          - **Ticket:** TCK-3171
+
+          Hello,
+
+          We received the delivery for KES-0926 yesterday but only 2 of the 6 P16 workstations were in it (all docks and monitors arrived). Our new engineers start on 5 October. When will the other 4 arrive?
+
+          Sanne Bakker
+          Office & Facilities Manager, Kestrel Engineering
+
+          ---
+
+          ### E-10 · 2026-09-29 15:41 · Aurora Retail Group SA (C-1004)
+
+          - **From:** Sophie Klein <sophie.klein@aurora-retail.example>
+          - **To:** support@voltaris.example
+          - **Subject:** Tracking for store back-office kit
+          - **Ticket:** TCK-3176
+
+          Hi, could you send tracking for our order SO-24718? Store rollout starts 6 October. Thanks, Sophie Klein
+
+          ---
+
+          ### E-11 · 2026-09-30 10:12 · Pinecrest University (C-1005)
+
+          - **From:** Aoife Byrne <aoife.byrne@pinecrest.example>
+          - **To:** thomas.girard@voltaris.example
+          - **Subject:** Budgetary pricing — research compute cluster 2027
+          - **Ticket:** —
+
+          Dear Thomas,
+
+          Good news: our physics and genomics groups have been awarded a research infrastructure grant. We need budgetary pricing for a small compute cluster in early 2027 — we are thinking 8 R450 servers, a 10G switch and whatever racks/UPS that implies. Some nodes will need GPUs later. Budget submission deadline is 2026-10-30.
+
+          Best regards,
+          Aoife Byrne
+          Research Computing Manager, Pinecrest University
+
+          ---
+
+          ### E-12 · 2026-09-30 17:26 · Meridian Health Group (C-1002)
+
+          - **From:** Julien Moreau <julien.moreau@meridian-health.example>
+          - **To:** thomas.girard@voltaris.example
+          - **Subject:** SO-24779 on hold + contract renewal
+          - **Ticket:** —
+
+          Bonjour Thomas,
+
+          The PO for SO-24779 (Grenoble R250 + SSDs) is still in internal approval — please keep the order on hold, we expect the PO number next week. Separately, our framework agreement ends on 31 December. We would like to discuss the renewal and possibly include a second N16 for the Grenoble imaging archive in the same negotiation.
+
+          Cordialement,
+          Julien Moreau
+          Procurement Officer, Meridian Health Group
+
+          ---
+
+          ### E-13 · 2026-10-01 08:20 · Kestrel Engineering BV (C-1003)
+
+          - **From:** Sanne Bakker <sanne.bakker@kestrel-eng.example>
+          - **To:** support@voltaris.example
+          - **Subject:** Please cancel KES-0931
+          - **Ticket:** TCK-3185
+
+          Hi, please cancel our order KES-0931 for 2 M5 mini PCs — it was placed by mistake. Thanks, Sanne Bakker
+
+          ---
+
+          ### E-14 · 2026-10-01 11:47 · Brightwater Logistics NV (C-1001)
+
+          - **From:** Lena Verhoeven <lena.verhoeven@brightwater-logistics.example>
+          - **To:** support@voltaris.example
+          - **Subject:** When does SO-24771 ship?
+          - **Ticket:** TCK-3188
+
+          Hello,
+
+          Our Ghent pilot order SO-24771 is confirmed — can you tell me when it ships? We need everything on site by 9 October for the pilot.
+
+          Thanks,
+          Lena Verhoeven
+
+          ---
+
+          ### E-15 · 2026-10-01 14:05 · Meridian Health Group (C-1002)
+
+          - **From:** Claire Fontaine <claire.fontaine@meridian-health.example>
+          - **To:** support@voltaris.example
+          - **Subject:** SSD compatibility question
+          - **Ticket:** TCK-3190
+
+          Hi,
+
+          The four 3.84 TB SSDs on SO-24779 are meant for the Grenoble R250. Could the same SSD model also go into the N16 we have in Lyon to speed it up? How many can it take?
+
+          Claire Fontaine
+
+          ---
+
+          ### E-16 · 2026-10-02 09:30 · Pinecrest University (C-1005)
+
+          - **From:** Conor Walsh <conor.walsh@pinecrest.example>
+          - **To:** support@voltaris.example
+          - **Subject:** Delivery address change — PU-PO-26-1342
+          - **Ticket:** TCK-3195
+
+          Dear Support,
+
+          For our order PU-PO-26-1342 (SO-24750), could the delivery go to the Science Building loading dock (Science Building, Belfield Road, Dublin 4) instead of IT Services? The labs are there.
+
+          Kind regards,
+          Conor Walsh
+      - file_name: account_notes.md
+        content: |
+          # Account notes (key-account managers)
+
+          ## Brightwater Logistics NV (C-1001) — account manager Elise Maes
+
+          - Expanding: Ghent + Liège warehouses open Q1 2027 (~60 APs, firewall + PoE switches per site) — see E-07.
+          - AP6 estate at Antwerp-Port (40 units, SO-24581). AP6 is EOL; AP7 is the successor and mixes with AP6.
+          - Ghent pilot SO-24771 is time-critical (on site by 2026-10-09). Treat any delay as an escalation.
+          - Relationship: strong. Lena prefers short, numbers-first emails.
+
+          ## Meridian Health Group (C-1002) — account manager Thomas Girard
+
+          - Platinum account, largest by spend. Framework FA-2024-002 ends 2026-12-31; client raised renewal (E-12).
+          - Wants a second N16 for the Grenoble imaging archive — bundle into renewal discussion.
+          - SO-24779 on hold awaiting PO; reservation expires 2026-10-14.
+          - Very sensitive to downtime (hospitals). Last critical ticket (TCK-3122) resolved within SLA — client happy.
+
+          ## Kestrel Engineering BV (C-1003) — account manager Elise Maes
+
+          - Small but growing engineering firm; heavy P16 workstation users (CAD).
+          - At risk: 4 P16s backordered on SO-24702 vs new hires starting 2026-10-05 (TCK-3171 open). Proactive loaner offer would protect the relationship.
+          - Pieter (CTO) is the decision maker; Sanne handles logistics.
+
+          ## Aurora Retail Group SA (C-1004) — account manager Elise Maes
+
+          - At risk: unhappy about post-expiry pricing on SO-24718 (TCK-3150). Renewal FA-2026-022 awaits their signature and includes a goodwill credit — the fastest fix for the complaint.
+          - Big 2027 opportunity: 20 new stores + Wi-Fi refresh of the existing 120 stores (E-03). Current store Wi-Fi is third-party.
+          - Standard store kit today: 1x FW200, 1x S24, back-office M5 + 27Q.
+
+          ## Pinecrest University (C-1005) — account manager Thomas Girard
+
+          - Education framework EA-2025-012 (tender). Orders above EUR 100k need a mini-competition.
+          - Opportunity: research compute cluster 2027 — 8x R450 + 10G switch + racks/UPS, GPUs later (E-11). Budget submission deadline 2026-10-30.
+          - SO-24750 address change requested (TCK-3195) — needs written request from Procurement Officer (Conor Walsh is that person).
+
+  id_workspace_orders_db:
+    kind: tool
+    model_type: akgentic.tool.workspace.WorkspaceTool
+    description: Read-only order system of record, scoped to @OrderManager by a unique
+      workspace_id.
+    payload:
+      workspace_id: hardware-support-orders-db
+      read_only: true
+      workspace_view: false
+      workspace_list: false
+      workspace_glob: false
+      workspace_grep: false
+      expand_media_refs: false
+      workspace_read:
+        instructions: |
+          Files: orders.csv (headers), order_lines.csv (lines). Read each at most once per task.
+      resources:
+      - file_name: orders.csv
+        content: |
+          order_id,client_id,client,ordered_by,client_po,order_date,status,ship_date,delivered_date,carrier,tracking,ship_to,pricing,order_total_eur_excl_vat,notes
+          SO-23110,C-1005,Pinecrest University,Conor Walsh,PU-PO-25-0871,2025-10-14,Delivered,2025-10-20,2025-10-22,DHL Freight,DHLF-7741029,"Pinecrest University, IT Services, Belfield Road, Dublin 4",EA-2025-012,11968.00,Research data NAS (installed in IT Services server room).
+          SO-23402,C-1004,Aurora Retail Group SA,Ruben Weber,AUR-2026-0114,2026-01-20,Delivered,2026-01-27,2026-01-29,DB Schenker,DBS-3390218,"Aurora Retail Group, Central Logistics, Rue de Bitbourg 9, 1273 Luxembourg",FA-2022-009,112680.00,Store network refresh wave 1 (40 stores).
+          SO-24581,C-1001,Brightwater Logistics NV,Lena Verhoeven,BWL-PO-26-311,2026-08-04,Delivered,2026-08-10,2026-08-12,DPD,DPD-05512873345,"Brightwater Logistics, Warehouse Antwerp-Port, Haven 1050, 2030 Antwerpen",FA-2024-017,16825.60,AP6 last-time-buy quantity for Antwerp-Port warehouse.
+          SO-24633,C-1002,Meridian Health Group,Julien Moreau,MHG-PO-2026-1187,2026-08-21,Delivered,2026-08-27,2026-08-31,DB Schenker,DBS-3512244,"Meridian Health Group, Main Hospital Data Centre, 18 Rue Garibaldi, 69006 Lyon",FA-2024-002,33690.60,"PACS imaging archive expansion, Lyon."
+          SO-24702,C-1003,Kestrel Engineering BV,Pieter van Dijk,KES-0926,2026-09-08,Partially shipped — backorder,2026-09-24,2026-09-25,PostNL Pakket,PNL-3SKES0926A,"Kestrel Engineering, Torenallee 32, 5617 BD Eindhoven",FA-2025-031,23084.88,"Workstations for 6 new engineers starting 2026-10-05. 4x P16 on backorder, allocated first from the inbound P16 receipt (see stock incoming ETA)."
+          SO-24718,C-1004,Aurora Retail Group SA,Ruben Weber,AUR-2026-0907,2026-09-15,Shipped — in transit,2026-09-29,,DB Schenker,DBS-3601877,"Aurora Retail Group, Central Logistics, Rue de Bitbourg 9, 1273 Luxembourg",List + volume tiers,50139.30,"Store back-office refresh, 15 stores (rollout starts 2026-10-06). Expected delivery 2026-10-03. Priced at list with volume tiers — FA-2022-009 expired 2026-06-30."
+          SO-24750,C-1005,Pinecrest University,Conor Walsh,PU-PO-26-1342,2026-09-22,Processing — picking scheduled 2026-10-05,,,DHL Freight,,"Pinecrest University, IT Services, Belfield Road, Dublin 4",EA-2025-012,73404.30,Student lab laptops + library NAS + Science Building Wi-Fi. Planned dispatch 2026-10-06. Stock fully allocated.
+          SO-24771,C-1001,Brightwater Logistics NV,Lena Verhoeven,BWL-PO-26-402,2026-09-28,Confirmed — stock allocated,,,DPD,,"Brightwater Logistics, Warehouse Ghent, Skaldenstraat 61, 9042 Gent",FA-2024-017,21640.08,"Ghent warehouse pilot. Planned dispatch 2026-10-07, delivery 2026-10-08 (client needs it by 2026-10-09)."
+          SO-24779,C-1002,Meridian Health Group,Julien Moreau,(pending),2026-09-30,On hold — awaiting client PO,,,DB Schenker,,"Meridian Health Group, Grenoble Site, 5 Avenue du Vercors, 38000 Grenoble",FA-2024-002,6881.40,Stock reserved until 2026-10-14; released automatically if no PO number by then (FA-2024-002 requires a Meridian PO before release).
+          SO-24790,C-1003,Kestrel Engineering BV,Sanne Bakker,KES-0931,2026-10-01,Cancelled,,,,,"Kestrel Engineering, Torenallee 32, 5617 BD Eindhoven",FA-2025-031,0.00,Cancelled by client on 2026-10-01 before picking (ordered by mistake) — no fee. Allocation released the same day.
+      - file_name: order_lines.csv
+        content: |
+          order_id,line,sku,product,qty,qty_shipped,qty_backordered,unit_price_eur,line_total_eur,pricing_basis,line_status
+          SO-23110,1,VX-STO-N16,Voltaris N16 16-Bay Rack NAS,1,1,0,5933.00,5933.00,EA-2025-012 (15% Datacenter),Delivered
+          SO-23110,2,VX-HDD-16T,Voltaris 16 TB Enterprise SAS HDD,16,16,0,364.65,5834.40,EA-2025-012 (15% Datacenter),Delivered
+          SO-23110,3,VX-SFP-10G-SR,Voltaris 10G SFP+ SR Transceiver,4,4,0,50.15,200.60,EA-2025-012 (15% Networking),Delivered
+          SO-23402,1,VX-NET-FW200,Voltaris FW200 Firewall Appliance,40,40,0,1656.00,66240.00,FA-2022-009 (10% Networking),Delivered
+          SO-23402,2,VX-NET-S24,Voltaris S24 24-Port PoE+ Switch,40,40,0,1161.00,46440.00,FA-2022-009 (10% Networking),Delivered
+          SO-24581,1,VX-NET-AP6,Voltaris AP6 Wi-Fi 6 Access Point,40,40,0,307.12,12284.80,FA-2024-017 (12% Networking),Delivered
+          SO-24581,2,VX-NET-S24,Voltaris S24 24-Port PoE+ Switch,4,4,0,1135.20,4540.80,FA-2024-017 (12% Networking),Delivered
+          SO-24633,1,VX-SRV-R450,Voltaris R450 2U Rack Server,2,2,0,10125.00,20250.00,FA-2024-002 (10% Datacenter),Delivered
+          SO-24633,2,VX-STO-N16,Voltaris N16 16-Bay Rack NAS,1,1,0,6282.00,6282.00,FA-2024-002 (10% Datacenter),Delivered
+          SO-24633,3,VX-HDD-16T,Voltaris 16 TB Enterprise SAS HDD,16,16,0,386.10,6177.60,FA-2024-002 (10% Datacenter),Delivered
+          SO-24633,4,VX-UPS-1500,Voltaris UPS-1500 Rack UPS,1,1,0,981.00,981.00,FA-2024-002 (10% Datacenter),Delivered
+          SO-24702,1,VX-LAP-P16,Voltaris P16 Mobile Workstation,6,2,4,2993.90,17963.40,FA-2025-031 (9% Endpoint),"2 shipped, 4 backordered"
+          SO-24702,2,VX-DOCK-TB4,Voltaris TB4 Thunderbolt Dock,6,6,0,226.59,1359.54,FA-2025-031 (9% Endpoint),Delivered
+          SO-24702,3,VX-MON-34W,"Voltaris 34W 34"" Ultrawide USB-C Monitor",6,6,0,626.99,3761.94,FA-2025-031 (9% Endpoint),Delivered
+          SO-24718,1,VX-DSK-M5,Voltaris M5 Mini Desktop,30,30,0,726.53,21795.90,"List price, volume tier 3%",Shipped
+          SO-24718,2,VX-MON-27Q,"Voltaris 27Q 27"" QHD Monitor",30,30,0,319.13,9573.90,"List price, volume tier 3%",Shipped
+          SO-24718,3,VX-NET-S24,Voltaris S24 24-Port PoE+ Switch,15,15,0,1251.30,18769.50,"List price, volume tier 3%",Shipped
+          SO-24750,1,VX-LAP-E14,Voltaris E14 Business Laptop,60,0,0,976.65,58599.00,EA-2025-012 (15% Endpoint),Allocated (reserved in stock)
+          SO-24750,2,VX-STO-N16,Voltaris N16 16-Bay Rack NAS,1,0,0,5933.00,5933.00,EA-2025-012 (15% Datacenter),Allocated (reserved in stock)
+          SO-24750,3,VX-HDD-16T,Voltaris 16 TB Enterprise SAS HDD,12,0,0,364.65,4375.80,EA-2025-012 (15% Datacenter),Allocated (reserved in stock)
+          SO-24750,4,VX-NET-AP7,Voltaris AP7 Wi-Fi 7 Access Point,10,0,0,449.65,4496.50,EA-2025-012 (15% Networking),Allocated (reserved in stock)
+          SO-24771,1,VX-NET-AP7,Voltaris AP7 Wi-Fi 7 Access Point,25,0,0,465.52,11638.00,FA-2024-017 (12% Networking),Allocated (reserved in stock)
+          SO-24771,2,VX-NET-FW200,Voltaris FW200 Firewall Appliance,2,0,0,1619.20,3238.40,FA-2024-017 (12% Networking),Allocated (reserved in stock)
+          SO-24771,3,VX-NET-S48X,Voltaris S48X 48-Port 10G Switch,1,0,0,6556.00,6556.00,FA-2024-017 (12% Networking),Allocated (reserved in stock)
+          SO-24771,4,VX-SFP-10G-SR,Voltaris 10G SFP+ SR Transceiver,4,0,0,51.92,207.68,FA-2024-017 (12% Networking),Allocated (reserved in stock)
+          SO-24779,1,VX-SSD-3840,Voltaris 3.84 TB Enterprise NVMe SSD,4,0,0,620.10,2480.40,FA-2024-002 (10% Datacenter),Allocated (reserved in stock)
+          SO-24779,2,VX-SRV-R250,Voltaris R250 1U Rack Server,1,0,0,4401.00,4401.00,FA-2024-002 (10% Datacenter),Allocated (reserved in stock)
+          SO-24790,1,VX-DSK-M5,Voltaris M5 Mini Desktop,2,0,0,681.59,1363.18,FA-2025-031 (9% Endpoint),Cancelled
+
+  id_workspace_stock_db:
+    kind: tool
+    model_type: akgentic.tool.workspace.WorkspaceTool
+    description: Warehouse stock record, read/write, scoped to @StockManager. Narrowed to
+      read + edit + multi_edit so rows can change and movements can be appended, but no
+      file can be deleted, replaced or created. Seeding never overwrites, so updates persist
+      across teams until the files are deleted.
+    payload:
+      workspace_id: hardware-support-stock-db
+      read_only: false
+      workspace_view: false
+      workspace_list: false
+      workspace_glob: false
+      workspace_grep: false
+      expand_media_refs: false
+      workspace_write: false
+      workspace_delete: false
+      workspace_mkdir: false
+      workspace_patch: false
+      workspace_read:
+        instructions: |
+          Files: stock.csv, stock_movements.csv. Read each at most once per task.
+      workspace_multi_edit:
+        instructions: |
+          Use for stock.csv: all row changes for one event in ONE call, one edit per row,
+          old_string = the full current row exactly as read. Check every row's
+          available = on_hand - reserved before calling.
+      workspace_edit:
+        instructions: |
+          Use to append to stock_movements.csv: old_string = the current last line,
+          new_string = that same line, a newline, then the new movement lines.
+      resources:
+      - file_name: stock.csv
+        content: |
+          sku,product,warehouse,on_hand,reserved,available,reorder_point,incoming_qty,incoming_eta,stock_flag,last_updated
+          VX-SRV-R250,Voltaris R250 1U Rack Server,Liège DC,3,1,2,4,10,2026-10-20,Below reorder point,2026-10-01
+          VX-SRV-R450,Voltaris R450 2U Rack Server,Liège DC,14,0,14,6,0,,OK,2026-10-01
+          VX-STO-N8,Voltaris N8 8-Bay NAS,Liège DC,22,0,22,6,0,,OK,2026-10-01
+          VX-STO-N16,Voltaris N16 16-Bay Rack NAS,Liège DC,5,1,4,3,4,2026-10-27,OK,2026-10-01
+          VX-SSD-3840,Voltaris 3.84 TB Enterprise NVMe SSD,Liège DC,48,4,44,20,0,,OK,2026-10-01
+          VX-HDD-16T,Voltaris 16 TB Enterprise SAS HDD,Liège DC,210,12,198,80,0,,OK,2026-10-01
+          VX-NET-S24,Voltaris S24 24-Port PoE+ Switch,Liège DC,64,0,64,25,0,,OK,2026-10-01
+          VX-NET-S48X,Voltaris S48X 48-Port 10G Switch,Liège DC,9,1,8,3,0,,OK,2026-10-01
+          VX-SFP-10G-SR,Voltaris 10G SFP+ SR Transceiver,Liège DC,180,4,176,60,0,,OK,2026-10-01
+          VX-NET-AP6,Voltaris AP6 Wi-Fi 6 Access Point,Liège DC,12,0,12,0,0,,"EOL — last-time-buy, no replenishment",2026-10-01
+          VX-NET-AP7,Voltaris AP7 Wi-Fi 7 Access Point,Liège DC,70,35,35,40,150,2026-11-05,Below reorder point,2026-10-01
+          VX-NET-FW200,Voltaris FW200 Firewall Appliance,Liège DC,26,2,24,10,0,,OK,2026-10-01
+          VX-LAP-E14,Voltaris E14 Business Laptop,Liège DC,85,60,25,40,0,,Below reorder point,2026-10-01
+          VX-LAP-P16,Voltaris P16 Mobile Workstation,Liège DC,0,0,0,6,20,2026-10-14,OUT OF STOCK,2026-10-01
+          VX-DSK-M5,Voltaris M5 Mini Desktop,Liège DC,40,0,40,20,0,,OK,2026-10-01
+          VX-MON-27Q,"Voltaris 27Q 27"" QHD Monitor",Liège DC,55,0,55,25,0,,OK,2026-10-01
+          VX-MON-34W,"Voltaris 34W 34"" Ultrawide USB-C Monitor",Liège DC,18,0,18,8,0,,OK,2026-10-01
+          VX-DOCK-TB4,Voltaris TB4 Thunderbolt Dock,Liège DC,120,0,120,40,0,,OK,2026-10-01
+          VX-UPS-1500,Voltaris UPS-1500 Rack UPS,Liège DC,11,0,11,5,0,,OK,2026-10-01
+          VX-RACK-42U,Voltaris 42U Server Rack Cabinet,Liège DC,6,0,6,2,0,,OK,2026-10-01
+      - file_name: stock_movements.csv
+        content: |
+          date,type,sku,qty_change_on_hand,reference,note
+          2026-08-10,Shipment,VX-NET-AP6,-40,SO-24581,Shipped to Brightwater Antwerp-Port
+          2026-08-10,Shipment,VX-NET-S24,-4,SO-24581,Shipped to Brightwater Antwerp-Port
+          2026-08-27,Shipment,VX-SRV-R450,-2,SO-24633,Shipped to Meridian Lyon
+          2026-08-27,Shipment,VX-STO-N16,-1,SO-24633,Shipped to Meridian Lyon
+          2026-08-27,Shipment,VX-HDD-16T,-16,SO-24633,Shipped to Meridian Lyon
+          2026-08-27,Shipment,VX-UPS-1500,-1,SO-24633,Shipped to Meridian Lyon
+          2026-09-03,Receipt,VX-NET-AP7,60,PO-SUP-8812,Supplier receipt
+          2026-09-16,Receipt,VX-LAP-E14,50,PO-SUP-8840,Supplier receipt
+          2026-09-24,Shipment,VX-LAP-P16,-2,SO-24702,"Partial shipment to Kestrel; 4 units backordered, P16 now 0 on hand"
+          2026-09-24,Shipment,VX-DOCK-TB4,-6,SO-24702,Shipped to Kestrel
+          2026-09-24,Shipment,VX-MON-34W,-6,SO-24702,Shipped to Kestrel
+          2026-09-29,Shipment,VX-DSK-M5,-30,SO-24718,Shipped to Aurora Central Logistics
+          2026-09-29,Shipment,VX-MON-27Q,-30,SO-24718,Shipped to Aurora Central Logistics
+          2026-09-29,Shipment,VX-NET-S24,-15,SO-24718,Shipped to Aurora Central Logistics
+          2026-10-01,Allocation released,VX-DSK-M5,0,SO-24790,Order cancelled by client; 2 units back to available
+
+  id_workspace_products_db:
+    kind: tool
+    model_type: akgentic.tool.workspace.WorkspaceTool
+    description: Read-only product catalogue, scoped to @ProductExpert by a unique workspace_id.
+    payload:
+      workspace_id: hardware-support-products-db
+      read_only: true
+      workspace_view: false
+      workspace_list: false
+      workspace_glob: false
+      workspace_grep: false
+      expand_media_refs: false
+      workspace_read:
+        instructions: |
+          The only file is products.md. Read it once per task.
+      resources:
+      - file_name: products.md
+        content: |
+          # Voltaris Hardware — Product Catalogue (2026 range)
+          Descriptions, specifications, compatibility, substitutes and accessories for every SKU we sell. Prices and stock are NOT in this catalogue.
+
+          ## Datacenter
+
+          ### VX-SRV-R250 — Voltaris R250 1U Rack Server
+
+          - **What it is:** Single-socket 1U rack server for branch offices, virtualisation hosts and edge workloads.
+          - **Key specs:** 1x 16-core Xeon-class CPU (2.9 GHz); 128 GB DDR5 ECC (max 1 TB, 8 DIMM slots); 4x 2.5" hot-swap NVMe/SAS bays; 2x 10GbE SFP+ onboard; 1x PCIe 5.0 x16 slot; redundant 800 W PSUs; Voltaris BMC remote management; 1U, 16 kg.
+          - **Compatible with:** VX-SSD-3840 (up to 4 drives), VX-SFP-10G-SR, VX-RACK-42U, VX-UPS-1500.
+          - **Substitutes:** VX-SRV-R450 when more cores, memory or drive bays are needed (2U, higher price).
+          - **Recommended accessories / add-ons:** VX-SSD-3840 drives, VX-SFP-10G-SR optics, VX-UPS-1500.
+          - **Warranty:** 3 years next-business-day onsite
+          - **Lifecycle:** Active
+
+          ### VX-SRV-R450 — Voltaris R450 2U Rack Server
+
+          - **What it is:** Dual-socket 2U workhorse for databases, virtualisation clusters, research computing and GPU workloads.
+          - **Key specs:** 2x 24-core Xeon-class CPUs (2.6 GHz); 256 GB DDR5 ECC (max 4 TB, 32 DIMM slots); 12x 3.5"/2.5" hot-swap bays (SAS/NVMe); 4x 10GbE SFP+ onboard; up to 2 double-width GPUs (300 W each); redundant 1400 W PSUs; Voltaris BMC; 2U, 28 kg.
+          - **Compatible with:** VX-SSD-3840, VX-HDD-16T, VX-SFP-10G-SR, VX-RACK-42U, VX-UPS-1500 (one UPS per two servers).
+          - **Substitutes:** VX-SRV-R250 for lighter single-socket workloads (fewer bays, half the memory slots).
+          - **Recommended accessories / add-ons:** VX-RACK-42U and VX-UPS-1500 for new deployments; VX-NET-S48X for 10G cluster fabric.
+          - **Warranty:** 3 years next-business-day onsite
+          - **Lifecycle:** Active
+
+          ### VX-STO-N8 — Voltaris N8 8-Bay NAS
+
+          - **What it is:** Desktop/tower 8-bay NAS for file sharing, backup targets and small-office video storage.
+          - **Key specs:** 8x 3.5" SATA/SAS bays (drives not included); quad-core CPU; 16 GB ECC (max 64 GB); 2x 2.5GbE + 1x 10GbE RJ45; RAID 0/1/5/6/10; snapshots and replication; max raw capacity 128 TB with VX-HDD-16T.
+          - **Compatible with:** VX-HDD-16T (up to 8). Not compatible with VX-SSD-3840 (no U.2/NVMe bays).
+          - **Substitutes:** VX-STO-N16 when rack mounting, SFP+ or more than 8 drives is needed.
+          - **Recommended accessories / add-ons:** VX-HDD-16T drives (sold separately), VX-UPS-1500.
+          - **Warranty:** 3 years return-to-base
+          - **Lifecycle:** Active
+
+          ### VX-STO-N16 — Voltaris N16 16-Bay Rack NAS
+
+          - **What it is:** 3U rack NAS for departmental storage, imaging archives (PACS), research data and backup.
+          - **Key specs:** 16x 3.5" SAS bays + 2x U.2 NVMe cache bays (drives not included); 8-core CPU; 64 GB ECC (max 512 GB); 2x 10GbE SFP+ + 2x 1GbE; RAID 5/6/10/60; dual controllers optional; max raw capacity 256 TB with VX-HDD-16T; 3U, 31 kg.
+          - **Compatible with:** VX-HDD-16T (up to 16), VX-SSD-3840 (only in the 2 U.2 cache bays), VX-SFP-10G-SR, VX-RACK-42U, VX-UPS-1500.
+          - **Substitutes:** VX-STO-N8 for small sites (desktop, 8 bays, no SFP+).
+          - **Recommended accessories / add-ons:** VX-HDD-16T drives, 2x VX-SSD-3840 as read/write cache, VX-SFP-10G-SR optics.
+          - **Warranty:** 3 years next-business-day onsite
+          - **Lifecycle:** Active
+
+          ### VX-SSD-3840 — Voltaris 3.84 TB Enterprise NVMe SSD
+
+          - **What it is:** U.2 NVMe data-centre SSD for server boot/data volumes and NAS caching.
+          - **Key specs:** 3.84 TB; U.2 (2.5", 15 mm) PCIe 4.0 x4; 6,800 MB/s read / 4,000 MB/s write; 1 DWPD; power-loss protection; hot-swap tray included.
+          - **Compatible with:** VX-SRV-R250, VX-SRV-R450, VX-STO-N16 (cache bays only). Not compatible with VX-STO-N8.
+          - **Substitutes:** None in the current range.
+          - **Recommended accessories / add-ons:** Sold with VX-SRV-R250 / VX-SRV-R450 configurations.
+          - **Warranty:** 5 years or 7 PBW, return-to-base
+          - **Lifecycle:** Active
+
+          ### VX-HDD-16T — Voltaris 16 TB Enterprise SAS HDD
+
+          - **What it is:** 7,200 rpm 3.5" capacity drive for NAS and server bulk storage.
+          - **Key specs:** 16 TB; SAS 12 Gb/s (also works on SATA backplanes of VX-STO-N8); 7,200 rpm; 512 MB cache; 550 TB/year workload rating; hot-swap tray included.
+          - **Compatible with:** VX-STO-N8, VX-STO-N16, VX-SRV-R450.
+          - **Substitutes:** None in the current range.
+          - **Recommended accessories / add-ons:** Sold with VX-STO-N8 / VX-STO-N16 (NAS units ship without drives).
+          - **Warranty:** 5 years return-to-base
+          - **Lifecycle:** Active
+
+          ### VX-UPS-1500 — Voltaris UPS-1500 Rack UPS
+
+          - **What it is:** 1,500 VA / 1,350 W line-interactive 2U UPS for server and network racks.
+          - **Key specs:** 1,500 VA / 1,350 W; 2U; 8x C13 outlets; hot-swap batteries; network management card included; ~10 min runtime at 800 W.
+          - **Compatible with:** VX-RACK-42U, VX-SRV-R250 (up to two), VX-SRV-R450 (one per two servers), VX-STO-N16, VX-NET-S48X.
+          - **Substitutes:** None in the current range.
+          - **Recommended accessories / add-ons:** Recommended with every new server or NAS rack deployment.
+          - **Warranty:** 3 years (2 years on batteries)
+          - **Lifecycle:** Active
+
+          ### VX-RACK-42U — Voltaris 42U Server Rack Cabinet
+
+          - **What it is:** 600x1200 mm 42U cabinet for server rooms.
+          - **Key specs:** 42U, 600 mm wide x 1200 mm deep; perforated front/rear doors; 1,300 kg static load; side panels with locks; cable management kit; 2x 0U PDU mounts.
+          - **Compatible with:** All Voltaris rack-mount products (R250, R450, N16, S48X, UPS-1500, FW200 rack kit).
+          - **Substitutes:** None.
+          - **Recommended accessories / add-ons:** VX-UPS-1500.
+          - **Warranty:** 5 years
+          - **Lifecycle:** Active
+
+          ## Networking
+
+          ### VX-NET-S24 — Voltaris S24 24-Port PoE+ Switch
+
+          - **What it is:** Managed L2+ access switch that powers access points, cameras and phones.
+          - **Key specs:** 24x 1GbE PoE+ (370 W budget); 4x 10GbE SFP+ uplinks; L2+ static routing; VLAN, LACP, 802.1X; cloud or local management; 1U, fanless below 200 W load.
+          - **Compatible with:** VX-NET-AP6, VX-NET-AP7 (PoE+ powers one AP7 per port at full performance), VX-SFP-10G-SR uplinks, VX-NET-FW200.
+          - **Substitutes:** None at 24 ports; for 10G aggregation use VX-NET-S48X.
+          - **Recommended accessories / add-ons:** VX-SFP-10G-SR uplink optics; pairs with VX-NET-AP7 rollouts.
+          - **Warranty:** Limited lifetime, next-business-day advance replacement
+          - **Lifecycle:** Active
+
+          ### VX-NET-S48X — Voltaris S48X 48-Port 10G Switch
+
+          - **What it is:** L3 aggregation/top-of-rack switch for server and storage networks.
+          - **Key specs:** 48x 10GbE SFP+; 6x 100GbE QSFP28; full L3 (OSPF, BGP); VXLAN; redundant hot-swap PSUs and fans; 1U.
+          - **Compatible with:** VX-SFP-10G-SR, VX-SRV-R250, VX-SRV-R450, VX-STO-N16, VX-NET-S24 uplinks.
+          - **Substitutes:** None in the current range.
+          - **Recommended accessories / add-ons:** VX-SFP-10G-SR optics (one per used port, both ends).
+          - **Warranty:** Limited lifetime, next-business-day advance replacement
+          - **Lifecycle:** Active
+
+          ### VX-SFP-10G-SR — Voltaris 10G SFP+ SR Transceiver
+
+          - **What it is:** 10GBASE-SR multimode optic for links up to 300 m.
+          - **Key specs:** SFP+, 850 nm, LC duplex, up to 300 m on OM3; DOM supported.
+          - **Compatible with:** All Voltaris SFP+ ports: VX-NET-S24, VX-NET-S48X, VX-SRV-R250, VX-SRV-R450, VX-STO-N16, VX-NET-FW200.
+          - **Substitutes:** None.
+          - **Recommended accessories / add-ons:** Always quoted with VX-NET-S48X and with SFP+ server/NAS links.
+          - **Warranty:** Limited lifetime
+          - **Lifecycle:** Active
+
+          ### VX-NET-AP6 — Voltaris AP6 Wi-Fi 6 Access Point
+
+          - **What it is:** Ceiling-mount Wi-Fi 6 (802.11ax) AP for offices and warehouses.
+          - **Key specs:** 2x2 dual-band 802.11ax, up to 3.0 Gbps aggregate; 1x 1GbE; PoE (802.3af) powered; cloud or controller managed; indoor, IP42.
+          - **Compatible with:** VX-NET-S24 (PoE).
+          - **Substitutes:** VX-NET-AP7 — the direct successor; same mounting bracket, same management platform, mixes with AP6 in one network.
+          - **Recommended accessories / add-ons:** VX-NET-S24 for PoE.
+          - **Warranty:** Limited lifetime; firmware support until 2029-06-30
+          - **Lifecycle:** End of life — last-time-buy, no further production (EOL announced 2026-06-30)
+
+          ### VX-NET-AP7 — Voltaris AP7 Wi-Fi 7 Access Point
+
+          - **What it is:** Tri-band Wi-Fi 7 (802.11be) AP — successor to the AP6 — for high-density offices, warehouses, retail and campuses.
+          - **Key specs:** 4x4 tri-band 2.4/5/6 GHz 802.11be, up to 9.3 Gbps aggregate; 1x 2.5GbE; PoE+ (802.3at) powered; uses the AP6 mounting bracket; cloud or controller managed; indoor, IP42.
+          - **Compatible with:** VX-NET-S24 (PoE+), VX-NET-AP6 (mixed deployments supported).
+          - **Substitutes:** VX-NET-AP6 only while last-time-buy stock lasts (lower performance, no 6 GHz).
+          - **Recommended accessories / add-ons:** VX-NET-S24 PoE+ switches; VX-NET-FW200 per site.
+          - **Warranty:** Limited lifetime
+          - **Lifecycle:** Active
+
+          ### VX-NET-FW200 — Voltaris FW200 Firewall Appliance
+
+          - **What it is:** Next-generation firewall for branches, stores and small campuses.
+          - **Key specs:** 5 Gbps firewall / 1.2 Gbps threat protection throughput; 8x 1GbE + 2x 10GbE SFP+; SD-WAN; site-to-site VPN; zero-touch provisioning; desktop or 1U rack kit.
+          - **Compatible with:** VX-NET-S24, VX-SFP-10G-SR.
+          - **Substitutes:** None in the current range.
+          - **Recommended accessories / add-ons:** One per site with VX-NET-S24 and VX-NET-AP7 rollouts.
+          - **Warranty:** 3 years advance replacement; security subscription sold separately
+          - **Lifecycle:** Active
+
+          ## Endpoint
+
+          ### VX-LAP-E14 — Voltaris E14 Business Laptop
+
+          - **What it is:** 14" business laptop for office staff, students and field teams.
+          - **Key specs:** 14" 1920x1200 IPS; 10-core CPU; 16 GB RAM; 512 GB NVMe; Wi-Fi 6E; 2x USB-C/Thunderbolt 4; 1.35 kg; 12 h battery; TPM 2.0.
+          - **Compatible with:** VX-DOCK-TB4, VX-MON-27Q, VX-MON-34W.
+          - **Substitutes:** VX-LAP-P16 for engineering/CAD users (heavier, much higher price).
+          - **Recommended accessories / add-ons:** VX-DOCK-TB4 + VX-MON-27Q desk setup.
+          - **Warranty:** 1 year carry-in (3-year onsite upgrade available)
+          - **Lifecycle:** Active
+
+          ### VX-LAP-P16 — Voltaris P16 Mobile Workstation
+
+          - **What it is:** 16" ISV-certified mobile workstation for CAD, simulation and content creation.
+          - **Key specs:** 16" 3840x2400 OLED; 16-core CPU; 64 GB RAM; 2 TB NVMe; professional GPU with 12 GB; Wi-Fi 7; 2x Thunderbolt 4; 2.4 kg; ISV-certified for major CAD suites.
+          - **Compatible with:** VX-DOCK-TB4, VX-MON-34W, VX-MON-27Q.
+          - **Substitutes:** No equivalent mobile workstation; VX-DSK-M5 is NOT a substitute for CAD workloads. VX-LAP-E14 only as a temporary loaner for non-CAD work.
+          - **Recommended accessories / add-ons:** VX-DOCK-TB4 + VX-MON-34W engineering desk setup.
+          - **Warranty:** 3 years onsite
+          - **Lifecycle:** Active
+
+          ### VX-DSK-M5 — Voltaris M5 Mini Desktop
+
+          - **What it is:** 1-litre mini PC for point-of-sale back offices, kiosks, reception desks and hot desks.
+          - **Key specs:** 8-core CPU; 16 GB RAM; 512 GB NVMe; 2x DisplayPort + HDMI; 1x 2.5GbE; Wi-Fi 6E; VESA mount included.
+          - **Compatible with:** VX-MON-27Q (VESA mount behind the monitor), VX-MON-34W.
+          - **Substitutes:** VX-LAP-E14 where mobility is required.
+          - **Recommended accessories / add-ons:** VX-MON-27Q (one per M5).
+          - **Warranty:** 3 years onsite
+          - **Lifecycle:** Active
+
+          ### VX-MON-27Q — Voltaris 27Q 27" QHD Monitor
+
+          - **What it is:** 27" QHD office monitor with height-adjustable stand.
+          - **Key specs:** 27" 2560x1440 IPS, 75 Hz; USB-C 65 W power delivery; DisplayPort, HDMI; VESA 100; M5 mounting bracket included.
+          - **Compatible with:** VX-LAP-E14, VX-LAP-P16, VX-DSK-M5, VX-DOCK-TB4.
+          - **Substitutes:** VX-MON-34W for more screen area.
+          - **Recommended accessories / add-ons:** VX-DOCK-TB4 for laptop users.
+          - **Warranty:** 3 years advance replacement
+          - **Lifecycle:** Active
+
+          ### VX-MON-34W — Voltaris 34W 34" Ultrawide USB-C Monitor
+
+          - **What it is:** 34" curved ultrawide for engineering, finance and multi-window work.
+          - **Key specs:** 34" 3440x1440 IPS, 100 Hz; USB-C 90 W power delivery with built-in KVM; 2.5GbE port; DisplayPort, HDMI; factory-calibrated.
+          - **Compatible with:** VX-LAP-E14, VX-LAP-P16, VX-DSK-M5, VX-DOCK-TB4.
+          - **Substitutes:** VX-MON-27Q (smaller, lower price).
+          - **Recommended accessories / add-ons:** VX-DOCK-TB4.
+          - **Warranty:** 3 years advance replacement
+          - **Lifecycle:** Active
+
+          ### VX-DOCK-TB4 — Voltaris TB4 Thunderbolt Dock
+
+          - **What it is:** Single-cable Thunderbolt 4 dock for laptops.
+          - **Key specs:** Thunderbolt 4 / USB4 host; 96 W charging; 2x DisplayPort 1.4; 1x 2.5GbE; 4x USB-A, 2x USB-C; drives up to two 4K displays.
+          - **Compatible with:** VX-LAP-E14, VX-LAP-P16, VX-MON-27Q, VX-MON-34W.
+          - **Substitutes:** None.
+          - **Recommended accessories / add-ons:** Sold with every E14/P16 desk setup.
+          - **Warranty:** 3 years advance replacement
+          - **Lifecycle:** Active
+
+  id_workspace_sales_db:
+    kind: tool
+    model_type: akgentic.tool.workspace.WorkspaceTool
+    description: Read-only price list and pricing policy, scoped to @SalesAssistant by a
+      unique workspace_id.
+    payload:
+      workspace_id: hardware-support-sales-db
+      read_only: true
+      workspace_view: false
+      workspace_list: false
+      workspace_glob: false
+      workspace_grep: false
+      expand_media_refs: false
+      workspace_read:
+        instructions: |
+          Files: price_list.csv, pricing_policy.md. Read each at most once per task.
+      resources:
+      - file_name: price_list.csv
+        content: |
+          sku,product,category,list_price_eur,tier_10plus_eur,tier_50plus_eur,lifecycle,cross_sell
+          VX-SRV-R250,Voltaris R250 1U Rack Server,Datacenter,4890.00,4743.30,4596.60,Active,"VX-SSD-3840 drives, VX-SFP-10G-SR optics, VX-UPS-1500."
+          VX-SRV-R450,Voltaris R450 2U Rack Server,Datacenter,11250.00,10912.50,10575.00,Active,VX-RACK-42U and VX-UPS-1500 for new deployments; VX-NET-S48X for 10G cluster fabric.
+          VX-STO-N8,Voltaris N8 8-Bay NAS,Datacenter,2390.00,2318.30,2246.60,Active,"VX-HDD-16T drives (sold separately), VX-UPS-1500."
+          VX-STO-N16,Voltaris N16 16-Bay Rack NAS,Datacenter,6980.00,6770.60,6561.20,Active,"VX-HDD-16T drives, 2x VX-SSD-3840 as read/write cache, VX-SFP-10G-SR optics."
+          VX-SSD-3840,Voltaris 3.84 TB Enterprise NVMe SSD,Datacenter,689.00,668.33,647.66,Active,Sold with VX-SRV-R250 / VX-SRV-R450 configurations.
+          VX-HDD-16T,Voltaris 16 TB Enterprise SAS HDD,Datacenter,429.00,416.13,403.26,Active,Sold with VX-STO-N8 / VX-STO-N16 (NAS units ship without drives).
+          VX-NET-S24,Voltaris S24 24-Port PoE+ Switch,Networking,1290.00,1251.30,1212.60,Active,VX-SFP-10G-SR uplink optics; pairs with VX-NET-AP7 rollouts.
+          VX-NET-S48X,Voltaris S48X 48-Port 10G Switch,Networking,7450.00,7226.50,7003.00,Active,"VX-SFP-10G-SR optics (one per used port, both ends)."
+          VX-SFP-10G-SR,Voltaris 10G SFP+ SR Transceiver,Networking,59.00,57.23,55.46,Active,Always quoted with VX-NET-S48X and with SFP+ server/NAS links.
+          VX-NET-AP6,Voltaris AP6 Wi-Fi 6 Access Point,Networking,349.00,338.53,328.06,EOL,VX-NET-S24 for PoE.
+          VX-NET-AP7,Voltaris AP7 Wi-Fi 7 Access Point,Networking,529.00,513.13,497.26,Active,VX-NET-S24 PoE+ switches; VX-NET-FW200 per site.
+          VX-NET-FW200,Voltaris FW200 Firewall Appliance,Networking,1840.00,1784.80,1729.60,Active,One per site with VX-NET-S24 and VX-NET-AP7 rollouts.
+          VX-LAP-E14,Voltaris E14 Business Laptop,Endpoint,1149.00,1114.53,1080.06,Active,VX-DOCK-TB4 + VX-MON-27Q desk setup.
+          VX-LAP-P16,Voltaris P16 Mobile Workstation,Endpoint,3290.00,3191.30,3092.60,Active,VX-DOCK-TB4 + VX-MON-34W engineering desk setup.
+          VX-DSK-M5,Voltaris M5 Mini Desktop,Endpoint,749.00,726.53,704.06,Active,VX-MON-27Q (one per M5).
+          VX-MON-27Q,"Voltaris 27Q 27"" QHD Monitor",Endpoint,329.00,319.13,309.26,Active,VX-DOCK-TB4 for laptop users.
+          VX-MON-34W,"Voltaris 34W 34"" Ultrawide USB-C Monitor",Endpoint,689.00,668.33,647.66,Active,VX-DOCK-TB4.
+          VX-DOCK-TB4,Voltaris TB4 Thunderbolt Dock,Endpoint,249.00,241.53,234.06,Active,Sold with every E14/P16 desk setup.
+          VX-UPS-1500,Voltaris UPS-1500 Rack UPS,Datacenter,1090.00,1057.30,1024.60,Active,Recommended with every new server or NAS rack deployment.
+          VX-RACK-42U,Voltaris 42U Server Rack Cabinet,Datacenter,1450.00,1406.50,1363.00,Active,VX-UPS-1500.
+      - file_name: pricing_policy.md
+        content: |
+          # Voltaris Hardware — Pricing & Proposal Policy (sales use only)
+
+          ## How a net price is built
+          1. Start from the list price (price_list.csv, EUR, excl. VAT).
+          2. **Client with a framework contract in force** on the quote date: apply that contract's discount for the
+             product's category (Datacenter / Networking / Endpoint). Volume tiers do NOT stack on a contract discount.
+             Contract discounts and status are held by @ContractingAssistant — never assume them.
+          3. **Client without a contract in force** (none, expired, or only a draft renewal): apply volume tiers per SKU line —
+             3% at 10+ units, 6% at 50+ units — and standard terms (Net 30).
+          4. **Promotions** (below) replace the discount from step 2 or 3 on the eligible SKUs, whichever is better for the
+             client. Never stack a promotion with a contract discount.
+          5. Discretionary discount: up to 3% extra on proposals above EUR 50,000 net, sales manager approval required above
+             that. Always state it as a separate line, never fold it into the unit price.
+          6. Quotes are valid 30 days (see terms and conditions). Prices exclude VAT and exclude installation services.
+
+          ## Active promotions
+          | Code | Offer | Eligible | Valid until |
+          |---|---|---|---|
+          | PROMO-WIFI7-Q4 | 15% off VX-NET-AP7 for customers migrating from AP6 or a third-party Wi-Fi estate | VX-NET-AP7, min. 20 units per order | 2026-12-31 |
+          | PROMO-RACKREADY | Free VX-RACK-42U with every 4x VX-SRV-R450 on one order | VX-SRV-R450 | 2026-12-31 |
+
+          ## Cross-sell & up-sell playbook
+          | If the client buys / plans… | Propose |
+          |---|---|
+          | Access points (AP7) for a new site | VX-NET-S24 PoE+ switch per ~20 APs, VX-NET-FW200 per site |
+          | AP6 estate (EOL) | AP7 migration with PROMO-WIFI7-Q4 |
+          | R450 / R250 servers | VX-RACK-42U, VX-UPS-1500 (1 per 2 R450), VX-SFP-10G-SR optics, VX-NET-S48X for a 10G fabric |
+          | N8 / N16 NAS | VX-HDD-16T drives (NAS ships empty), VX-SSD-3840 cache (N16 only), VX-UPS-1500 |
+          | E14 / P16 laptops | VX-DOCK-TB4 + VX-MON-27Q (office) or VX-MON-34W (engineering) |
+          | Retail store kit | 1x VX-NET-FW200, 1x VX-NET-S24, 2-3x VX-NET-AP7, 1x VX-DSK-M5 + VX-MON-27Q per store |
+          | Contract renewal due | Bundle the client's next planned purchase into the renewal to lift the discount band |
+
+          ## Proposal format
+          Proposal ID (PRP-<client id>-<yyyymmdd>), client, pricing basis (contract id or list/tiers), one line per SKU
+          (qty, list, discount %, net unit, line total), promotions applied, subtotal, validity date, payment terms, and
+          up to three cross-sell suggestions as optional lines (not included in the subtotal).
+
+  id_workspace_contracts_db:
+    kind: tool
+    model_type: akgentic.tool.workspace.WorkspaceTool
+    description: Read-only client contracts and general terms of sale, scoped to
+      @ContractingAssistant by a unique workspace_id.
+    payload:
+      workspace_id: hardware-support-contracts-db
+      read_only: true
+      workspace_view: false
+      workspace_list: false
+      workspace_glob: false
+      workspace_grep: false
+      expand_media_refs: false
+      workspace_read:
+        instructions: |
+          Files: contracts.csv, terms_and_conditions.md. Read each at most once per task.
+      resources:
+      - file_name: contracts.csv
+        content: |
+          contract_id,client_id,client,type,start_date,end_date,status,discount_datacenter_pct,discount_networking_pct,discount_endpoint_pct,payment_terms,incoterms,service_level,notice_and_renewal,price_protection,special_clauses
+          FA-2024-017,C-1001,Brightwater Logistics NV,Framework Supply Agreement,2024-03-01,2027-02-28,Active,8,12,6,Net 45,DAP customer site,Next-business-day onsite (Datacenter & Networking),90 days before end date,List prices frozen per contract year (March-February),"Volume commitment EUR 350k/year (2025 actual: EUR 412.6k — met). Promotional pricing may replace (not stack with) the contract discount, whichever is better for the client."
+          FA-2024-002,C-1002,Meridian Health Group,Framework Supply & Service Agreement,2024-01-01,2026-12-31,Active — renewal window open,10,10,8,Net 60,DAP customer site,4-hour onsite for Datacenter products at hospital sites; next-business-day for all other products,Renewal or termination notice due by 2026-11-01 (60 days before end date); auto-renews for 12 months on unchanged terms if no notice,12-month price protection on quoted configurations,"Healthcare data clause: failed storage drives are retained by the client (no return), replacement shipped without return requirement. Purchase orders must reference a Meridian PO number before release."
+          FA-2025-031,C-1003,Kestrel Engineering BV,Framework Supply Agreement,2025-05-01,2027-04-30,Active,6,6,9,Net 30,DAP customer site,Next-business-day onsite,60 days before end date,None,"Early-life failure clause: any endpoint failing within 30 days of delivery is swapped for a new unit, not repaired."
+          FA-2022-009,C-1004,Aurora Retail Group SA,Framework Supply Agreement,2022-07-01,2026-06-30,Expired,9,10,10,Net 45,DAP Luxembourg HQ or store,Next-business-day advance replacement,90 days before end date (lapsed without renewal),None,"Expired 2026-06-30. Since 2026-07-01 Aurora orders are priced at list with standard volume tiers (3% at 10+ units, 6% at 50+ units per SKU) and standard payment terms (Net 30). Renewal FA-2026-022 is drafted and awaiting the client's signature."
+          FA-2026-022,C-1004,Aurora Retail Group SA,Framework Supply Agreement (renewal of FA-2022-009),2026-11-01,2029-10-31,"Draft — sent to client 2026-09-18, awaiting signature",9,12,10,Net 45,DAP Luxembourg HQ or store,Next-business-day advance replacement,90 days before end date,List prices frozen for 12 months from start date,"Not yet in force. Proposed goodwill credit: the difference between list-tier pricing and the old FA-2022-009 discounts on orders placed 2026-07-01 to 2026-10-31, credited on signature."
+          EA-2025-012,C-1005,Pinecrest University,Education Framework Agreement (public tender PU-2025-ICT-04),2025-09-01,2028-08-31,Active,15,15,15,Net 30,DAP Pinecrest campus (named building loading dock),Next-business-day onsite,Tender-governed: no auto-renewal; re-tender required,Tender prices fixed for the full term on awarded lots,Delivery address changes must be requested in writing by the Procurement Officer at least 2 business days before dispatch. Orders above EUR 100k need a separate mini-competition.
+      - file_name: terms_and_conditions.md
+        content: |
+          # Voltaris Hardware — General Terms and Conditions of Sale (version 2026.1, effective 2026-01-01)
+
+          Applies to every sale unless a signed framework agreement says otherwise; where a framework agreement and these terms
+          conflict, the framework agreement wins.
+
+          1. **Quotations.** Valid for 30 days from issue. Prices in EUR, excluding VAT, delivery included within the EU for
+             orders above EUR 1,000 net (EUR 45 flat fee below that).
+          2. **Orders.** An order is binding once confirmed in writing by Voltaris Hardware. Stock is allocated at confirmation.
+             Orders on hold awaiting a client purchase order keep their allocation for 10 business days, then the allocation is released.
+          3. **Payment.** Net 30 days from invoice date unless a framework agreement specifies otherwise. Late payments bear
+             interest at 8% per year plus a EUR 40 recovery fee. Deliveries may be suspended for accounts more than 30 days overdue.
+          4. **Delivery.** DAP (Incoterms 2020) to the address on the order. Risk passes on delivery; title passes on full
+             payment. Delivery dates are estimates; partial shipments are allowed and invoiced as shipped.
+          5. **Backorders.** Backordered lines ship automatically when stock arrives, in order-date sequence. The client may
+             cancel a backordered line without fee at any time before it ships.
+          6. **Address changes.** Possible until the order is picked; after picking, a re-routing fee of EUR 75 per shipment applies.
+          7. **Cancellation.** Free until the order is picked. After picking and before shipment: 10% fee. After shipment,
+             cancellation is handled as a return.
+          8. **Returns.** Unopened products within 30 days of delivery, 15% restocking fee. Opened products are not returnable
+             unless defective. End-of-life and custom-configured products are not returnable.
+          9. **Dead on arrival (DOA).** Reported within 14 days of delivery: free replacement, return label provided.
+          10. **Warranty.** As stated per product in the product catalogue, from delivery date. Warranty excludes misuse,
+              unauthorised modification and consumables. Batteries: 2 years.
+          11. **Price changes.** List prices may change with 30 days' notice; confirmed orders keep their confirmed prices.
+          12. **Liability.** Limited to the net value of the affected order; no liability for indirect or consequential loss.
+          13. **Governing law.** Belgian law; courts of Liège have jurisdiction.
+
+  #### ─── Models ───────────────────────────────────────────────────────── ####
+  id_run_limits_lead:
+    kind: model
+    model_type: akgentic.llm.RunUsageLimits
+    description: Per-run brake for the Support Lead — a gather turn does a planning read
+      and update or two, then one reply.
+    payload:
+      run_request_limit: 25
+      tool_calls_limit: 12
+      total_tokens_limit: 200000
+      output_tokens_limit: 4000
+
+  id_agent_limits_lead:
+    kind: model
+    model_type: akgentic.llm.AgentUsageLimits
+    description: Lifetime budget for the Support Lead across one support session.
+    payload:
+      agent_request_limit: 200
+      total_tokens_limit: 1500000
+
+  id_run_limits_member:
+    kind: model
+    model_type: akgentic.llm.RunUsageLimits
+    description: Per-run brake for read-only specialists — up to 5 file reads (often in
+      one parallel batch, which counts as 5 calls), then one response. A limit of 4 was
+      measured to refuse @CustomerEngagementAssistant's single 5-file batch outright.
+    payload:
+      run_request_limit: 12
+      tool_calls_limit: 8
+      total_tokens_limit: 80000
+      output_tokens_limit: 2500
+
+  id_run_limits_stock:
+    kind: model
+    model_type: akgentic.llm.RunUsageLimits
+    description: Per-run brake for the Stock Manager — 2 reads + 1 multi_edit + 1 edit per
+      update, with headroom for a retried edit.
+    payload:
+      run_request_limit: 14
+      tool_calls_limit: 10
+      total_tokens_limit: 120000
+      output_tokens_limit: 3000
+
+  id_agent_limits_member:
+    kind: model
+    model_type: akgentic.llm.AgentUsageLimits
+    description: Lifetime budget per specialist across one support session.
+    payload:
+      agent_request_limit: 80
+      total_tokens_limit: 600000
+
+  #### ─── Models (External ref, readonly) ──────────────────────────────── ####
+
+  global.id_gpt_56_terra:
+    kind: model
+    model_type: akgentic.llm.ModelConfig
+    description: GPT-5.6 terra (mid tier) with fallback to gpt-5.4 - coordinator model
+    payload:
+      provider: openai
+      model: gpt-5.6-terra
+      fallback_models:
+      - provider: openai
+        model: gpt-5.4
+
+  global.id_gpt_56_luna:
+    kind: model
+    model_type: akgentic.llm.ModelConfig
+    description: GPT-5.6 luna (small/fast tier) with fallback to gpt-5.4-mini - member
+      model
+    payload:
+      provider: openai
+      model: gpt-5.6-luna
+      fallback_models:
+      - provider: openai
+        model: gpt-5.4-mini

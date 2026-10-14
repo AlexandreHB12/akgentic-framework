@@ -1,0 +1,63 @@
+id: id_workspace_orders_db
+kind: tool
+namespace: hardware-support-team
+user_id: anonymous
+model_type: akgentic.tool.workspace.WorkspaceTool
+description: Read-only order system of record, scoped to @OrderManager by a unique
+  workspace_id.
+payload:
+  workspace_id: hardware-support-orders-db
+  read_only: true
+  workspace_view: false
+  workspace_list: false
+  workspace_glob: false
+  workspace_grep: false
+  expand_media_refs: false
+  workspace_read:
+    instructions: |
+      Files: orders.csv (headers), order_lines.csv (lines). Read each at most once per task.
+  resources:
+  - file_name: orders.csv
+    content: |
+      order_id,client_id,client,ordered_by,client_po,order_date,status,ship_date,delivered_date,carrier,tracking,ship_to,pricing,order_total_eur_excl_vat,notes
+      SO-23110,C-1005,Pinecrest University,Conor Walsh,PU-PO-25-0871,2025-10-14,Delivered,2025-10-20,2025-10-22,DHL Freight,DHLF-7741029,"Pinecrest University, IT Services, Belfield Road, Dublin 4",EA-2025-012,11968.00,Research data NAS (installed in IT Services server room).
+      SO-23402,C-1004,Aurora Retail Group SA,Ruben Weber,AUR-2026-0114,2026-01-20,Delivered,2026-01-27,2026-01-29,DB Schenker,DBS-3390218,"Aurora Retail Group, Central Logistics, Rue de Bitbourg 9, 1273 Luxembourg",FA-2022-009,112680.00,Store network refresh wave 1 (40 stores).
+      SO-24581,C-1001,Brightwater Logistics NV,Lena Verhoeven,BWL-PO-26-311,2026-08-04,Delivered,2026-08-10,2026-08-12,DPD,DPD-05512873345,"Brightwater Logistics, Warehouse Antwerp-Port, Haven 1050, 2030 Antwerpen",FA-2024-017,16825.60,AP6 last-time-buy quantity for Antwerp-Port warehouse.
+      SO-24633,C-1002,Meridian Health Group,Julien Moreau,MHG-PO-2026-1187,2026-08-21,Delivered,2026-08-27,2026-08-31,DB Schenker,DBS-3512244,"Meridian Health Group, Main Hospital Data Centre, 18 Rue Garibaldi, 69006 Lyon",FA-2024-002,33690.60,"PACS imaging archive expansion, Lyon."
+      SO-24702,C-1003,Kestrel Engineering BV,Pieter van Dijk,KES-0926,2026-09-08,Partially shipped — backorder,2026-09-24,2026-09-25,PostNL Pakket,PNL-3SKES0926A,"Kestrel Engineering, Torenallee 32, 5617 BD Eindhoven",FA-2025-031,23084.88,"Workstations for 6 new engineers starting 2026-10-05. 4x P16 on backorder, allocated first from the inbound P16 receipt (see stock incoming ETA)."
+      SO-24718,C-1004,Aurora Retail Group SA,Ruben Weber,AUR-2026-0907,2026-09-15,Shipped — in transit,2026-09-29,,DB Schenker,DBS-3601877,"Aurora Retail Group, Central Logistics, Rue de Bitbourg 9, 1273 Luxembourg",List + volume tiers,50139.30,"Store back-office refresh, 15 stores (rollout starts 2026-10-06). Expected delivery 2026-10-03. Priced at list with volume tiers — FA-2022-009 expired 2026-06-30."
+      SO-24750,C-1005,Pinecrest University,Conor Walsh,PU-PO-26-1342,2026-09-22,Processing — picking scheduled 2026-10-05,,,DHL Freight,,"Pinecrest University, IT Services, Belfield Road, Dublin 4",EA-2025-012,73404.30,Student lab laptops + library NAS + Science Building Wi-Fi. Planned dispatch 2026-10-06. Stock fully allocated.
+      SO-24771,C-1001,Brightwater Logistics NV,Lena Verhoeven,BWL-PO-26-402,2026-09-28,Confirmed — stock allocated,,,DPD,,"Brightwater Logistics, Warehouse Ghent, Skaldenstraat 61, 9042 Gent",FA-2024-017,21640.08,"Ghent warehouse pilot. Planned dispatch 2026-10-07, delivery 2026-10-08 (client needs it by 2026-10-09)."
+      SO-24779,C-1002,Meridian Health Group,Julien Moreau,(pending),2026-09-30,On hold — awaiting client PO,,,DB Schenker,,"Meridian Health Group, Grenoble Site, 5 Avenue du Vercors, 38000 Grenoble",FA-2024-002,6881.40,Stock reserved until 2026-10-14; released automatically if no PO number by then (FA-2024-002 requires a Meridian PO before release).
+      SO-24790,C-1003,Kestrel Engineering BV,Sanne Bakker,KES-0931,2026-10-01,Cancelled,,,,,"Kestrel Engineering, Torenallee 32, 5617 BD Eindhoven",FA-2025-031,0.00,Cancelled by client on 2026-10-01 before picking (ordered by mistake) — no fee. Allocation released the same day.
+  - file_name: order_lines.csv
+    content: |
+      order_id,line,sku,product,qty,qty_shipped,qty_backordered,unit_price_eur,line_total_eur,pricing_basis,line_status
+      SO-23110,1,VX-STO-N16,Voltaris N16 16-Bay Rack NAS,1,1,0,5933.00,5933.00,EA-2025-012 (15% Datacenter),Delivered
+      SO-23110,2,VX-HDD-16T,Voltaris 16 TB Enterprise SAS HDD,16,16,0,364.65,5834.40,EA-2025-012 (15% Datacenter),Delivered
+      SO-23110,3,VX-SFP-10G-SR,Voltaris 10G SFP+ SR Transceiver,4,4,0,50.15,200.60,EA-2025-012 (15% Networking),Delivered
+      SO-23402,1,VX-NET-FW200,Voltaris FW200 Firewall Appliance,40,40,0,1656.00,66240.00,FA-2022-009 (10% Networking),Delivered
+      SO-23402,2,VX-NET-S24,Voltaris S24 24-Port PoE+ Switch,40,40,0,1161.00,46440.00,FA-2022-009 (10% Networking),Delivered
+      SO-24581,1,VX-NET-AP6,Voltaris AP6 Wi-Fi 6 Access Point,40,40,0,307.12,12284.80,FA-2024-017 (12% Networking),Delivered
+      SO-24581,2,VX-NET-S24,Voltaris S24 24-Port PoE+ Switch,4,4,0,1135.20,4540.80,FA-2024-017 (12% Networking),Delivered
+      SO-24633,1,VX-SRV-R450,Voltaris R450 2U Rack Server,2,2,0,10125.00,20250.00,FA-2024-002 (10% Datacenter),Delivered
+      SO-24633,2,VX-STO-N16,Voltaris N16 16-Bay Rack NAS,1,1,0,6282.00,6282.00,FA-2024-002 (10% Datacenter),Delivered
+      SO-24633,3,VX-HDD-16T,Voltaris 16 TB Enterprise SAS HDD,16,16,0,386.10,6177.60,FA-2024-002 (10% Datacenter),Delivered
+      SO-24633,4,VX-UPS-1500,Voltaris UPS-1500 Rack UPS,1,1,0,981.00,981.00,FA-2024-002 (10% Datacenter),Delivered
+      SO-24702,1,VX-LAP-P16,Voltaris P16 Mobile Workstation,6,2,4,2993.90,17963.40,FA-2025-031 (9% Endpoint),"2 shipped, 4 backordered"
+      SO-24702,2,VX-DOCK-TB4,Voltaris TB4 Thunderbolt Dock,6,6,0,226.59,1359.54,FA-2025-031 (9% Endpoint),Delivered
+      SO-24702,3,VX-MON-34W,"Voltaris 34W 34"" Ultrawide USB-C Monitor",6,6,0,626.99,3761.94,FA-2025-031 (9% Endpoint),Delivered
+      SO-24718,1,VX-DSK-M5,Voltaris M5 Mini Desktop,30,30,0,726.53,21795.90,"List price, volume tier 3%",Shipped
+      SO-24718,2,VX-MON-27Q,"Voltaris 27Q 27"" QHD Monitor",30,30,0,319.13,9573.90,"List price, volume tier 3%",Shipped
+      SO-24718,3,VX-NET-S24,Voltaris S24 24-Port PoE+ Switch,15,15,0,1251.30,18769.50,"List price, volume tier 3%",Shipped
+      SO-24750,1,VX-LAP-E14,Voltaris E14 Business Laptop,60,0,0,976.65,58599.00,EA-2025-012 (15% Endpoint),Allocated (reserved in stock)
+      SO-24750,2,VX-STO-N16,Voltaris N16 16-Bay Rack NAS,1,0,0,5933.00,5933.00,EA-2025-012 (15% Datacenter),Allocated (reserved in stock)
+      SO-24750,3,VX-HDD-16T,Voltaris 16 TB Enterprise SAS HDD,12,0,0,364.65,4375.80,EA-2025-012 (15% Datacenter),Allocated (reserved in stock)
+      SO-24750,4,VX-NET-AP7,Voltaris AP7 Wi-Fi 7 Access Point,10,0,0,449.65,4496.50,EA-2025-012 (15% Networking),Allocated (reserved in stock)
+      SO-24771,1,VX-NET-AP7,Voltaris AP7 Wi-Fi 7 Access Point,25,0,0,465.52,11638.00,FA-2024-017 (12% Networking),Allocated (reserved in stock)
+      SO-24771,2,VX-NET-FW200,Voltaris FW200 Firewall Appliance,2,0,0,1619.20,3238.40,FA-2024-017 (12% Networking),Allocated (reserved in stock)
+      SO-24771,3,VX-NET-S48X,Voltaris S48X 48-Port 10G Switch,1,0,0,6556.00,6556.00,FA-2024-017 (12% Networking),Allocated (reserved in stock)
+      SO-24771,4,VX-SFP-10G-SR,Voltaris 10G SFP+ SR Transceiver,4,0,0,51.92,207.68,FA-2024-017 (12% Networking),Allocated (reserved in stock)
+      SO-24779,1,VX-SSD-3840,Voltaris 3.84 TB Enterprise NVMe SSD,4,0,0,620.10,2480.40,FA-2024-002 (10% Datacenter),Allocated (reserved in stock)
+      SO-24779,2,VX-SRV-R250,Voltaris R250 1U Rack Server,1,0,0,4401.00,4401.00,FA-2024-002 (10% Datacenter),Allocated (reserved in stock)
+      SO-24790,1,VX-DSK-M5,Voltaris M5 Mini Desktop,2,0,0,681.59,1363.18,FA-2025-031 (9% Endpoint),Cancelled

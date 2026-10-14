@@ -1,0 +1,347 @@
+id: id_workspace_customer_db
+kind: tool
+namespace: hardware-support-team
+user_id: anonymous
+model_type: akgentic.tool.workspace.WorkspaceTool
+description: Read-only client system of record (profile, contacts, tickets, emails,
+  account notes), scoped to @CustomerEngagementAssistant by a unique workspace_id.
+payload:
+  workspace_id: hardware-support-customer-db
+  read_only: true
+  workspace_view: false
+  workspace_list: false
+  workspace_glob: false
+  workspace_grep: false
+  expand_media_refs: false
+  workspace_read:
+    instructions: |
+      Files: clients.csv, contacts.csv, tickets.csv, emails.md, account_notes.md.
+      Read each file at most once per task.
+  resources:
+  - file_name: clients.csv
+    content: |
+      client_id,client,industry,country,address,account_tier,account_manager,account_manager_email,customer_since,spend_2025_eur,sites
+      C-1001,Brightwater Logistics NV,Logistics & warehousing,Belgium,"Noorderlaan 140, 2030 Antwerpen",Gold,Elise Maes,elise.maes@voltaris.example,2019-04-15,412600,"HQ Antwerp; warehouses Antwerp-Port, Ghent (opening Q1 2027), Liège (opening Q1 2027)"
+      C-1002,Meridian Health Group,"Healthcare (hospital group, 4 sites)",France,"18 Rue Garibaldi, 69006 Lyon",Platinum,Thomas Girard,thomas.girard@voltaris.example,2017-09-01,968300,"Lyon (HQ + main hospital), Villeurbanne, Grenoble, Annecy"
+      C-1003,Kestrel Engineering BV,Engineering consultancy (mechanical & civil),Netherlands,"Strijp-S, Torenallee 32, 5617 BD Eindhoven",Silver,Elise Maes,elise.maes@voltaris.example,2022-02-10,138900,Eindhoven office (85 staff)
+      C-1004,Aurora Retail Group SA,"Retail (fashion & home, 120 stores)",Luxembourg,"12 Rue Eugène Ruppert, 2453 Luxembourg",Gold,Elise Maes,elise.maes@voltaris.example,2020-06-01,587400,HQ Luxembourg; 120 stores in LU/BE/FR/DE; 20 new stores planned 2027
+      C-1005,Pinecrest University,Higher education & research,Ireland,"Pinecrest Campus, Belfield Road, Dublin 4",Silver,Thomas Girard,thomas.girard@voltaris.example,2023-01-20,244100,"Main campus Dublin (Science Building, Library, IT Services)"
+  - file_name: contacts.csv
+    content: |
+      contact_id,client_id,client,name,title,email,phone,primary_contact
+      CT-01,C-1001,Brightwater Logistics NV,Lena Verhoeven,IT Procurement Manager,lena.verhoeven@brightwater-logistics.example,+32 3 555 01 21,yes
+      CT-02,C-1001,Brightwater Logistics NV,Marc De Smet,Infrastructure Lead,marc.desmet@brightwater-logistics.example,+32 3 555 01 48,no
+      CT-03,C-1002,Meridian Health Group,Claire Fontaine,Head of IT Operations,claire.fontaine@meridian-health.example,+33 4 55 50 12 30,yes
+      CT-04,C-1002,Meridian Health Group,Julien Moreau,Procurement Officer,julien.moreau@meridian-health.example,+33 4 55 50 12 77,no
+      CT-05,C-1003,Kestrel Engineering BV,Pieter van Dijk,CTO,pieter.vandijk@kestrel-eng.example,+31 40 555 0190,yes
+      CT-06,C-1003,Kestrel Engineering BV,Sanne Bakker,Office & Facilities Manager,sanne.bakker@kestrel-eng.example,+31 40 555 0112,no
+      CT-07,C-1004,Aurora Retail Group SA,Sophie Klein,Head of Store Technology,sophie.klein@aurora-retail.example,+352 555 340 10,yes
+      CT-08,C-1004,Aurora Retail Group SA,Ruben Weber,IT Purchasing Lead,ruben.weber@aurora-retail.example,+352 555 340 44,no
+      CT-09,C-1005,Pinecrest University,Aoife Byrne,Research Computing Manager,aoife.byrne@pinecrest.example,+353 1 555 7720,yes
+      CT-10,C-1005,Pinecrest University,Conor Walsh,Procurement Officer,conor.walsh@pinecrest.example,+353 1 555 7704,no
+  - file_name: tickets.csv
+    content: |
+      ticket_id,client_id,client,contact,opened,closed,status,priority,channel,subject,related_order,related_sku,summary
+      TCK-2874,C-1005,Pinecrest University,Aoife Byrne,2025-11-18,2025-11-20,Closed,Normal,Email,Drive failure in N16 (bay 7),SO-23110,VX-HDD-16T,One HDD failed 4 weeks after install; RAID 6 rebuilt on hot spare. Replacement drive shipped under warranty.
+      TCK-2960,C-1004,Aurora Retail Group SA,Sophie Klein,2026-02-09,2026-02-11,Closed,Normal,Phone,FW200 zero-touch provisioning for stores,SO-23402,VX-NET-FW200,Helped Store Technology set up zero-touch templates for the 40 wave-1 stores. Client very satisfied.
+      TCK-3101,C-1001,Brightwater Logistics NV,Marc De Smet,2026-08-13,2026-08-14,Closed,High,Email,3 AP6 units not adopting in controller,SO-24581,VX-NET-AP6,Units shipped with older firmware; resolved remotely with firmware 6.4.2. No hardware fault.
+      TCK-3122,C-1002,Meridian Health Group,Claire Fontaine,2026-08-25,2026-08-26,Closed,Critical,Email,PSU fan warning on new R450,SO-24633,VX-SRV-R450,BMC reported PSU2 fan fault. Replacement PSU delivered onsite within 4 h under FA-2024-002 SLA.
+      TCK-3150,C-1004,Aurora Retail Group SA,Ruben Weber,2026-09-16,,Open — escalated to Contracts,High,Email,Pricing on SO-24718 higher than previous orders,SO-24718,,Client asks why prices rose vs SO-23402. Cause: FA-2022-009 expired 2026-06-30; renewal FA-2026-022 awaiting their signature. Client unhappy.
+      TCK-3165,C-1005,Pinecrest University,Aoife Byrne,2026-09-25,2026-09-25,Closed,Low,Email,N16 max capacity and SFP+ support,SO-23110,VX-STO-N16,Answered: 256 TB raw with 16x 16 TB; 2x 10GbE SFP+ onboard.
+      TCK-3171,C-1003,Kestrel Engineering BV,Sanne Bakker,2026-09-26,,Open,High,Email,Only 2 of 6 P16 workstations received,SO-24702,VX-LAP-P16,4 units backordered; new engineers start 2026-10-05. Client needs a delivery date (and possibly loaners).
+      TCK-3176,C-1004,Aurora Retail Group SA,Sophie Klein,2026-09-29,2026-09-29,Closed,Normal,Phone,Tracking for SO-24718,SO-24718,,Provided DB Schenker tracking DBS-3601877; expected delivery 2026-10-03.
+      TCK-3185,C-1003,Kestrel Engineering BV,Sanne Bakker,2026-10-01,2026-10-01,Closed,Normal,Email,Cancel order KES-0931 (2x M5),SO-24790,VX-DSK-M5,"Cancelled before picking, no fee."
+      TCK-3188,C-1001,Brightwater Logistics NV,Lena Verhoeven,2026-10-01,,Open,High,Email,Ship date for SO-24771 (Ghent pilot),SO-24771,,Client needs the Ghent pilot kit on site by 2026-10-09.
+      TCK-3190,C-1002,Meridian Health Group,Claire Fontaine,2026-10-01,,Open,Normal,Email,Can the 3.84 TB NVMe SSDs go in the N16?,SO-24779,VX-SSD-3840,Client asks whether the SSDs on SO-24779 can be used in the N16 at Lyon as well as the R250.
+      TCK-3195,C-1005,Pinecrest University,Conor Walsh,2026-10-02,,Open,Normal,Email,Delivery address change for SO-24750,SO-24750,,Wants delivery to Science Building loading dock instead of IT Services.
+  - file_name: emails.md
+    content: |
+      # Client correspondence log (most recent last)
+
+      ---
+
+      ### E-01 · 2026-08-13 09:12 · Brightwater Logistics NV (C-1001)
+
+      - **From:** Marc De Smet <marc.desmet@brightwater-logistics.example>
+      - **To:** support@voltaris.example
+      - **Subject:** AP6 units not showing up in controller
+      - **Ticket:** TCK-3101
+
+      Hi Voltaris support,
+
+      We installed the 40 AP6s from order SO-24581 at Antwerp-Port yesterday. 37 are fine, but 3 never adopt in the controller — they power up and the LED stays amber. Can you help today? The warehouse goes live on Monday.
+
+      Thanks,
+      Marc De Smet
+      Infrastructure Lead, Brightwater Logistics
+
+      ---
+
+      ### E-02 · 2026-08-25 07:48 · Meridian Health Group (C-1002)
+
+      - **From:** Claire Fontaine <claire.fontaine@meridian-health.example>
+      - **To:** support@voltaris.example
+      - **Subject:** URGENT: PSU fan warning on new R450 (Lyon)
+      - **Ticket:** TCK-3122
+
+      Hello,
+
+      One of the two R450 servers delivered on order SO-24633 is reporting a PSU2 fan fault in the BMC. This server hosts part of our imaging archive. Please send someone under our 4-hour SLA.
+
+      Claire Fontaine
+      Head of IT Operations, Meridian Health Group
+
+      ---
+
+      ### E-03 · 2026-09-02 16:30 · Aurora Retail Group SA (C-1004)
+
+      - **From:** Sophie Klein <sophie.klein@aurora-retail.example>
+      - **To:** elise.maes@voltaris.example
+      - **Subject:** 2027 store openings — early heads-up
+      - **Ticket:** —
+
+      Hi Elise,
+
+      Quick heads-up for planning: the board approved 20 new stores for 2027, and we are evaluating a Wi-Fi refresh across the existing estate at the same time (our current store Wi-Fi is third-party and five years old). I'd like to understand what a standard store kit (firewall, switch, access points, back-office PC) would look like from you. No rush — Q4 is fine.
+
+      Best,
+      Sophie Klein
+      Head of Store Technology, Aurora Retail Group
+
+      ---
+
+      ### E-04 · 2026-09-10 11:05 · Kestrel Engineering BV (C-1003)
+
+      - **From:** Pieter van Dijk <pieter.vandijk@kestrel-eng.example>
+      - **To:** elise.maes@voltaris.example
+      - **Subject:** Confirming 6x P16 for new hires
+      - **Ticket:** —
+
+      Elise,
+
+      Confirming our PO KES-0926 for six P16 workstations with docks and 34" monitors. Six engineers start on 5 October, so delivery before then is essential.
+
+      Regards,
+      Pieter van Dijk
+      CTO, Kestrel Engineering
+
+      ---
+
+      ### E-05 · 2026-09-16 14:22 · Aurora Retail Group SA (C-1004)
+
+      - **From:** Ruben Weber <ruben.weber@aurora-retail.example>
+      - **To:** support@voltaris.example
+      - **Subject:** Invoice for AUR-2026-0907 — prices higher?
+      - **Ticket:** TCK-3150
+
+      Hello,
+
+      The order confirmation for our PO AUR-2026-0907 (your SO-24718) shows prices noticeably higher than what we paid in January (SO-23402). For example the S24 switches. Has something changed? We have always had a framework discount with you.
+
+      Ruben Weber
+      IT Purchasing Lead, Aurora Retail Group
+
+      ---
+
+      ### E-06 · 2026-09-18 10:40 · Pinecrest University (C-1005)
+
+      - **From:** Conor Walsh <conor.walsh@pinecrest.example>
+      - **To:** thomas.girard@voltaris.example
+      - **Subject:** PU-PO-26-1342 — student lab order
+      - **Ticket:** —
+
+      Dear Thomas,
+
+      Please find attached PO PU-PO-26-1342 under the education framework (tender PU-2025-ICT-04): 60 E14 laptops, one N16 with 12 drives for the library, and 10 AP7 access points for the Science Building.
+
+      Kind regards,
+      Conor Walsh
+      Procurement Officer, Pinecrest University
+
+      ---
+
+      ### E-07 · 2026-09-24 08:55 · Brightwater Logistics NV (C-1001)
+
+      - **From:** Lena Verhoeven <lena.verhoeven@brightwater-logistics.example>
+      - **To:** elise.maes@voltaris.example
+      - **Subject:** Wi-Fi for Ghent and Liège warehouses
+      - **Ticket:** —
+
+      Hi Elise,
+
+      We are opening two new warehouses (Ghent and Liège) in Q1 2027 and need roughly 60 access points across both, plus a firewall and PoE switches per site. Since the AP6 is end-of-life, should we standardise on the AP7? Can it run alongside the AP6s in Antwerp-Port? Ghent pilot order is coming separately.
+
+      Thanks,
+      Lena Verhoeven
+      IT Procurement Manager, Brightwater Logistics
+
+      ---
+
+      ### E-08 · 2026-09-25 13:17 · Pinecrest University (C-1005)
+
+      - **From:** Aoife Byrne <aoife.byrne@pinecrest.example>
+      - **To:** support@voltaris.example
+      - **Subject:** N16 capacity question
+      - **Ticket:** TCK-3165
+
+      Hi,
+
+      For the N16 we bought last year (SO-23110): what is the maximum raw capacity if we fill it with your 16 TB drives, and does it have SFP+ onboard or do we need a card?
+
+      Thanks,
+      Aoife Byrne
+      Research Computing Manager, Pinecrest University
+
+      ---
+
+      ### E-09 · 2026-09-26 09:03 · Kestrel Engineering BV (C-1003)
+
+      - **From:** Sanne Bakker <sanne.bakker@kestrel-eng.example>
+      - **To:** support@voltaris.example
+      - **Subject:** Missing 4 P16 laptops!
+      - **Ticket:** TCK-3171
+
+      Hello,
+
+      We received the delivery for KES-0926 yesterday but only 2 of the 6 P16 workstations were in it (all docks and monitors arrived). Our new engineers start on 5 October. When will the other 4 arrive?
+
+      Sanne Bakker
+      Office & Facilities Manager, Kestrel Engineering
+
+      ---
+
+      ### E-10 · 2026-09-29 15:41 · Aurora Retail Group SA (C-1004)
+
+      - **From:** Sophie Klein <sophie.klein@aurora-retail.example>
+      - **To:** support@voltaris.example
+      - **Subject:** Tracking for store back-office kit
+      - **Ticket:** TCK-3176
+
+      Hi, could you send tracking for our order SO-24718? Store rollout starts 6 October. Thanks, Sophie Klein
+
+      ---
+
+      ### E-11 · 2026-09-30 10:12 · Pinecrest University (C-1005)
+
+      - **From:** Aoife Byrne <aoife.byrne@pinecrest.example>
+      - **To:** thomas.girard@voltaris.example
+      - **Subject:** Budgetary pricing — research compute cluster 2027
+      - **Ticket:** —
+
+      Dear Thomas,
+
+      Good news: our physics and genomics groups have been awarded a research infrastructure grant. We need budgetary pricing for a small compute cluster in early 2027 — we are thinking 8 R450 servers, a 10G switch and whatever racks/UPS that implies. Some nodes will need GPUs later. Budget submission deadline is 2026-10-30.
+
+      Best regards,
+      Aoife Byrne
+      Research Computing Manager, Pinecrest University
+
+      ---
+
+      ### E-12 · 2026-09-30 17:26 · Meridian Health Group (C-1002)
+
+      - **From:** Julien Moreau <julien.moreau@meridian-health.example>
+      - **To:** thomas.girard@voltaris.example
+      - **Subject:** SO-24779 on hold + contract renewal
+      - **Ticket:** —
+
+      Bonjour Thomas,
+
+      The PO for SO-24779 (Grenoble R250 + SSDs) is still in internal approval — please keep the order on hold, we expect the PO number next week. Separately, our framework agreement ends on 31 December. We would like to discuss the renewal and possibly include a second N16 for the Grenoble imaging archive in the same negotiation.
+
+      Cordialement,
+      Julien Moreau
+      Procurement Officer, Meridian Health Group
+
+      ---
+
+      ### E-13 · 2026-10-01 08:20 · Kestrel Engineering BV (C-1003)
+
+      - **From:** Sanne Bakker <sanne.bakker@kestrel-eng.example>
+      - **To:** support@voltaris.example
+      - **Subject:** Please cancel KES-0931
+      - **Ticket:** TCK-3185
+
+      Hi, please cancel our order KES-0931 for 2 M5 mini PCs — it was placed by mistake. Thanks, Sanne Bakker
+
+      ---
+
+      ### E-14 · 2026-10-01 11:47 · Brightwater Logistics NV (C-1001)
+
+      - **From:** Lena Verhoeven <lena.verhoeven@brightwater-logistics.example>
+      - **To:** support@voltaris.example
+      - **Subject:** When does SO-24771 ship?
+      - **Ticket:** TCK-3188
+
+      Hello,
+
+      Our Ghent pilot order SO-24771 is confirmed — can you tell me when it ships? We need everything on site by 9 October for the pilot.
+
+      Thanks,
+      Lena Verhoeven
+
+      ---
+
+      ### E-15 · 2026-10-01 14:05 · Meridian Health Group (C-1002)
+
+      - **From:** Claire Fontaine <claire.fontaine@meridian-health.example>
+      - **To:** support@voltaris.example
+      - **Subject:** SSD compatibility question
+      - **Ticket:** TCK-3190
+
+      Hi,
+
+      The four 3.84 TB SSDs on SO-24779 are meant for the Grenoble R250. Could the same SSD model also go into the N16 we have in Lyon to speed it up? How many can it take?
+
+      Claire Fontaine
+
+      ---
+
+      ### E-16 · 2026-10-02 09:30 · Pinecrest University (C-1005)
+
+      - **From:** Conor Walsh <conor.walsh@pinecrest.example>
+      - **To:** support@voltaris.example
+      - **Subject:** Delivery address change — PU-PO-26-1342
+      - **Ticket:** TCK-3195
+
+      Dear Support,
+
+      For our order PU-PO-26-1342 (SO-24750), could the delivery go to the Science Building loading dock (Science Building, Belfield Road, Dublin 4) instead of IT Services? The labs are there.
+
+      Kind regards,
+      Conor Walsh
+  - file_name: account_notes.md
+    content: |
+      # Account notes (key-account managers)
+
+      ## Brightwater Logistics NV (C-1001) — account manager Elise Maes
+
+      - Expanding: Ghent + Liège warehouses open Q1 2027 (~60 APs, firewall + PoE switches per site) — see E-07.
+      - AP6 estate at Antwerp-Port (40 units, SO-24581). AP6 is EOL; AP7 is the successor and mixes with AP6.
+      - Ghent pilot SO-24771 is time-critical (on site by 2026-10-09). Treat any delay as an escalation.
+      - Relationship: strong. Lena prefers short, numbers-first emails.
+
+      ## Meridian Health Group (C-1002) — account manager Thomas Girard
+
+      - Platinum account, largest by spend. Framework FA-2024-002 ends 2026-12-31; client raised renewal (E-12).
+      - Wants a second N16 for the Grenoble imaging archive — bundle into renewal discussion.
+      - SO-24779 on hold awaiting PO; reservation expires 2026-10-14.
+      - Very sensitive to downtime (hospitals). Last critical ticket (TCK-3122) resolved within SLA — client happy.
+
+      ## Kestrel Engineering BV (C-1003) — account manager Elise Maes
+
+      - Small but growing engineering firm; heavy P16 workstation users (CAD).
+      - At risk: 4 P16s backordered on SO-24702 vs new hires starting 2026-10-05 (TCK-3171 open). Proactive loaner offer would protect the relationship.
+      - Pieter (CTO) is the decision maker; Sanne handles logistics.
+
+      ## Aurora Retail Group SA (C-1004) — account manager Elise Maes
+
+      - At risk: unhappy about post-expiry pricing on SO-24718 (TCK-3150). Renewal FA-2026-022 awaits their signature and includes a goodwill credit — the fastest fix for the complaint.
+      - Big 2027 opportunity: 20 new stores + Wi-Fi refresh of the existing 120 stores (E-03). Current store Wi-Fi is third-party.
+      - Standard store kit today: 1x FW200, 1x S24, back-office M5 + 27Q.
+
+      ## Pinecrest University (C-1005) — account manager Thomas Girard
+
+      - Education framework EA-2025-012 (tender). Orders above EUR 100k need a mini-competition.
+      - Opportunity: research compute cluster 2027 — 8x R450 + 10G switch + racks/UPS, GPUs later (E-11). Budget submission deadline 2026-10-30.
+      - SO-24750 address change requested (TCK-3195) — needs written request from Procurement Officer (Conor Walsh is that person).

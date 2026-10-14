@@ -1,0 +1,10 @@
+id: id_checklist_tool
+kind: tool
+namespace: support-team
+user_id: anonymous
+model_type: payroll_qa.tool.ChecklistTool
+description: >-
+  Read and replace the Payroll Quality Assistant's own validation checklist
+  (defaults to 3 checks; a new checklist given in chat fully replaces it and
+  persists for the rest of the conversation)
+payload: {}

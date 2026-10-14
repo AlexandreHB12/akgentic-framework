@@ -1,0 +1,19 @@
+id: id_planning_lead
+kind: tool
+namespace: hardware-support-team
+user_id: anonymous
+model_type: akgentic.tool.planning.PlanningTool
+description: The Support Lead's dispatch/gather ledger
+payload:
+  vector_store: false
+  update_planning:
+    instructions: |
+      This board is how you know whether you are still waiting.
+
+      Create ONE task per specialist request the moment you dispatch it, with that
+      specialist as the owner and the question as the description. Mark it done only
+      when that specialist sends a `response` — a `notification` means still working.
+
+      Before you send anything to @Human, read the board. If any task is still open,
+      send nothing and stop. Only when every task is done do you combine the replies
+      and answer @Human, once.

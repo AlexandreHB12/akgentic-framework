@@ -1,0 +1,40 @@
+id: knowledge_assistant
+kind: agent
+namespace: support-team
+user_id: anonymous
+model_type: akgentic.core.AgentCard
+description: Answers general policy, product, procedural and reference questions using
+  the internal knowledge base, wiki pages, external reference sites, and the ELLA
+  payroll knowledge assistant's own Q&A history
+payload:
+  description: Answers general policy, product, procedural and reference questions
+    using the internal knowledge base, wiki pages, external reference sites, and the
+    ELLA payroll knowledge assistant's own Q&A history
+  agent_class: akgentic.agent.BaseAgent
+  skills:
+  - knowledge-base
+  - faq
+  - policy
+  config:
+    name: '@Knowledge Assistant'
+    role: Knowledge Assistant
+    prompt:
+      template:
+        __ref__: id_support_prompt
+      params:
+        role: Knowledge Assistant
+        instructions: Use the knowledge base tool to search knowledge about payroll
+          and HR. When you receive a question, you interpret it in the context of
+          payroll and HR. Your knowledge contains legal documents, contract templates
+          etc. that you need to answer the question. If the knowledge base tool doesn't
+          have a clear answer, crawl the SD Worx DigiFAQ payroll site for it before
+          giving up. You only answer questions based on the knowledge. If neither
+          the knowledge base nor the DigiFAQ crawl contains a clear answer to the
+          question, you answer that you don't know. You always cite the sources for
+          the answers.
+    model_cfg:
+      __ref__: global.id_gpt_54
+    tools:
+    - __ref__: id_web_crawl
+    - __ref__: id_knowledge_base
+  can_be_hired: true

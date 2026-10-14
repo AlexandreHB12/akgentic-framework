@@ -1,0 +1,39 @@
+id: id_payroll_calendar
+kind: tool
+namespace: support-team
+user_id: anonymous
+model_type: akgentic.tool.workspace.WorkspaceTool
+description: Dummy payroll calendar — when each client's payroll computation is due
+payload:
+  workspace_id: support-team-payroll-calendar
+  read_only: true
+  workspace_view: false
+  expand_media_refs: false
+  workspace_read:
+    instructions: 'One row per (employer, payrollPeriod): periodEndDate, computationDueDate, status (completed
+      / completed_with_errors / failed for periods already run, matching los21_payroll_run_status.csv
+      exactly for 2026-07 — or upcoming / scheduled for periods not yet run) and notes, e.g. an employer''s
+      timesheet-cutoff day from los21_employer_instructions.csv. Compare computationDueDate against the
+      current date (given in your own system prompt) to say how soon a client''s payroll is due, or whether
+      it''s overdue.'
+  resources:
+  - file_name: los21_payroll_calendar.csv
+    file_type: text
+    content: |
+      dossierNumber,employerName,payrollPeriod,periodEndDate,computationDueDate,status,notes
+      0624623,Bakkerij Nijs BV,2026-07,2026-07-31,2026-08-03,completed_with_errors,Matches RUN-202607-0624623 in los21_payroll_run_status.csv - 3 errors on this run.
+      0624623,Bakkerij Nijs BV,2026-08,2026-08-31,2026-09-03,completed,
+      0624623,Bakkerij Nijs BV,2026-09,2026-09-30,2026-10-03,upcoming,Timesheet cutoff is the 18th per employer instructions (Loonverwerking).
+      0624623,Bakkerij Nijs BV,2026-10,2026-10-31,2026-11-03,scheduled,
+      0841348,Constructions Ghys SA,2026-07,2026-07-31,2026-08-03,completed_with_errors,Matches RUN-202607-0841348 in los21_payroll_run_status.csv - 2 errors on this run.
+      0841348,Constructions Ghys SA,2026-08,2026-08-31,2026-09-03,completed,
+      0841348,Constructions Ghys SA,2026-09,2026-09-30,2026-10-03,upcoming,Employer instructions list two conflicting Loonverwerking entries - exact cutoff day is unclear.
+      0841348,Constructions Ghys SA,2026-10,2026-10-31,2026-11-03,scheduled,
+      0171169,Heyndrickx Logistiek NV,2026-07,2026-07-31,2026-08-03,completed,Matches RUN-202607-0171169 in los21_payroll_run_status.csv - no errors on this run.
+      0171169,Heyndrickx Logistiek NV,2026-08,2026-08-31,2026-09-03,completed,
+      0171169,Heyndrickx Logistiek NV,2026-09,2026-09-30,2026-10-03,upcoming,Timesheet cutoff is the 18th per employer instructions (Loonverwerking).
+      0171169,Heyndrickx Logistiek NV,2026-10,2026-10-31,2026-11-03,scheduled,
+      0287042,Brasserie Hannard SPRL,2026-07,2026-07-31,2026-08-03,failed,Matches RUN-202607-0287042 in los21_payroll_run_status.csv - run failed, 2 blocking errors.
+      0287042,Brasserie Hannard SPRL,2026-08,2026-08-31,2026-09-03,completed,Re-run succeeded after the July blocking errors were resolved.
+      0287042,Brasserie Hannard SPRL,2026-09,2026-09-30,2026-10-03,upcoming,No Loonverwerking cutoff on file - using the standard 3rd-business-day default.
+      0287042,Brasserie Hannard SPRL,2026-10,2026-10-31,2026-11-03,scheduled,

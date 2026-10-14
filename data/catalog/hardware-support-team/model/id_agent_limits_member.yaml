@@ -1,0 +1,9 @@
+id: id_agent_limits_member
+kind: model
+namespace: hardware-support-team
+user_id: anonymous
+model_type: akgentic.llm.AgentUsageLimits
+description: Lifetime budget per specialist across one support session.
+payload:
+  agent_request_limit: 80
+  total_tokens_limit: 600000

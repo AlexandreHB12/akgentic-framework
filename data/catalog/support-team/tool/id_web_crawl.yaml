@@ -1,0 +1,11 @@
+id: id_web_crawl
+kind: tool
+namespace: support-team
+user_id: anonymous
+model_type: akgentic.tool.search.SearchTool
+description: Crawl a supplied website for relevant information about payroll and HR.
+payload:
+  web_search: true
+  web_fetch: true
+  web_crawl:
+    instructions: Use this to crawl the supplied webpage

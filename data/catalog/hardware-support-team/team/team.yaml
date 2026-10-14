@@ -1,0 +1,36 @@
+id: team
+kind: team
+namespace: hardware-support-team
+user_id: anonymous
+model_type: akgentic.team.TeamCard
+description: Support Lead routing hardware customer-support cases to six specialists
+payload:
+  welcome_message: |
+    Welcome to the Voltaris Hardware support desk. I'm @SupportLead — give me the case you're working on and I'll bring in the right specialists as the case needs them:
+
+    Customer Engagement Assistant (client history), Order Manager (orders), Stock Manager (stock — can also update it), Product Expert (products & substitutes), Sales Assistant (proposals & upsell) and Contracting Assistant (contracts and T&C). Watch the team grow as each one is hired the first time it's needed.
+
+    Try for example:
+    - "Sanne from Kestrel says 4 of her 6 P16 laptops are missing — what do I tell her?"
+    - "Brightwater wants Wi-Fi for two new warehouses. What should we propose, and at what price?"
+    - "Warehouse confirms SO-24771 shipped today."
+    - "Aurora is complaining about the prices on SO-24718. What happened?"
+    - "Can Meridian put the 3.84 TB SSDs into their N16?"
+
+    I can also email or WhatsApp a client contact — give me their address or number, or I'll use the one on file — and I'll always show you the message before it goes out.
+  entry_point:
+    card:
+      __ref__: human_proxy
+  members:
+  - card:
+      __ref__: support_lead
+  agent_profiles:
+  - __ref__: customer_engagement_assistant
+  - __ref__: order_manager
+  - __ref__: stock_manager
+  - __ref__: product_expert
+  - __ref__: sales_assistant
+  - __ref__: contracting_assistant
+  - __ref__: client
+  message_types:
+  - __type__: akgentic.agent.messages.AgentMessage

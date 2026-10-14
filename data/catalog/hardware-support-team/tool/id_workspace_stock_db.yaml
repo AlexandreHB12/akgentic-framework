@@ -1,0 +1,75 @@
+id: id_workspace_stock_db
+kind: tool
+namespace: hardware-support-team
+user_id: anonymous
+model_type: akgentic.tool.workspace.WorkspaceTool
+description: Warehouse stock record, read/write, scoped to @StockManager. Narrowed
+  to read + edit + multi_edit so rows can change and movements can be appended, but
+  no file can be deleted, replaced or created. Seeding never overwrites, so updates
+  persist across teams until the files are deleted.
+payload:
+  workspace_id: hardware-support-stock-db
+  read_only: false
+  workspace_view: false
+  workspace_list: false
+  workspace_glob: false
+  workspace_grep: false
+  expand_media_refs: false
+  workspace_write: false
+  workspace_delete: false
+  workspace_mkdir: false
+  workspace_patch: false
+  workspace_read:
+    instructions: |
+      Files: stock.csv, stock_movements.csv. Read each at most once per task.
+  workspace_multi_edit:
+    instructions: |
+      Use for stock.csv: all row changes for one event in ONE call, one edit per row,
+      old_string = the full current row exactly as read. Check every row's
+      available = on_hand - reserved before calling.
+  workspace_edit:
+    instructions: |
+      Use to append to stock_movements.csv: old_string = the current last line,
+      new_string = that same line, a newline, then the new movement lines.
+  resources:
+  - file_name: stock.csv
+    content: |
+      sku,product,warehouse,on_hand,reserved,available,reorder_point,incoming_qty,incoming_eta,stock_flag,last_updated
+      VX-SRV-R250,Voltaris R250 1U Rack Server,Liège DC,3,1,2,4,10,2026-10-20,Below reorder point,2026-10-01
+      VX-SRV-R450,Voltaris R450 2U Rack Server,Liège DC,14,0,14,6,0,,OK,2026-10-01
+      VX-STO-N8,Voltaris N8 8-Bay NAS,Liège DC,22,0,22,6,0,,OK,2026-10-01
+      VX-STO-N16,Voltaris N16 16-Bay Rack NAS,Liège DC,5,1,4,3,4,2026-10-27,OK,2026-10-01
+      VX-SSD-3840,Voltaris 3.84 TB Enterprise NVMe SSD,Liège DC,48,4,44,20,0,,OK,2026-10-01
+      VX-HDD-16T,Voltaris 16 TB Enterprise SAS HDD,Liège DC,210,12,198,80,0,,OK,2026-10-01
+      VX-NET-S24,Voltaris S24 24-Port PoE+ Switch,Liège DC,64,0,64,25,0,,OK,2026-10-01
+      VX-NET-S48X,Voltaris S48X 48-Port 10G Switch,Liège DC,9,1,8,3,0,,OK,2026-10-01
+      VX-SFP-10G-SR,Voltaris 10G SFP+ SR Transceiver,Liège DC,180,4,176,60,0,,OK,2026-10-01
+      VX-NET-AP6,Voltaris AP6 Wi-Fi 6 Access Point,Liège DC,12,0,12,0,0,,"EOL — last-time-buy, no replenishment",2026-10-01
+      VX-NET-AP7,Voltaris AP7 Wi-Fi 7 Access Point,Liège DC,70,35,35,40,150,2026-11-05,Below reorder point,2026-10-01
+      VX-NET-FW200,Voltaris FW200 Firewall Appliance,Liège DC,26,2,24,10,0,,OK,2026-10-01
+      VX-LAP-E14,Voltaris E14 Business Laptop,Liège DC,85,60,25,40,0,,Below reorder point,2026-10-01
+      VX-LAP-P16,Voltaris P16 Mobile Workstation,Liège DC,0,0,0,6,20,2026-10-14,OUT OF STOCK,2026-10-01
+      VX-DSK-M5,Voltaris M5 Mini Desktop,Liège DC,40,0,40,20,0,,OK,2026-10-01
+      VX-MON-27Q,"Voltaris 27Q 27"" QHD Monitor",Liège DC,55,0,55,25,0,,OK,2026-10-01
+      VX-MON-34W,"Voltaris 34W 34"" Ultrawide USB-C Monitor",Liège DC,18,0,18,8,0,,OK,2026-10-01
+      VX-DOCK-TB4,Voltaris TB4 Thunderbolt Dock,Liège DC,120,0,120,40,0,,OK,2026-10-01
+      VX-UPS-1500,Voltaris UPS-1500 Rack UPS,Liège DC,11,0,11,5,0,,OK,2026-10-01
+      VX-RACK-42U,Voltaris 42U Server Rack Cabinet,Liège DC,6,0,6,2,0,,OK,2026-10-01
+  - file_name: stock_movements.csv
+    content: |
+      date,type,sku,qty_change_on_hand,reference,note
+      2026-08-10,Shipment,VX-NET-AP6,-40,SO-24581,Shipped to Brightwater Antwerp-Port
+      2026-08-10,Shipment,VX-NET-S24,-4,SO-24581,Shipped to Brightwater Antwerp-Port
+      2026-08-27,Shipment,VX-SRV-R450,-2,SO-24633,Shipped to Meridian Lyon
+      2026-08-27,Shipment,VX-STO-N16,-1,SO-24633,Shipped to Meridian Lyon
+      2026-08-27,Shipment,VX-HDD-16T,-16,SO-24633,Shipped to Meridian Lyon
+      2026-08-27,Shipment,VX-UPS-1500,-1,SO-24633,Shipped to Meridian Lyon
+      2026-09-03,Receipt,VX-NET-AP7,60,PO-SUP-8812,Supplier receipt
+      2026-09-16,Receipt,VX-LAP-E14,50,PO-SUP-8840,Supplier receipt
+      2026-09-24,Shipment,VX-LAP-P16,-2,SO-24702,"Partial shipment to Kestrel; 4 units backordered, P16 now 0 on hand"
+      2026-09-24,Shipment,VX-DOCK-TB4,-6,SO-24702,Shipped to Kestrel
+      2026-09-24,Shipment,VX-MON-34W,-6,SO-24702,Shipped to Kestrel
+      2026-09-29,Shipment,VX-DSK-M5,-30,SO-24718,Shipped to Aurora Central Logistics
+      2026-09-29,Shipment,VX-MON-27Q,-30,SO-24718,Shipped to Aurora Central Logistics
+      2026-09-29,Shipment,VX-NET-S24,-15,SO-24718,Shipped to Aurora Central Logistics
+      2026-10-01,Allocation released,VX-DSK-M5,0,SO-24790,Order cancelled by client; 2 units back to available
